@@ -2,9 +2,12 @@
 import { Calendar, Menu, Search, User } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useEvent } from '../contexts/EventContext';
+import { Button } from './ui/button';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isLoggedIn, user, logout } = useEvent();
 
   return (
     <header className="bg-white shadow-sm border-b">
@@ -20,6 +23,9 @@ const Header = () => {
           <nav className="hidden md:flex items-center space-x-8">
             <Link to="/" className="text-gray-700 hover:text-blue-600 transition-colors">
               Home
+            </Link>
+            <Link to="/venues" className="text-gray-700 hover:text-blue-600 transition-colors">
+              Venues
             </Link>
             <Link to="/events" className="text-gray-700 hover:text-blue-600 transition-colors">
               Events
@@ -37,9 +43,27 @@ const Header = () => {
             <button className="p-2 text-gray-600 hover:text-blue-600 transition-colors">
               <Search className="w-5 h-5" />
             </button>
-            <button className="p-2 text-gray-600 hover:text-blue-600 transition-colors">
-              <User className="w-5 h-5" />
-            </button>
+            
+            {isLoggedIn ? (
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600">Hello, {user?.name}</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={logout}
+                >
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <Link to="/login">
+                <Button variant="outline" size="sm">
+                  <User className="w-4 h-4 mr-2" />
+                  Login
+                </Button>
+              </Link>
+            )}
+            
             <button
               className="md:hidden p-2 text-gray-600"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -55,6 +79,9 @@ const Header = () => {
             <div className="flex flex-col space-y-4">
               <Link to="/" className="text-gray-700 hover:text-blue-600 transition-colors">
                 Home
+              </Link>
+              <Link to="/venues" className="text-gray-700 hover:text-blue-600 transition-colors">
+                Venues
               </Link>
               <Link to="/events" className="text-gray-700 hover:text-blue-600 transition-colors">
                 Events
