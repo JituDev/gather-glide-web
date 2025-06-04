@@ -22,19 +22,19 @@ const Header = () => {
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             <Link to="/" className="text-gray-700 hover:text-blue-600 transition-colors">
-              Home
-            </Link>
-            <Link to="/venues" className="text-gray-700 hover:text-blue-600 transition-colors">
-              Venues
-            </Link>
-            <Link to="/events" className="text-gray-700 hover:text-blue-600 transition-colors">
-              Events
-            </Link>
-            <Link to="/create" className="text-gray-700 hover:text-blue-600 transition-colors">
-              Create Event
+              HOME
             </Link>
             <Link to="/about" className="text-gray-700 hover:text-blue-600 transition-colors">
-              About
+              ABOUT
+            </Link>
+            <Link to="/services" className="text-gray-700 hover:text-blue-600 transition-colors">
+              SERVICES
+            </Link>
+            <Link to="/vendor" className="text-gray-700 hover:text-blue-600 transition-colors">
+              VENDOR
+            </Link>
+            <Link to="/contact" className="text-gray-700 hover:text-blue-600 transition-colors">
+              CONTACT US
             </Link>
           </nav>
 
@@ -78,19 +78,19 @@ const Header = () => {
           <div className="md:hidden py-4 border-t">
             <div className="flex flex-col space-y-4">
               <Link to="/" className="text-gray-700 hover:text-blue-600 transition-colors">
-                Home
-              </Link>
-              <Link to="/venues" className="text-gray-700 hover:text-blue-600 transition-colors">
-                Venues
-              </Link>
-              <Link to="/events" className="text-gray-700 hover:text-blue-600 transition-colors">
-                Events
-              </Link>
-              <Link to="/create" className="text-gray-700 hover:text-blue-600 transition-colors">
-                Create Event
+                HOME
               </Link>
               <Link to="/about" className="text-gray-700 hover:text-blue-600 transition-colors">
-                About
+                ABOUT
+              </Link>
+              <Link to="/services" className="text-gray-700 hover:text-blue-600 transition-colors">
+                SERVICES
+              </Link>
+              <Link to="/vendor" className="text-gray-700 hover:text-blue-600 transition-colors">
+                VENDOR
+              </Link>
+              <Link to="/contact" className="text-gray-700 hover:text-blue-600 transition-colors">
+                CONTACT US
               </Link>
             </div>
           </div>

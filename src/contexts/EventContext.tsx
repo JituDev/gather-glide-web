@@ -42,6 +42,7 @@ interface EventContextType {
 const EventContext = createContext<EventContextType | undefined>(undefined);
 
 const dummyVenues: Venue[] = [
+  // Wedding Venues
   {
     id: '1',
     name: 'AA CONVENTION & RESORT',
@@ -56,14 +57,14 @@ const dummyVenues: Venue[] = [
       'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1545558014-8692077e9b5c?w=800&h=600&fit=crop'
     ],
-    description: 'A beautiful convention center with modern amenities and stunning decor.'
+    description: 'A beautiful wedding venue with elegant decor and modern amenities.'
   },
   {
     id: '2',
-    name: 'ROYAL BANQUET HALL',
-    location: 'DELHI',
-    price: 'RS. 25,000 - 40,000',
-    rating: 4.3,
+    name: 'AA CONVENTION & RESORT',
+    location: 'FATEHABAD',
+    price: 'RS. 30,000 - 45,000',
+    rating: 4.5,
     image: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800&h=600&fit=crop',
     category: 'Wedding Venues',
     type: 'Banquet Halls',
@@ -71,14 +72,14 @@ const dummyVenues: Venue[] = [
       'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&h=600&fit=crop'
     ],
-    description: 'Elegant banquet hall perfect for weddings and special occasions.'
+    description: 'Elegant banquet hall perfect for wedding ceremonies and receptions.'
   },
   {
     id: '3',
-    name: 'GARDEN PARADISE',
-    location: 'MUMBAI',
-    price: 'RS. 35,000 - 55,000',
-    rating: 4.7,
+    name: 'AA CONVENTION & RESORT',
+    location: 'FATEHABAD',
+    price: 'RS. 30,000 - 45,000',
+    rating: 4.5,
     image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&h=600&fit=crop',
     category: 'Wedding Venues',
     type: 'Luxury Properties',
@@ -88,12 +89,13 @@ const dummyVenues: Venue[] = [
     ],
     description: 'Beautiful garden venue with outdoor seating and natural ambiance.'
   },
+  // Catering
   {
     id: '4',
-    name: 'CATERING EXCELLENCE',
-    location: 'PUNE',
-    price: 'RS. 20,000 - 35,000',
-    rating: 4.2,
+    name: 'AA CONVENTION & RESORT',
+    location: 'FATEHABAD',
+    price: 'RS. 30,000 - 45,000',
+    rating: 4.5,
     image: 'https://images.unsplash.com/photo-1555244162-803834f70033?w=800&h=600&fit=crop',
     category: 'Catering',
     type: 'Premium Properties',
@@ -105,10 +107,26 @@ const dummyVenues: Venue[] = [
   },
   {
     id: '5',
-    name: 'LIGHT & SOUND STUDIO',
-    location: 'BANGALORE',
-    price: 'RS. 15,000 - 30,000',
-    rating: 4.4,
+    name: 'AA CONVENTION & RESORT',
+    location: 'FATEHABAD',
+    price: 'RS. 30,000 - 45,000',
+    rating: 4.5,
+    image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&h=600&fit=crop',
+    category: 'Catering',
+    type: 'Premium Properties',
+    images: [
+      'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&h=600&fit=crop'
+    ],
+    description: 'Exquisite catering services for all types of events.'
+  },
+  // Light & Studio
+  {
+    id: '6',
+    name: 'AA CONVENTION & RESORT',
+    location: 'FATEHABAD',
+    price: 'RS. 30,000 - 45,000',
+    rating: 4.5,
     image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop',
     category: 'Light & Studio',
     type: 'Premium Properties',
@@ -117,6 +135,21 @@ const dummyVenues: Venue[] = [
       'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&h=600&fit=crop'
     ],
     description: 'Professional lighting and sound equipment for your events.'
+  },
+  {
+    id: '7',
+    name: 'AA CONVENTION & RESORT',
+    location: 'FATEHABAD',
+    price: 'RS. 30,000 - 45,000',
+    rating: 4.5,
+    image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=600&fit=crop',
+    category: 'Light & Studio',
+    type: 'Premium Properties',
+    images: [
+      'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&h=600&fit=crop'
+    ],
+    description: 'State-of-the-art lighting and studio equipment rental.'
   }
 ];
 

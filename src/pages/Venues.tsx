@@ -31,44 +31,28 @@ const Venues = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center space-x-4">
-              <select
-                className="bg-teal-700 text-white px-3 py-2 rounded text-sm"
-                value=""
-                onChange={() => {}}
-              >
+              <select className="bg-teal-700 text-white px-3 py-2 rounded text-sm">
                 <option>No Of Guests</option>
                 <option>50-100</option>
                 <option>100-200</option>
                 <option>200+</option>
               </select>
               
-              <select
-                className="bg-teal-700 text-white px-3 py-2 rounded text-sm"
-                value=""
-                onChange={() => {}}
-              >
+              <select className="bg-teal-700 text-white px-3 py-2 rounded text-sm">
                 <option>Room Count</option>
                 <option>1-2</option>
                 <option>3-5</option>
                 <option>5+</option>
               </select>
               
-              <select
-                className="bg-teal-700 text-white px-3 py-2 rounded text-sm"
-                value=""
-                onChange={() => {}}
-              >
+              <select className="bg-teal-700 text-white px-3 py-2 rounded text-sm">
                 <option>Price Per Plate (Rs)</option>
                 <option>500-1000</option>
                 <option>1000-2000</option>
                 <option>2000+</option>
               </select>
               
-              <select
-                className="bg-teal-700 text-white px-3 py-2 rounded text-sm"
-                value=""
-                onChange={() => {}}
-              >
+              <select className="bg-teal-700 text-white px-3 py-2 rounded text-sm">
                 <option>Rental Cost (Per function)</option>
                 <option>10000-25000</option>
                 <option>25000-50000</option>
@@ -86,11 +70,7 @@ const Venues = () => {
                 ))}
               </select>
               
-              <select
-                className="bg-teal-700 text-white px-3 py-2 rounded text-sm"
-                value=""
-                onChange={() => {}}
-              >
+              <select className="bg-teal-700 text-white px-3 py-2 rounded text-sm">
                 <option>Space</option>
                 <option>Indoor</option>
                 <option>Outdoor</option>
@@ -114,10 +94,10 @@ const Venues = () => {
                   <div className="w-16 h-16 rounded-full overflow-hidden">
                     <img
                       src={category === 'Wedding Venues' 
-                        ? 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=100&h=100&fit=crop'
+                        ? '/lovable-uploads/faae7d29-ab60-452a-bd1f-96bef61f93dd.png'
                         : category === 'Catering'
-                        ? 'https://images.unsplash.com/photo-1555244162-803834f70033?w=100&h=100&fit=crop'
-                        : 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop'
+                        ? '/lovable-uploads/c979e341-ed23-46c3-bfff-bf452f8b682b.png'
+                        : '/lovable-uploads/f7d63271-7b35-4f15-8283-77e320e217f0.png'
                       }
                       alt={category}
                       className="w-full h-full object-cover"
