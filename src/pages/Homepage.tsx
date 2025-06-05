@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Users, Music, MapPin, Home, Gift, User, HelpCircle, Phone } from 'lucide-react';
 import { Button } from '../components/ui/button';
-import { Card, CardContent } from '../components/ui/card';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../components/ui/carousel';
+import { Calendar, Music, Users, MapPin, Camera, ChevronLeft, ChevronRight, Star, Award, Clock, Heart, Home, Gift, User, HelpCircle, Phone } from 'lucide-react';
+import Navbar from '@/components/Navbar';
 
 
 const Homepage = () => {
   // State for service card image animation
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentImageIndices, setCurrentImageIndices] = useState([0, 0, 0, 0, 0]);
+  const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -66,93 +67,115 @@ const Homepage = () => {
         'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=800&h=600&fit=crop',
         'https://images.unsplash.com/photo-1554080353-a576cf803bda?w=800&h=600&fit=crop'
       ],
-      icon: MapPin
+      icon: Camera
     }
   ];
 
-  const features = [
+   const features = [
     {
-      title: '24/7 Event Support',
-      description: 'Our team is available round the clock to ensure your event runs smoothly without any hiccups.',
-      icon: Calendar
+      icon: Award,
+      title: 'Premium Quality',
+      description: 'We use only the finest materials and equipment to ensure your event exceeds expectations with unmatched quality and attention to detail.'
     },
     {
-      title: 'Premium Locations',
-      description: 'Access to the most sought-after venues in the city with excellent amenities and accessibility.',
-      icon: MapPin
+      icon: Clock,
+      title: '24/7 Support',
+      description: 'Our dedicated team is available around the clock to assist you with any questions or concerns throughout your event planning journey.'
     },
     {
-      title: 'After Party Services',
-      description: 'Extend the celebration with our specialized after-party arrangements and entertainment options.',
-      icon: Music
+      icon: Heart,
+      title: 'Personalized Service',
+      description: 'Every event is unique, and we tailor our services to match your specific vision, style, and requirements for a truly personalized experience.'
     }
   ];
 
-  const testimonials = [
+ const testimonials = [
     {
       id: 1,
-      image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop',
-      alt: 'Client 1'
+      image: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600&h=800&fit=crop',
+      description: 'Elegant Wedding Reception with Premium Floral Arrangements and Ambient Lighting',
+      url: '/gallery/wedding-1'
     },
     {
       id: 2,
-      image: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=200&h=200&fit=crop',
-      alt: 'Client 2'
+      image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600&h=800&fit=crop',
+      description: 'Colorful Birthday Party Setup with Custom Balloon Decorations and Themed Styling',
+      url: '/gallery/birthday-1'
     },
     {
       id: 3,
-      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop',
-      alt: 'Client 3'
+      image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=600&h=800&fit=crop',
+      description: 'Corporate Event with Professional Stage Setup and State-of-the-Art Audio Visual',
+      url: '/gallery/corporate-1'
     },
     {
       id: 4,
-      image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=200&h=200&fit=crop',
-      alt: 'Client 4'
+      image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&h=800&fit=crop',
+      description: 'Outdoor Garden Party with Beautiful Tent Arrangements and Natural Décor',
+      url: '/gallery/outdoor-1'
     },
     {
       id: 5,
-      image: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=200&h=200&fit=crop',
-      alt: 'Client 5'
+      image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&h=800&fit=crop',
+      description: 'Anniversary Celebration with Romantic Lighting and Luxurious Table Settings',
+      url: '/gallery/anniversary-1'
+    },
+    {
+      id: 6,
+      image: 'https://images.unsplash.com/photo-1505236858219-8359eb29e329?w=600&h=800&fit=crop',
+      description: 'Baby Shower Event with Pastel Theme and Creative Backdrop Designs',
+      url: '/gallery/baby-shower-1'
+    },
+    {
+      id: 7,
+      image: 'https://images.unsplash.com/photo-1478146896981-b80fe463b330?w=600&h=800&fit=crop',
+      description: 'Engagement Party with Premium Catering and Sophisticated Venue Styling',
+      url: '/gallery/engagement-1'
     }
   ];
 
+
+  // Staggered image transitions for service cards
+  useEffect(() => {
+    const intervals = services.map((_, index) => {
+      return setInterval(() => {
+        setCurrentImageIndices(prev => {
+          const newIndices = [...prev];
+          newIndices[index] = (newIndices[index] + 1) % services[index].images.length;
+          return newIndices;
+        });
+      }, 3000 + (index * 800)); // Each card changes at different intervals
+    });
+
+    return () => intervals.forEach(interval => clearInterval(interval));
+  }, []);
+
+  // Carousel navigation
+  const nextSlide = () => {
+    setCurrentCarouselIndex((prev) => (prev + 1) % testimonials.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentCarouselIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  };
+
+  // Get visible testimonials for 3D effect
+  const getVisibleTestimonials = () => {
+    const visible = [];
+    for (let i = -2; i <= 2; i++) {
+      const index = (currentCarouselIndex + i + testimonials.length) % testimonials.length;
+      visible.push({
+        ...testimonials[index],
+        position: i
+      });
+    }
+    return visible;
+  };
+
+
   return (
     <div className="min-h-screen">
-      {/* Navigation */}
-      <nav className="bg-purple-800 text-white py-4 sticky top-0 z-50 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="font-bold text-2xl flex items-center">
-              <span className="bg-white text-purple-800 px-3 py-1 rounded mr-2">EVENT</span>
-              <span>WALA</span>
-            </Link>
-            
-            <div className="hidden md:flex items-center space-x-8 mx-auto">
-              <Link to="/" className="hover:text-purple-200 transition-colors flex items-center">
-                <Home className="w-4 h-4 mr-1" /> HOME
-              </Link>
-              <Link to="/bookings" className="hover:text-purple-200 transition-colors flex items-center">
-                <Calendar className="w-4 h-4 mr-1" /> BOOKINGS
-              </Link>
-              <Link to="/offer" className="hover:text-purple-200 transition-colors flex items-center">
-                <Gift className="w-4 h-4 mr-1" /> OFFER
-              </Link>
-              <Link to="/vendor" className="hover:text-purple-200 transition-colors flex items-center">
-                <User className="w-4 h-4 mr-1" /> VENDOR
-              </Link>
-              <Link to="/help" className="hover:text-purple-200 transition-colors flex items-center">
-                <HelpCircle className="w-4 h-4 mr-1" /> HELP
-              </Link>
-            </div>
-            
-            <Link to="/login">
-              <Button className="bg-white text-purple-800 hover:bg-purple-100 px-6 py-2 rounded-full font-medium shadow-md transition-all hover:scale-105">
-                GET STARTED
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero Section */}
       <div className="relative h-screen overflow-hidden">
@@ -182,7 +205,7 @@ const Homepage = () => {
                   <option>Corporate</option>
                   <option>Birthday</option>
                 </select>
-                <Button className="bg-purple-600 hover:bg-purple-700 px-8 py-4 rounded-none text-lg font-semibold transition-all duration-300 hover:shadow-lg">
+                <Button className="bg-purple-600 hover:bg-purple-700 px-8 py-4 mx-4 rounded-none text-lg font-semibold transition-all duration-300 hover:shadow-lg">
                   Search
                 </Button>
               </div>
@@ -194,106 +217,171 @@ const Homepage = () => {
         </div>
       </div>
 
-      {/* Highlights Section */}
-      <section className="py-16 bg-white">
+      <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">OUR SERVICES</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Premium event services tailored to make your occasion truly special
+          <div className="text-center mb-16">
+            <h2 className="text-5xl font-bold text-gray-900 mb-6 tracking-tight">OUR SERVICES</h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-purple-600 mx-auto mb-6"></div>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Premium event services tailored to make your occasion truly special and unforgettable
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
             {services.map((service, index) => (
-              <Card key={index} className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
-                <div className="h-48 overflow-hidden relative">
-                  {service.images.map((img, imgIndex) => (
-                    <img
-                      key={imgIndex}
-                      src={img}
-                      alt={service.title}
-                      className={`absolute w-full h-full object-cover transition-opacity duration-1000 ${imgIndex === currentImageIndex % service.images.length ? 'opacity-100' : 'opacity-0'}`}
-                    />
-                  ))}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                    <service.icon className="w-10 h-10 text-white" />
+              <div key={index} className="group cursor-pointer">
+                <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+                  <div className="h-56 overflow-hidden relative">
+                    {service.images.map((img, imgIndex) => (
+                      <img
+                        key={imgIndex}
+                        src={img}
+                        alt={service.title}
+                        className={`absolute w-full h-full object-cover transition-opacity duration-1000 ${
+                          imgIndex === currentImageIndices[index] ? 'opacity-100 scale-105' : 'opacity-0 scale-100'
+                        }`}
+                      />
+                    ))}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                    <div className="absolute bottom-4 left-4">
+                      <service.icon className="w-10 h-10 text-white drop-shadow-lg" />
+                    </div>
+                    <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-full p-2">
+                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors duration-300">
+                      {service.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-4">
+                      {service.description}
+                    </p>
+                    <button className="w-full bg-gradient-to-r from-sky-400 to-purple-700 text-white py-2.5 px-4 rounded-lg font-medium hover:from-purple-700 hover:to-blue-400 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
+                      Learn More
+                    </button>
                   </div>
                 </div>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">{service.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed mb-4">
-                    {service.description}
-                  </p>
-                  <Button variant="outline" className="w-full border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white transition-colors">
-                    Learn more
-                  </Button>
-                </CardContent>
-              </Card>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Amenities Section */}
-      <section className="py-16 bg-gray-50">
+      {/* Amenities Section with 3D Carousel */}
+      <section className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-8">EVENT AMENITIES</h2>
+          <div className="text-center mb-16">
+            <h2 className="text-5xl font-bold text-gray-900 mb-6 tracking-tight">OUR BEST DESIGNS</h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-purple-600 to-pink-600 mx-auto mb-6"></div>
             <p className="max-w-4xl mx-auto text-gray-600 leading-relaxed text-lg">
-              We provide comprehensive event solutions with attention to every detail. Our team of experienced professionals ensures seamless execution from planning to completion, delivering exceptional quality and service that exceeds expectations for any type of event.
+              Discover our stunning event designs and setups that have made countless celebrations unforgettable. Each project showcases our commitment to excellence, creativity, and attention to detail in creating magical moments for our clients.
             </p>
           </div>
 
-          {/* Enhanced Carousel */}
-          <div className="relative max-w-6xl mx-auto mb-16">
-            <Carousel 
-              className="w-full"
-              // plugins={[Autoplay({ delay: 5000 })]}
-              opts={{
-                align: "center",
-                loop: true,
-              }}
-            >
-              <CarouselContent className="-ml-4">
-                {testimonials.map((testimonial, index) => (
-                  <CarouselItem key={testimonial.id} className="pl-4 basis-1/3 lg:basis-1/5">
-                    <div className="relative group">
-                      <div className={`overflow-hidden rounded-xl transition-all duration-500 ${index === 2 ? 'h-64 scale-110 shadow-xl z-10' : 'h-56 scale-90 opacity-90'}`}>
+          {/* 3D Carousel */}
+          <div className="relative max-w-6xl mx-auto mb-16 h-96 flex items-center justify-center">
+            <div className="relative w-full h-full flex items-center justify-center perspective-1000">
+              {getVisibleTestimonials().map((testimonial, index) => {
+                const position = testimonial.position;
+                let transform = '';
+                let zIndex = 0;
+                let opacity = 1;
+                let scale = 1;
+
+                if (position === 0) {
+                  // Center - largest
+                  transform = 'translateX(0) translateZ(0)';
+                  zIndex = 50;
+                  scale = 1.2;
+                } else if (position === -1 || position === 1) {
+                  // First left/right - medium, slightly behind
+                  transform = `translateX(${position * 200}px) translateZ(-100px)`;
+                  zIndex = 30;
+                  scale = 0.9;
+                  opacity = 0.8;
+                } else {
+                  // Far left/right - smallest, furthest back
+                  transform = `translateX(${position * 280}px) translateZ(-200px)`;
+                  zIndex = 10;
+                  scale = 0.7;
+                  opacity = 0.6;
+                }
+
+                return (
+                  <div
+                    key={testimonial.id}
+                    className="absolute transition-all duration-700 ease-out cursor-pointer"
+                    style={{
+                      transform: `${transform} scale(${scale})`,
+                      zIndex,
+                      opacity
+                    }}
+                    onClick={() => window.open(testimonial.url, '_blank')}
+                  >
+                    <div className="w-64 h-80 bg-white rounded-2xl shadow-2xl overflow-hidden group hover:shadow-3xl transition-all duration-300 hover:-translate-y-1">
+                      <div className="relative h-full">
                         <img
                           src={testimonial.image}
-                          alt={testimonial.alt}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          alt="Event Design"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                          <h3 className="text-white font-medium">Client {testimonial.id}</h3>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40"></div>
+                        <div className="absolute bottom-4 left-4 right-4">
+                          <div className="bg-black/60 backdrop-blur-sm rounded-lg p-3">
+                            <p className="text-white text-xs font-medium leading-relaxed">
+                              {testimonial.description}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="absolute bottom-4 right-4">
+                          <div className="bg-white/90 backdrop-blur-sm rounded-full p-2">
+                            <div className="w-2 h-2 bg-purple-600 rounded-full animate-pulse"></div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious className="left-2 bg-white/80 hover:bg-white text-purple-800 border-none shadow-lg" />
-              <CarouselNext className="right-2 bg-white/80 hover:bg-white text-purple-800 border-none shadow-lg" />
-            </Carousel>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Navigation Buttons */}
+            <button
+              onClick={prevSlide}
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-purple-800 p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-60 backdrop-blur-sm"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <button
+              onClick={nextSlide}
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-purple-800 p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-60 backdrop-blur-sm"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
           </div>
 
           {/* Feature Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="text-center p-8 hover:shadow-lg transition-shadow duration-300 hover:border-purple-500">
-                <CardContent>
-                  <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-300 group-hover:bg-purple-600 group-hover:text-white">
-                    <feature.icon className="w-8 h-8 text-purple-600 transition-all duration-300 group-hover:text-white" />
+              <div key={index} className="group">
+                <div className="bg-white rounded-2xl p-8 text-center hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 border border-gray-100 hover:border-purple-200">
+                  <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:from-blue-600 group-hover:to-purple-800 transition-all duration-500 transform group-hover:scale-110">
+                    <feature.icon className="w-10 h-10 text-purple-600 group-hover:text-white transition-all duration-500" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.description}</p>
-                </CardContent>
-              </Card>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-purple-600 transition-colors duration-300">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </section>
+
 
       {/* Video Section */}
       <section className="py-16 bg-white">
@@ -327,15 +415,15 @@ const Homepage = () => {
             <div>
               <h3 className="text-2xl font-bold mb-4 flex items-center">
                 <span className="bg-white text-purple-900 px-2 py-1 rounded mr-2">EVENT</span>
-                <span>WALA</span>
+                <span>LOOP</span>
               </h3>
               <p className="text-purple-200 mb-4">
                 Creating memorable experiences through exceptional event planning and execution.
               </p>
               <div className="flex space-x-4">
                 {['facebook', 'twitter', 'instagram', 'linkedin'].map((social) => (
-                  <a key={social} href="#" className="w-10 h-10 bg-purple-800 rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors">
-                    <span className="sr-only">{social}</span>
+                  <a key={social} href="#" className="w-10 h-10 bg-purple-800 text-white rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors">
+                    <span className="sr-only text-white">{social}</span>
                   </a>
                 ))}
               </div>
@@ -376,7 +464,7 @@ const Homepage = () => {
                 </div>
                 <div className="flex items-center">
                   <span className="w-5 h-5 mr-3">✉️</span>
-                  <span>info@eventwala.com</span>
+                  <span>info@eventloop.com</span>
                 </div>
               </div>
               

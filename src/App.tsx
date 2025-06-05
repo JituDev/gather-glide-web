@@ -8,7 +8,7 @@ import { EventProvider } from "./contexts/EventContext";
 import Homepage from "./pages/Homepage";
 import Login from "./pages/Login";
 import Venues from "./pages/Venues";
-import VenueDetail from "./pages/VenueDetail";
+import VenueDetail from "./pages/VenueDetail.js";
 import Catering from "./pages/Catering";
 import LightStudio from "./pages/LightStudio";
 import WeddingVenues from "./pages/WeddingVenues";
