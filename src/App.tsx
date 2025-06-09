@@ -14,6 +14,7 @@ import LightStudio from "./pages/LightStudio";
 import WeddingVenues from "./pages/WeddingVenues";
 import NotFound from "./pages/NotFound";
 import EventWalaProfiles from './pages/ProfilePage.js'
+import HelpSupportPage from "./pages/HelpSupportPage.js";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/wedding-venues" element={<WeddingVenues />} />
             <Route path="/venue/:id" element={<VenueDetail />} />
             <Route path="/profile" element={<EventWalaProfiles/>} />
+            <Route path="/help" element={<HelpSupportPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

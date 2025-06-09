@@ -183,7 +183,7 @@ const Homepage = () => {
           autoPlay 
           loop 
           muted 
-          className="absolute z-0 w-auto min-w-full min-h-full max-w-none object-cover"
+          className="absolute z-0 w-auto min-w-full min-h-full max-w-none object-contain"
         >
           <source src="/hero.mp4" type="video/mp4" />
           Your browser does not support the video tag.

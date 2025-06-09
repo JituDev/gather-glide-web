@@ -140,7 +140,7 @@ const UserProfile = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
           <textarea
             defaultValue={userData.address}
-            rows="3"
+            rows={3}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-colors"
           />
         </div>
@@ -148,9 +148,9 @@ const UserProfile = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
           <textarea
             defaultValue={userData.description}
-            rows="4"
+            rows={4}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-colors"
-            maxLength="500"
+            maxLength={500}
           />
           <p className="text-sm text-gray-500 mt-1">Maximum 500 characters</p>
         </div>
