@@ -54,7 +54,7 @@ const AuthPage = () => {
         <div className="relative z-10 w-full flex flex-col justify-center items-center text-white p-12 text-center">
           <div className="mb-8">
             <Calendar className="w-16 h-16 mx-auto mb-4" />
-            <h1 className="text-4xl font-bold mb-2">EventWala</h1>
+            <h1 className="text-4xl font-bold mb-2">EventLoop</h1>
             <p className="text-xl opacity-90">Your Dream Events, Our Expertise</p>
           </div>
           

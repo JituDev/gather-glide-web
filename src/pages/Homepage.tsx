@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Calendar, Music, Users, MapPin, Camera, ChevronLeft, ChevronRight, Star, Award, Clock, Heart, Home, Gift, User, HelpCircle, Phone } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
 
 const Homepage = () => {
+  const navigate = useNavigate();
+
+  const handleLearnMore = (title: string) => {
+    // Convert title to URL-friendly format (e.g., "LIGHT & SOUND" -> "light-sound")
+    const categoryPath = title.toLowerCase().replace(' & ', '-').replace(' ', '-');
+    navigate(`/vendors/${categoryPath}`);
+  };
   // State for service card image animation
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [currentImageIndices, setCurrentImageIndices] = useState([0, 0, 0, 0, 0]);
@@ -21,7 +28,6 @@ const Homepage = () => {
   const services = [
     {
       title: 'TENT',
-      description: 'Premium quality tents for all occasions - weddings, corporate events, and parties. Our tents come with weather-resistant materials, elegant designs, and customizable sizes to fit any venue requirements.',
       images: [
         'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&h=600&fit=crop',
         'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&h=600&fit=crop',
@@ -31,7 +37,6 @@ const Homepage = () => {
     },
     {
       title: 'LIGHT & SOUND',
-      description: 'Professional audio-visual solutions with state-of-the-art equipment. Our sound systems and lighting setups will elevate your event with crystal clear audio and stunning visual effects tailored to your theme.',
       images: [
         'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop',
         'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=800&h=600&fit=crop',
@@ -41,7 +46,6 @@ const Homepage = () => {
     },
     {
       title: 'CATERING',
-      description: 'Gourmet catering services with diverse menu options from international cuisines to local favorites. Our professional chefs create delicious, beautifully presented dishes that will impress your guests.',
       images: [
         'https://images.unsplash.com/photo-1555244162-803834f70033?w=800&h=600&fit=crop',
         'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&h=600&fit=crop',
@@ -51,7 +55,6 @@ const Homepage = () => {
     },
     {
       title: 'PARTY HALL',
-      description: 'Elegant and spacious venues equipped with modern amenities. Our party halls offer versatile spaces that can be customized for weddings, receptions, corporate events, and social gatherings.',
       images: [
         'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&h=600&fit=crop',
         'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop',
@@ -61,7 +64,6 @@ const Homepage = () => {
     },
     {
       title: 'PHOTOGRAPHY',
-      description: 'Professional photography and videography services to capture your special moments. Our team uses high-end equipment and creative techniques to deliver stunning visual memories of your event.',
       images: [
         'https://images.unsplash.com/photo-1523438885200-e635ba2c371e?w=800&h=600&fit=crop',
         'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=800&h=600&fit=crop',
@@ -71,7 +73,7 @@ const Homepage = () => {
     }
   ];
 
-   const features = [
+  const features = [
     {
       icon: Award,
       title: 'Premium Quality',
@@ -89,7 +91,7 @@ const Homepage = () => {
     }
   ];
 
- const testimonials = [
+  const testimonials = [
     {
       id: 1,
       image: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600&h=800&fit=crop',
@@ -179,16 +181,16 @@ const Homepage = () => {
 
       {/* Hero Section */}
       <div className="relative h-screen overflow-hidden">
-        <video 
-          autoPlay 
-          loop 
-          muted 
+        <video
+          autoPlay
+          loop
+          muted
           className="absolute z-0 w-auto min-w-full min-h-full max-w-none object-contain"
         >
           <source src="/hero.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
-        
+
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="text-center text-white px-4">
             <h1 className="text-5xl md:text-6xl font-bold mb-6 animate-fade-in">We Create Unforgettable Events</h1>
@@ -226,7 +228,7 @@ const Homepage = () => {
               Premium event services tailored to make your occasion truly special and unforgettable
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
             {services.map((service, index) => (
               <div key={index} className="group cursor-pointer">
@@ -237,9 +239,8 @@ const Homepage = () => {
                         key={imgIndex}
                         src={img}
                         alt={service.title}
-                        className={`absolute w-full h-full object-cover transition-opacity duration-1000 ${
-                          imgIndex === currentImageIndices[index] ? 'opacity-100 scale-105' : 'opacity-0 scale-100'
-                        }`}
+                        className={`absolute w-full h-full object-cover transition-opacity duration-1000 ${imgIndex === currentImageIndices[index] ? 'opacity-100 scale-105' : 'opacity-0 scale-100'
+                          }`}
                       />
                     ))}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
@@ -251,13 +252,16 @@ const Homepage = () => {
                     </div>
                   </div>
                   <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors duration-300">
+                    <h3 className="text-xl text-center font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors duration-300">
                       {service.title}
                     </h3>
-                    <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-4">
+                    {/* <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-4">
                       {service.description}
-                    </p>
-                    <button className="w-full bg-gradient-to-r from-sky-400 to-purple-700 text-white py-2.5 px-4 rounded-lg font-medium hover:from-purple-700 hover:to-blue-400 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
+                    </p> */}
+                    <button
+                      onClick={() => handleLearnMore(service.title)}
+                      className="w-full bg-gradient-to-r from-sky-400 to-purple-700 text-white py-2.5 px-4 rounded-lg font-medium hover:from-purple-700 hover:to-blue-400 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+                    >
                       Learn More
                     </button>
                   </div>
@@ -387,18 +391,18 @@ const Homepage = () => {
       <section className="py-16 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-            <video 
-              autoPlay 
-              loop 
-              muted 
+            <video
+              autoPlay
+              loop
+              muted
               className="w-full h-auto"
             >
-              <source src="https://assets.mixkit.co/videos/preview/mixkit-wedding-couple-dancing-under-lights-4642-large.mp4" type="video/mp4" />
+              <source src="https://videos.pexels.com/video-files/2361938/2361938-uhd_2560_1440_30fps.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
             <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="w-20 h-20 rounded-full bg-white text-purple-600 hover:bg-purple-100 transition-all hover:scale-110 shadow-xl"
               >
                 <div className="w-0 h-0 border-l-[12px] border-l-purple-600 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent ml-1"></div>
@@ -428,7 +432,7 @@ const Homepage = () => {
                 ))}
               </div>
             </div>
-            
+
             <div>
               <h4 className="text-lg font-semibold mb-4 border-b border-purple-700 pb-2">Quick Links</h4>
               <ul className="space-y-2">
@@ -439,7 +443,7 @@ const Homepage = () => {
                 ))}
               </ul>
             </div>
-            
+
             <div>
               <h4 className="text-lg font-semibold mb-4 border-b border-purple-700 pb-2">Services</h4>
               <ul className="space-y-2">
@@ -450,7 +454,7 @@ const Homepage = () => {
                 ))}
               </ul>
             </div>
-            
+
             <div>
               <h4 className="text-lg font-semibold mb-4 border-b border-purple-700 pb-2">Contact Us</h4>
               <div className="space-y-3">
@@ -467,7 +471,7 @@ const Homepage = () => {
                   <span>info@eventloop.com</span>
                 </div>
               </div>
-              
+
               <h4 className="text-lg font-semibold mt-6 mb-3">Newsletter</h4>
               <div className="flex">
                 <input
@@ -481,7 +485,7 @@ const Homepage = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="mt-12 pt-8 border-t border-purple-800 text-center text-purple-300">
             <p>&copy; {new Date().getFullYear()} EVENT WALA. All Rights Reserved | Designed with ❤️</p>
           </div>
