@@ -284,8 +284,9 @@ const Homepage = () => {
           </div>
 
           {/* 3D Carousel */}
-          <div className="relative max-w-6xl mx-auto mb-16 h-96 flex items-center justify-center">
-            <div className="relative w-full h-full flex items-center justify-center perspective-1000">
+          <div className="relative max-w-6xl mx-auto mb-16 h-96 overflow-hidden">
+  <div className="relative w-full h-full flex items-center justify-center perspective-1000 overflow-hidden">
+
               {getVisibleTestimonials().map((testimonial, index) => {
                 const position = testimonial.position;
                 let transform = '';
@@ -306,7 +307,7 @@ const Homepage = () => {
                   opacity = 0.8;
                 } else {
                   // Far left/right - smallest, furthest back
-                  transform = `translateX(${position * 280}px) translateZ(-200px)`;
+                  transform = `translateX(${position * 240}px) translateZ(-200px)`;
                   zIndex = 10;
                   scale = 0.7;
                   opacity = 0.6;
@@ -472,7 +473,7 @@ const Homepage = () => {
                 </div>
               </div>
 
-              <h4 className="text-lg font-semibold mt-6 mb-3">Newsletter</h4>
+              {/* <h4 className="text-lg font-semibold mt-6 mb-3">Newsletter</h4>
               <div className="flex">
                 <input
                   type="email"
@@ -482,7 +483,7 @@ const Homepage = () => {
                 <Button className="bg-purple-600 hover:bg-purple-700 rounded-l-none px-4">
                   Subscribe
                 </Button>
-              </div>
+              </div> */}
             </div>
           </div>
 
