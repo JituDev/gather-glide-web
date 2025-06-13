@@ -1,11 +1,24 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, User, Building, Calendar, Star, Users, Camera, Utensils, Lightbulb } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+
+type FormData = {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  fullName: string;
+  phone: string;
+  businessName: string;
+  serviceType: string;
+  gstNumber: string;
+};
 
 const AuthPage = () => {
+  const { register, login, loading, error, setError } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
-  const [userType, setUserType] = useState('user');
+  const [userType, setUserType] = useState<'user' | 'vendor'>('user');
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
     confirmPassword: '',
@@ -16,21 +29,43 @@ const AuthPage = () => {
     gstNumber: ''
   });
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log('Form submitted:', { ...formData, userType, isLogin });
+    setError(null);
+
+    if (!isLogin && formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    try {
+      if (isLogin) {
+        await login({ email: formData.email, password: formData.password });
+      } else {
+        const registerData = {
+          name: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          role: userType,
+          phoneNumber:formData.phone,
+          ...(userType === 'vendor' && { category: formData.serviceType , businessName:formData.businessName})
+        };
+        await register(registerData);
+      }
+    } catch (err) {
+      // Error is already handled in the auth context
+    }
   };
 
-  const getUserTypeIcon = (type) => {
+  const getUserTypeIcon = (type: 'user' | 'vendor') => {
     return type === 'user' ? <User className="w-4 h-4" /> : <Building className="w-4 h-4" />;
   };
 
-  const getUserTypeColor = (type) => {
+  const getUserTypeColor = (type: 'user' | 'vendor') => {
     if (type === 'user') {
       return userType === type ? 'bg-purple-700 text-white' : 'bg-gray-100 text-gray-700 hover:bg-purple-50';
     } else {
@@ -60,7 +95,7 @@ const AuthPage = () => {
           
           <div className="space-y-6 max-w-md">
             <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Why Choose EventWala?</h3>
+              <h3 className="text-lg font-semibold mb-4">Why Choose EventLoop?</h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center space-x-2">
                   <Star className="w-4 h-4" />
@@ -118,14 +153,14 @@ const AuthPage = () => {
           <div className="text-center lg:hidden mb-8">
             <div className="flex items-center justify-center mb-4">
               <Calendar className="w-8 h-8 text-purple-700 mr-2" />
-              <h1 className="text-3xl font-bold text-purple-700">EventWala</h1>
+              <h1 className="text-3xl font-bold text-purple-700">EventLoop</h1>
             </div>
           </div>
 
           {/* Header */}
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-800 mb-2">
-              {isLogin ? 'Welcome Back!' : 'Join EventWala'}
+              {isLogin ? 'Welcome Back!' : 'Join EventLoop'}
             </h2>
             <p className="text-gray-600">
               {isLogin 
@@ -135,13 +170,29 @@ const AuthPage = () => {
             </p>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border-l-4 border-red-500 p-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* User Type Selection */}
           <div className="space-y-4">
             <p className="text-sm font-medium text-gray-700 text-center">
               {isLogin ? 'Login as:' : 'Register as:'}
             </p>
             <div className="grid grid-cols-2 gap-3">
-              {['user', 'vendor'].map((type) => (
+              {(['user', 'vendor'] as const).map((type) => (
                 <button
                   key={type}
                   onClick={() => setUserType(type)}
@@ -161,7 +212,7 @@ const AuthPage = () => {
           </div>
 
           {/* Form */}
-          <div className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
               {/* Full Name - Only for signup */}
               {!isLogin && (
@@ -301,6 +352,7 @@ const AuthPage = () => {
                     className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
                     placeholder="Enter your password"
                     required
+                    minLength={6}
                   />
                   <button
                     type="button"
@@ -328,6 +380,7 @@ const AuthPage = () => {
                       className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
                       placeholder="Confirm your password"
                       required
+                      minLength={6}
                     />
                   </div>
                 </div>
@@ -348,14 +401,25 @@ const AuthPage = () => {
 
             {/* Submit Button */}
             <button
-              onClick={handleSubmit}
+              type="submit"
+              disabled={loading}
               className={`w-full py-4 px-4 rounded-xl font-semibold text-white transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl ${
                 userType === 'vendor' 
                   ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:ring-4 focus:ring-blue-200' 
                   : 'bg-gradient-to-r from-purple-700 to-purple-800 hover:from-purple-800 hover:to-purple-900 focus:ring-4 focus:ring-purple-200'
-              }`}
+              } ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-              {isLogin ? 'Sign In to EventWala' : 'Create My Account'}
+              {loading ? (
+                <span className="inline-flex items-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  {isLogin ? 'Signing In...' : 'Creating Account...'}
+                </span>
+              ) : (
+                isLogin ? 'Sign In to EventLoop' : 'Create My Account'
+              )}
             </button>
 
             {/* Terms - Only for signup */}
@@ -371,12 +435,12 @@ const AuthPage = () => {
                 </a>
               </p>
             )}
-          </div>
+          </form>
 
           {/* Toggle Login/Signup */}
           <div className="text-center pt-4 border-t border-gray-200">
             <p className="text-gray-600">
-              {isLogin ? "New to EventWala?" : "Already have an account?"}{' '}
+              {isLogin ? "New to EventLoop?" : "Already have an account?"}{' '}
               <button
                 onClick={() => setIsLogin(!isLogin)}
                 className="text-purple-600 hover:text-purple-700 font-semibold transition-colors duration-200"

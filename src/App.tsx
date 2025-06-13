@@ -13,21 +13,27 @@ import Catering from "./pages/Catering";
 import LightStudio from "./pages/LightStudio";
 import WeddingVenues from "./pages/WeddingVenues";
 import NotFound from "./pages/NotFound";
-import EventWalaProfiles from './pages/ProfilePage.js'
+// import EventWalaProfiles from './pages/ProfilePage.js'
 import HelpSupportPage from "./pages/HelpSupportPage.js";
 import UserOffersPage from "./pages/UserOffersPage.js";
 import VendorCreateOfferPage from "./pages/VendorCreateOfferPage .js";
 import VendorsPage from "./pages/VendorsPage.js";
+import { AuthProvider } from "./contexts/AuthContext.js";
+import UserProfile from "./pages/UserProfile.js";
+import VendorProfile from "./pages/VendorProfile.js";
+import AdminProfile from "./pages/AdminProfile.js";
+import AdminAuthForm from "./pages/AdminAuthForm.js";
 
-const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <EventProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+  // <QueryClientProvider client={queryClient}>
+  <TooltipProvider>
+    <EventProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <AuthProvider>
+
           <Routes>
             <Route path="/" element={<Homepage />} />
             <Route path="/login" element={<Login />} />
@@ -36,18 +42,24 @@ const App = () => (
             <Route path="/light-studio" element={<LightStudio />} />
             <Route path="/wedding-venues" element={<WeddingVenues />} />
             <Route path="/venue/:id" element={<VenueDetail />} />
-            <Route path="/profile" element={<EventWalaProfiles/>} />
+            {/* <Route path="/profile" element={<EventWalaProfiles />} /> */}
             <Route path="/help" element={<HelpSupportPage />} />
-            <Route path="/userOffer" element = {<UserOffersPage/>} />
-            <Route path="/vendorOffer" element = {<VendorCreateOfferPage/>} />
+            <Route path="/userOffer" element={<UserOffersPage />} />
+            <Route path="/vendorOffer" element={<VendorCreateOfferPage />} />
             <Route path="/vendors/:category" element={<VendorsPage />} />
+            <Route path="/userprofile" element={<UserProfile />} />
+            <Route path="/vendorprofile" element={<VendorProfile />} />
+            <Route path="/adminprofile" element={<AdminProfile />} />
+            <Route path="/admin/login" element={<AdminAuthForm />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-      </EventProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+        </AuthProvider>
+
+      </BrowserRouter>
+    </EventProvider>
+  </TooltipProvider>
+  // </QueryClientProvider>
 );
 
 export default App;
