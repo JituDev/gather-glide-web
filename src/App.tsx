@@ -2,7 +2,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+// import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { EventProvider } from "./contexts/EventContext";
 import Homepage from "./pages/Homepage";
@@ -23,6 +23,8 @@ import UserProfile from "./pages/UserProfile.js";
 import VendorProfile from "./pages/VendorProfile.js";
 import AdminProfile from "./pages/AdminProfile.js";
 import AdminAuthForm from "./pages/AdminAuthForm.js";
+import { AdminProvider } from "./contexts/AdminContext.js";
+import { VendorProvider } from "./contexts/VendorContext.js";
 
 
 const App = () => (
@@ -33,27 +35,30 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-
-          <Routes>
-            <Route path="/" element={<Homepage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/venues" element={<Venues />} />
-            <Route path="/catering" element={<Catering />} />
-            <Route path="/light-studio" element={<LightStudio />} />
-            <Route path="/wedding-venues" element={<WeddingVenues />} />
-            <Route path="/venue/:id" element={<VenueDetail />} />
-            {/* <Route path="/profile" element={<EventWalaProfiles />} /> */}
-            <Route path="/help" element={<HelpSupportPage />} />
-            <Route path="/userOffer" element={<UserOffersPage />} />
-            <Route path="/vendorOffer" element={<VendorCreateOfferPage />} />
-            <Route path="/vendors/:category" element={<VendorsPage />} />
-            <Route path="/userprofile" element={<UserProfile />} />
-            <Route path="/vendorprofile" element={<VendorProfile />} />
-            <Route path="/adminprofile" element={<AdminProfile />} />
-            <Route path="/admin/login" element={<AdminAuthForm />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AdminProvider>
+            <VendorProvider>
+              <Routes>
+                <Route path="/" element={<Homepage />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/venues" element={<Venues />} />
+                <Route path="/catering" element={<Catering />} />
+                <Route path="/light-studio" element={<LightStudio />} />
+                <Route path="/wedding-venues" element={<WeddingVenues />} />
+                <Route path="/venue/:id" element={<VenueDetail />} />
+                {/* <Route path="/profile" element={<EventWalaProfiles />} /> */}
+                <Route path="/help" element={<HelpSupportPage />} />
+                <Route path="/userOffer" element={<UserOffersPage />} />
+                <Route path="/vendorOffer" element={<VendorCreateOfferPage />} />
+                <Route path="/vendors/:category" element={<VendorsPage />} />
+                <Route path="/userprofile" element={<UserProfile />} />
+                <Route path="/vendorprofile" element={<VendorProfile />} />
+                <Route path="/adminprofile" element={<AdminProfile />} />
+                <Route path="/admin/login" element={<AdminAuthForm />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </VendorProvider>
+          </AdminProvider>
         </AuthProvider>
 
       </BrowserRouter>

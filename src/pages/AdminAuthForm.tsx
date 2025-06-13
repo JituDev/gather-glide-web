@@ -51,7 +51,7 @@ const AdminAuthForm = () => {
           phoneNumber: formData.phoneNumber,
         });
       }
-      navigate('/admin/dashboard');
+      navigate('/adminProfile');
     } catch (err: any) {
       setError(err.message || 'An error occurred');
     } finally {
