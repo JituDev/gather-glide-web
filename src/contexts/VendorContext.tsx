@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios, { AxiosError } from 'axios';
 import api from '../utils/axiosInstance'
+import { useAuth } from './AuthContext';
 // Types
 interface User {
   _id: string;
@@ -43,11 +44,11 @@ interface VendorContextType {
   errorVendor: string | null;
   getVendor: (id: string) => Promise<void>;
   updateVendor: (id: string, data: Partial<User>) => Promise<User>;
-  
+
   // Gallery Images
   uploadingImages: boolean;
   uploadGalleryImages: (id: string, files: File[]) => Promise<string[]>;
-  
+
   // Offers
   offers: Offer[];
   loadingOffers: boolean;
@@ -58,6 +59,10 @@ interface VendorContextType {
   updateOffer: (id: string, offerData: FormData) => Promise<Offer>;
   deleteOffer: (id: string) => Promise<void>;
   toggleOfferStatus: (id: string) => Promise<Offer>;
+
+  // Add this line 👇
+  vendorId: string | undefined;
+
 }
 
 // Create context
@@ -65,6 +70,9 @@ const VendorContext = createContext<VendorContextType | undefined>(undefined);
 
 // Provider component
 export const VendorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+  const vendorId = user?._id;
+
   const [currentVendor, setCurrentVendor] = useState<User | null>(null);
   const [loadingVendor, setLoadingVendor] = useState(false);
   const [errorVendor, setErrorVendor] = useState<string | null>(null);
@@ -77,12 +85,12 @@ export const VendorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [errorOffers, setErrorOffers] = useState<string | null>(null);
 
   // Axios instance with auth header
-//   const api = axios.create({
-//     baseURL: `${import.meta.env.VITE_API_BASE_URL}/api/vendors`,
-//     headers: {
-//       'Content-Type': 'application/json',
-//     },
-//   });
+  //   const api = axios.create({
+  //     baseURL: `${import.meta.env.VITE_API_BASE_URL}/api/vendors`,
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //   });
 
   // Set auth token if available
   const setAuthToken = (token: string | null) => {
@@ -100,21 +108,28 @@ export const VendorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, []);
 
   // Vendor functions
-  const getVendor = async (id: string) => {
-    try {
-      setLoadingVendor(true);
-      setErrorVendor(null);
-      const response = await api.get(`/api/vendors/${id}`);
-      setCurrentVendor(response.data.data);
-      return response.data.data;
-    } catch (error) {
-      const err = error as AxiosError<{ message?: string }>;
-      setErrorVendor(err.response?.data?.message || 'Failed to fetch vendor');
-      throw err;
-    } finally {
-      setLoadingVendor(false);
-    }
-  };
+  const getVendor = async (id?: string) => {
+  const vendorId = id || user?._id;
+
+  if (!vendorId) {
+    setErrorVendor('Vendor ID not available');
+    throw new Error('Vendor ID not available');
+  }
+
+  try {
+    setLoadingVendor(true);
+    setErrorVendor(null);
+    const response = await api.get(`/api/vendors/${vendorId}`);
+    setCurrentVendor(response.data.data);
+    return response.data.data;
+  } catch (error) {
+    const err = error as AxiosError<{ message?: string }>;
+    setErrorVendor(err.response?.data?.message || 'Failed to fetch vendor');
+    throw err;
+  } finally {
+    setLoadingVendor(false);
+  }
+};
 
   const updateVendor = async (id: string, data: Partial<User>) => {
     try {
@@ -167,7 +182,7 @@ export const VendorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     try {
       setLoadingOffers(true);
       setErrorOffers(null);
-      const response = await api.get('/api/vendors/offers/my-offers');
+      const response = await api.get('/api/offer/my-offers');
       setOffers(response.data.data);
     } catch (error) {
       const err = error as AxiosError<{ message?: string }>;
@@ -203,7 +218,7 @@ export const VendorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           'Content-Type': 'multipart/form-data',
         },
       });
-      setOffers(offers.map(offer => 
+      setOffers(offers.map(offer =>
         offer._id === id ? response.data.data : offer
       ));
       return response.data.data;
@@ -232,7 +247,7 @@ export const VendorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     try {
       setLoadingOffers(true);
       const response = await api.put(`/api/vendors/offers/${id}/toggle-status`);
-      setOffers(offers.map(offer => 
+      setOffers(offers.map(offer =>
         offer._id === id ? response.data.data : offer
       ));
       return response.data.data;
@@ -251,11 +266,11 @@ export const VendorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     errorVendor,
     getVendor,
     updateVendor,
-    
+
     // Gallery Images
     uploadingImages,
     uploadGalleryImages,
-    
+
     // Offers
     offers,
     loadingOffers,
@@ -265,7 +280,9 @@ export const VendorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     createOffer,
     updateOffer,
     deleteOffer,
-    toggleOfferStatus
+    toggleOfferStatus,
+
+     vendorId, // 👈 Add this
   };
 
   return <VendorContext.Provider value={value}>{children}</VendorContext.Provider>;

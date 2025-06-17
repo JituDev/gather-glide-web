@@ -25,6 +25,8 @@ import AdminProfile from "./pages/AdminProfile.js";
 import AdminAuthForm from "./pages/AdminAuthForm.js";
 import { AdminProvider } from "./contexts/AdminContext.js";
 import { VendorProvider } from "./contexts/VendorContext.js";
+import { ServiceProvider } from "./contexts/ServiceContext.js";
+// import VendorServiceManagement from "./pages/VendorServiceManagement.js";
 
 
 const App = () => (
@@ -37,26 +39,29 @@ const App = () => (
         <AuthProvider>
           <AdminProvider>
             <VendorProvider>
-              <Routes>
-                <Route path="/" element={<Homepage />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/venues" element={<Venues />} />
-                <Route path="/catering" element={<Catering />} />
-                <Route path="/light-studio" element={<LightStudio />} />
-                <Route path="/wedding-venues" element={<WeddingVenues />} />
-                <Route path="/venue/:id" element={<VenueDetail />} />
-                {/* <Route path="/profile" element={<EventWalaProfiles />} /> */}
-                <Route path="/help" element={<HelpSupportPage />} />
-                <Route path="/userOffer" element={<UserOffersPage />} />
-                <Route path="/vendorOffer" element={<VendorCreateOfferPage />} />
-                <Route path="/vendors/:category" element={<VendorsPage />} />
-                <Route path="/userprofile" element={<UserProfile />} />
-                <Route path="/vendorprofile" element={<VendorProfile />} />
-                <Route path="/adminprofile" element={<AdminProfile />} />
-                <Route path="/admin/login" element={<AdminAuthForm />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <ServiceProvider>
+                <Routes>
+                  <Route path="/" element={<Homepage />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/venues" element={<Venues />} />
+                  <Route path="/catering" element={<Catering />} />
+                  <Route path="/light-studio" element={<LightStudio />} />
+                  <Route path="/wedding-venues" element={<WeddingVenues />} />
+                  <Route path="/venue/:id" element={<VenueDetail />} />
+                  {/* <Route path="/profile" element={<EventWalaProfiles />} /> */}
+                  <Route path="/help" element={<HelpSupportPage />} />
+                  <Route path="/userOffer" element={<UserOffersPage />} />
+                  <Route path="/vendorOffer" element={<VendorCreateOfferPage />} />
+                  <Route path="/vendors/:category" element={<VendorsPage />} />
+                  <Route path="/userprofile" element={<UserProfile />} />
+                  <Route path="/vendorprofile" element={<VendorProfile />} />
+                  <Route path="/adminprofile" element={<AdminProfile />} />
+                  <Route path="/admin/login" element={<AdminAuthForm />} />
+                  {/* <Route path="/servicemanagent" element={<VendorServiceManagement />} /> */}
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </ServiceProvider>
             </VendorProvider>
           </AdminProvider>
         </AuthProvider>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { 
+import {
   CheckCircle,
   Calendar,
   TrendingUp,
@@ -19,9 +19,9 @@ import { useVendor } from "@/contexts/VendorContext";
 import { useAuth } from "@/contexts/AuthContext";
 
 const VendorProfile = () => {
-  const { 
-    currentVendor, 
-    loadingVendor, 
+  const {
+    currentVendor,
+    loadingVendor,
     getVendor,
     updateVendor,
     uploadGalleryImages,
@@ -30,7 +30,8 @@ const VendorProfile = () => {
     loadingOffers,
     getMyOffers
   } = useVendor();
-  const {user} = useAuth();
+  const { logout } = useAuth();
+  const { user } = useAuth();
   const [editMode, setEditMode] = useState(false);
   const [vendorForm, setVendorForm] = useState({
     name: '',
@@ -39,7 +40,14 @@ const VendorProfile = () => {
   });
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [showImageUpload, setShowImageUpload] = useState(false);
-
+  const handleLogout = async ()=>{
+    try {
+      await logout();
+    } catch (error) {
+      alert("error ");
+      console.log(error)
+    }
+  }
   // Fetch vendor data on component mount
   useEffect(() => {
     const fetchVendorData = async () => {
@@ -117,7 +125,7 @@ const VendorProfile = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+
       <div className="max-w-6xl mx-auto py-8 px-4">
         {/* Profile Header */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
@@ -126,7 +134,7 @@ const VendorProfile = () => {
               <div className="w-40 h-40 bg-gradient-to-br from-purple-400 to-blue-500 rounded-xl flex items-center justify-center text-white text-5xl font-bold">
                 {currentVendor.name.substring(0, 2).toUpperCase()}
               </div>
-              <button 
+              <button
                 onClick={() => setShowImageUpload(!showImageUpload)}
                 className="absolute bottom-2 right-2 bg-white rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow"
               >
@@ -138,7 +146,7 @@ const VendorProfile = () => {
                 </div>
               )}
             </div>
-            
+
             <div className="flex-1 text-center lg:text-left">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4">
                 <div>
@@ -146,7 +154,7 @@ const VendorProfile = () => {
                     <input
                       type="text"
                       value={vendorForm.name}
-                      onChange={(e) => setVendorForm({...vendorForm, name: e.target.value})}
+                      onChange={(e) => setVendorForm({ ...vendorForm, name: e.target.value })}
                       className="text-3xl font-bold text-gray-800 mb-2 bg-gray-100 rounded px-2 py-1 w-full lg:w-auto"
                     />
                   ) : (
@@ -157,7 +165,7 @@ const VendorProfile = () => {
                       <input
                         type="text"
                         value={vendorForm.category}
-                        onChange={(e) => setVendorForm({...vendorForm, category: e.target.value})}
+                        onChange={(e) => setVendorForm({ ...vendorForm, category: e.target.value })}
                         className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium w-32"
                       />
                     ) : (
@@ -171,17 +179,26 @@ const VendorProfile = () => {
                     </div>
                   </div>
                 </div>
-                
+                <button
+                        // key={item.id}
+                        onClick={handleLogout}
+                        className={` flex items-center bg-red-600 text-white space-x-3 px-4 py-3 rounded-lg transition-colors text-left`}
+                      >
+                        <Settings className="w-5 h-5" /><span></span>Logout 
+                        <span className="font-medium"></span>
+                      </button>
+
                 <div className="flex space-x-2 mt-4 lg:mt-0">
+                  
                   {editMode ? (
                     <>
-                      <button 
+                      <button
                         onClick={handleUpdateVendor}
                         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
                       >
                         Save Changes
                       </button>
-                      <button 
+                      <button
                         onClick={() => setEditMode(false)}
                         className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg transition-colors"
                       >
@@ -190,7 +207,8 @@ const VendorProfile = () => {
                     </>
                   ) : (
                     <>
-                      <button 
+                      
+                      <button
                         onClick={() => setEditMode(true)}
                         className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
                       >
@@ -204,20 +222,20 @@ const VendorProfile = () => {
                   )}
                 </div>
               </div>
-              
+
               <p className="text-gray-600 mb-4">{currentVendor.email}</p>
-              
+
               {editMode ? (
                 <textarea
                   value={vendorForm.description}
-                  onChange={(e) => setVendorForm({...vendorForm, description: e.target.value})}
+                  onChange={(e) => setVendorForm({ ...vendorForm, description: e.target.value })}
                   className="w-full p-2 border rounded text-gray-700 mb-6 h-24"
                   placeholder="Enter your business description"
                 />
               ) : (
                 <p className="text-gray-700 mb-6">{currentVendor.description || 'No description provided'}</p>
               )}
-              
+
               <div className="flex flex-wrap justify-center lg:justify-start gap-6">
                 <div className="flex items-center text-blue-600">
                   <TrendingUp className="w-5 h-5 mr-2" />
@@ -240,7 +258,7 @@ const VendorProfile = () => {
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-medium text-gray-800">Upload Gallery Images</h3>
-                <button 
+                <button
                   onClick={() => {
                     setShowImageUpload(false);
                     setSelectedImages([]);
@@ -250,7 +268,7 @@ const VendorProfile = () => {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              
+
               <input
                 type="file"
                 multiple
@@ -258,7 +276,7 @@ const VendorProfile = () => {
                 className="mb-4 w-full"
                 accept="image/*"
               />
-              
+
               {selectedImages.length > 0 && (
                 <div className="mb-4">
                   <p className="text-sm text-gray-600 mb-2">
@@ -277,7 +295,7 @@ const VendorProfile = () => {
                   </div>
                 </div>
               )}
-              
+
               <button
                 onClick={handleImageUpload}
                 disabled={uploadingImages || selectedImages.length === 0}
@@ -310,7 +328,7 @@ const VendorProfile = () => {
               <Calendar className="w-8 h-8 text-purple-400" />
             </div>
           </div>
-          
+
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -320,7 +338,7 @@ const VendorProfile = () => {
               <Star className="w-8 h-8 text-yellow-400" />
             </div>
           </div>
-          
+
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -330,7 +348,7 @@ const VendorProfile = () => {
               <CheckCircle className="w-8 h-8 text-green-400" />
             </div>
           </div>
-          
+
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -346,7 +364,7 @@ const VendorProfile = () => {
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-800">Gallery</h2>
-            <button 
+            <button
               onClick={() => setShowImageUpload(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
             >
@@ -354,14 +372,14 @@ const VendorProfile = () => {
               Add Images
             </button>
           </div>
-          
+
           {currentVendor.galleryImages && currentVendor.galleryImages.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {currentVendor.galleryImages.map((image, index) => (
                 <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
-                  <img 
-                    src={image} 
-                    alt={`Gallery ${index + 1}`} 
+                  <img
+                    src={image}
+                    alt={`Gallery ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
                 </div>

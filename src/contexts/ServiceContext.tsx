@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios, { AxiosError } from 'axios';
+import { useVendor } from './VendorContext';
 
 // Types
 interface Service {
@@ -72,6 +73,7 @@ const ServiceContext = createContext<ServiceContextType | undefined>(undefined);
 
 // Provider component
 export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { vendorId } = useVendor();
   const [services, setServices] = useState<Service[]>([]);
   const [currentService, setCurrentService] = useState<Service | null>(null);
   const [loadingServices, setLoadingServices] = useState(false);
@@ -139,6 +141,7 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setErrorVendorServices(null);
       const response = await api.get(`/vendor/${vendorId}`);
       setVendorServices(response.data.data);
+      console.log('getVendorServices',response.data.data)
       return response.data.data;
     } catch (error) {
       const err = error as AxiosError<{ message?: string }>;
