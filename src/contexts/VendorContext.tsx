@@ -195,7 +195,7 @@ export const VendorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const createOffer = async (offerData: FormData) => {
     try {
       setLoadingOffers(true);
-      const response = await api.post('/api/vendors/offers', offerData, {
+      const response = await api.post('/api/offer', offerData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -213,7 +213,7 @@ export const VendorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const updateOffer = async (id: string, offerData: FormData) => {
     try {
       setLoadingOffers(true);
-      const response = await api.put(`/api/vendors/offers/${id}`, offerData, {
+      const response = await api.put(`/api/offer/${id}`, offerData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -233,7 +233,7 @@ export const VendorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const deleteOffer = async (id: string) => {
     try {
       setLoadingOffers(true);
-      await api.delete(`/api/vendors/offers/${id}`);
+      await api.delete(`/api/offer/${id}`);
       setOffers(offers.filter(offer => offer._id !== id));
     } catch (error) {
       const err = error as AxiosError<{ message?: string }>;
@@ -246,7 +246,7 @@ export const VendorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const toggleOfferStatus = async (id: string) => {
     try {
       setLoadingOffers(true);
-      const response = await api.put(`/api/vendors/offers/${id}/toggle-status`);
+      const response = await api.put(`/api/offer/${id}/toggle-status`);
       setOffers(offers.map(offer =>
         offer._id === id ? response.data.data : offer
       ));

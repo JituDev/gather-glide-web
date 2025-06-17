@@ -39,29 +39,29 @@ interface ServiceContextType {
   currentService: Service | null;
   loadingServices: boolean;
   errorServices: string | null;
-  
+
   // Vendor Services
   vendorServices: Service[];
   loadingVendorServices: boolean;
   errorVendorServices: string | null;
-  
+
   // Category Services
   categoryServices: Service[];
   loadingCategoryServices: boolean;
   errorCategoryServices: string | null;
-  
+
   // Search Results
   searchResults: Service[];
   loadingSearch: boolean;
   errorSearch: string | null;
-  
+
   // CRUD Operations
   createService: (formData: FormData) => Promise<Service>;
   getVendorServices: (vendorId: string) => Promise<Service[]>;
   updateService: (id: string, formData: FormData) => Promise<Service>;
   deleteService: (id: string) => Promise<void>;
   getService: (id: string) => Promise<Service>;
-  
+
   // Public Queries
   getServicesByCategory: (category: string, location?: string, search?: string) => Promise<Service[]>;
   searchServices: (query: string, location?: string, category?: string) => Promise<Service[]>;
@@ -78,6 +78,7 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [currentService, setCurrentService] = useState<Service | null>(null);
   const [loadingServices, setLoadingServices] = useState(false);
   const [errorServices, setErrorServices] = useState<string | null>(null);
+  const token = localStorage.getItem('token'); // Or use useAuth() if preferred
 
   const [vendorServices, setVendorServices] = useState<Service[]>([]);
   const [loadingVendorServices, setLoadingVendorServices] = useState(false);
@@ -93,7 +94,7 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Axios instance with auth header
   const api = axios.create({
-    baseURL: '/api/services',
+    baseURL: `${import.meta.env.VITE_API_BASE_URL}/api/services`,
     headers: {
       'Content-Type': 'application/json',
     },
@@ -118,10 +119,12 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const createService = async (formData: FormData) => {
     try {
       setLoadingServices(true);
+      if (!token) throw new Error('User not authenticated');
       setErrorServices(null);
       const response = await api.post('/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
         },
       });
       setServices([...services, response.data.data]);
@@ -141,7 +144,7 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setErrorVendorServices(null);
       const response = await api.get(`/vendor/${vendorId}`);
       setVendorServices(response.data.data);
-      console.log('getVendorServices',response.data.data)
+      console.log('getVendorServices', response.data.data)
       return response.data.data;
     } catch (error) {
       const err = error as AxiosError<{ message?: string }>;
@@ -155,17 +158,24 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const updateService = async (id: string, formData: FormData) => {
     try {
       setLoadingServices(true);
+
+      if (!token) throw new Error('User not authenticated');
+
       const response = await api.put(`/${id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`, // ✅ Include Bearer token
         },
       });
-      setServices(services.map(service => 
+
+      setServices(services.map(service =>
         service._id === id ? response.data.data : service
       ));
+
       if (currentService?._id === id) {
         setCurrentService(response.data.data);
       }
+
       return response.data.data;
     } catch (error) {
       const err = error as AxiosError<{ message?: string }>;
@@ -215,7 +225,7 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const params = new URLSearchParams();
       if (location) params.append('location', location);
       if (search) params.append('search', search);
-      
+
       const response = await api.get(`/category/${category}?${params.toString()}`);
       setCategoryServices(response.data.data);
       return response.data.data;
@@ -235,7 +245,7 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const params = new URLSearchParams({ q: query });
       if (location) params.append('location', location);
       if (category) params.append('category', category);
-      
+
       const response = await api.get(`/search?${params.toString()}`);
       setSearchResults(response.data.data);
       return response.data.data;
@@ -270,29 +280,29 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     currentService,
     loadingServices,
     errorServices,
-    
+
     // Vendor Services
     vendorServices,
     loadingVendorServices,
     errorVendorServices,
-    
+
     // Category Services
     categoryServices,
     loadingCategoryServices,
     errorCategoryServices,
-    
+
     // Search Results
     searchResults,
     loadingSearch,
     errorSearch,
-    
+
     // CRUD Operations
     createService,
     getVendorServices,
     updateService,
     deleteService,
     getService,
-    
+
     // Public Queries
     getServicesByCategory,
     searchServices,

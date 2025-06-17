@@ -26,7 +26,7 @@ import AdminAuthForm from "./pages/AdminAuthForm.js";
 import { AdminProvider } from "./contexts/AdminContext.js";
 import { VendorProvider } from "./contexts/VendorContext.js";
 import { ServiceProvider } from "./contexts/ServiceContext.js";
-// import VendorServiceManagement from "./pages/VendorServiceManagement.js";
+import ServiceManagement from "./pages/ServiceManagement.js";
 
 
 const App = () => (
@@ -57,7 +57,7 @@ const App = () => (
                   <Route path="/vendorprofile" element={<VendorProfile />} />
                   <Route path="/adminprofile" element={<AdminProfile />} />
                   <Route path="/admin/login" element={<AdminAuthForm />} />
-                  {/* <Route path="/servicemanagent" element={<VendorServiceManagement />} /> */}
+                  <Route path="/servicemanagent" element={<ServiceManagement />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
