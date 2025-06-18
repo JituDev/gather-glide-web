@@ -51,19 +51,31 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const { user } = useAuth();
 
   const api = axios.create({
-    baseURL: '/api/bookings',
+    baseURL: `${import.meta.env.VITE_API_BASE_URL}/api/bookings`,
     headers: {
       'Content-Type': 'application/json',
     },
   });
 
   // Set auth token if user is logged in
-  api.interceptors.request.use((config) => {
-    if (user?.token) {
-      config.headers.Authorization = `Bearer ${user.token}`;
+  // api.interceptors.request.use((config) => {
+  //   if (user?.token) {
+  //     config.headers.Authorization = `Bearer ${user.token}`;
+  //   }
+  //   return config;
+  // });
+  const setAuthToken = (token: string | null) => {
+    if (token) {
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+      delete api.defaults.headers.common['Authorization'];
     }
-    return config;
-  });
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem('token'); // Adjust based on your auth setup
+    setAuthToken(token);
+  }, []);
 
   const createBooking = async (
     vendorId: string,

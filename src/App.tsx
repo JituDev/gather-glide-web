@@ -27,6 +27,8 @@ import { ServiceProvider } from "./contexts/ServiceContext.js";
 import ServiceManagement from "./pages/ServiceManagement.js";
 import ServicesPage from "./pages/Venues";
 import ServiceDetail from "./pages/VenueDetail.js";
+import { WishlistProvider } from "./contexts/WishlistContext.js";
+import WishlistPage from "./pages/WishlistPage.js";
 
 
 const App = () => (
@@ -40,6 +42,7 @@ const App = () => (
           <AdminProvider>
             <VendorProvider>
               <ServiceProvider>
+                <WishlistProvider>
                 <Routes>
                   <Route path="/" element={<Homepage />} />
                   <Route path="/login" element={<Login />} />
@@ -57,10 +60,12 @@ const App = () => (
                   <Route path="/vendorprofile" element={<VendorProfile />} />
                   <Route path="/adminprofile" element={<AdminProfile />} />
                   <Route path="/admin/login" element={<AdminAuthForm />} />
+                  <Route path="/wishlist" element={<WishlistPage />} />
                   <Route path="/servicemanagent" element={<ServiceManagement />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
+                </WishlistProvider>
               </ServiceProvider>
             </VendorProvider>
           </AdminProvider>

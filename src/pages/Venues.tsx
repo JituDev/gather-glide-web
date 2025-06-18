@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, 
-  List, 
-  Star, 
-  MapPin, 
-  Users, 
-  Calendar, 
-  DollarSign, 
-  Home, 
-  Filter, 
-  ChevronDown, 
-  Heart, 
-  Eye, 
-  ArrowRight 
+import {
+  Search,
+  List,
+  Star,
+  MapPin,
+  Users,
+  Calendar,
+  DollarSign,
+  Home,
+  Filter,
+  ChevronDown,
+  Heart,
+  Eye,
+  ArrowRight
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useNavigate } from 'react-router-dom';
 import { useAdmin } from '@/contexts/AdminContext';
 import { useService } from '@/contexts/ServiceContext';
+import { useWishlist } from '@/contexts/WishlistContext';
 
 interface Service {
   _id: string;
@@ -66,11 +67,21 @@ const ServicesPage = () => {
   const [favorites, setFavorites] = useState(new Set<string>());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+  const { isInWishlist, addToWishlist, removeFromWishlist, loading: wishlistLoading } = useWishlist();
+
+  const handleWishlistToggle = async (id: string) => {
+    if (isInWishlist(id)) {
+      await removeFromWishlist(id);
+    } else {
+      await addToWishlist(id);
+    }
+  };
+
+
   const { getCategories, categories } = useAdmin();
-  const { 
-    getAllServices, 
-    getServicesByCategory, 
+  const {
+    getAllServices,
+    getServicesByCategory,
     searchServices,
     services,
     setServices
@@ -81,7 +92,7 @@ const ServicesPage = () => {
     try {
       setLoading(true);
       setError('');
-      
+
       let response;
       if (selectedCategory) {
         response = await getServicesByCategory(selectedCategory, locationFilter, searchTerm);
@@ -90,7 +101,7 @@ const ServicesPage = () => {
       } else {
         response = await getAllServices();
       }
-      
+
       setServices(response);
     } catch (err) {
       setError('Failed to fetch services. Please try again.');
@@ -144,22 +155,22 @@ const ServicesPage = () => {
   const filteredServices = services?.filter(service => {
     // Filter by category if selected
     if (selectedCategory && service.category._id !== selectedCategory) return false;
-    
+
     // Filter by search term if entered
-    if (searchTerm && 
-        !service.title.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !service.description.toLowerCase().includes(searchTerm.toLowerCase())) {
+    if (searchTerm &&
+      !service.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !service.description.toLowerCase().includes(searchTerm.toLowerCase())) {
       return false;
     }
-    
+
     // Filter by location if selected
     if (locationFilter && !service.location.toLowerCase().includes(locationFilter.toLowerCase())) {
       return false;
     }
-    
+
     // Filter by service type if selected
     if (serviceType && service.type !== serviceType) return false;
-    
+
     return true;
   });
 
@@ -219,7 +230,7 @@ const ServicesPage = () => {
                   <div className="absolute top-full left-0 right-0 bg-white border-t shadow-xl py-4 animate-in slide-in-from-top-2">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        <select 
+                        <select
                           className="bg-gray-50 border border-gray-200 text-gray-700 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                           value={locationFilter}
                           onChange={(e) => setLocationFilter(e.target.value)}
@@ -289,11 +300,10 @@ const ServicesPage = () => {
                   {categories?.map(category => (
                     <div
                       key={category._id}
-                      className={`flex items-center space-x-4 p-3 rounded-xl cursor-pointer transition-all duration-300 hover:shadow-md ${
-                        selectedCategory === category._id
+                      className={`flex items-center space-x-4 p-3 rounded-xl cursor-pointer transition-all duration-300 hover:shadow-md ${selectedCategory === category._id
                           ? 'bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200'
                           : 'hover:bg-gray-50'
-                      }`}
+                        }`}
                       onClick={() => setSelectedCategory(selectedCategory === category._id ? '' : category._id)}
                     >
                       <div className="w-14 h-14 rounded-xl overflow-hidden shadow-md bg-gray-100 flex items-center justify-center">
@@ -308,9 +318,8 @@ const ServicesPage = () => {
                         )}
                       </div>
                       <div className="flex-1">
-                        <h4 className={`font-semibold ${
-                          selectedCategory === category._id ? 'text-blue-600' : 'text-gray-700'
-                        }`}>
+                        <h4 className={`font-semibold ${selectedCategory === category._id ? 'text-blue-600' : 'text-gray-700'
+                          }`}>
                           {category.title}
                         </h4>
                         <p className="text-sm text-gray-500">
@@ -362,7 +371,7 @@ const ServicesPage = () => {
               <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
                 <div>
                   <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                    {selectedCategory 
+                    {selectedCategory
                       ? categories.find(c => c._id === selectedCategory)?.title || 'Selected Services'
                       : 'All Services'}
                   </h2>
@@ -407,14 +416,14 @@ const ServicesPage = () => {
                         </div>
                         <div className="absolute top-4 right-4 z-10">
                           <button
-                            onClick={() => toggleFavorite(service._id)}
-                            className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${
-                              favorites.has(service._id)
+                            onClick={() => handleWishlistToggle(service._id)}
+                            disabled={wishlistLoading}
+                            className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${isInWishlist(service._id)  // Changed from isInWishlist.has() to isInWishlist()
                                 ? 'bg-red-500 text-white'
                                 : 'bg-white/80 text-gray-600 hover:bg-white hover:text-red-500'
-                            }`}
+                              }`}
                           >
-                            <Heart className={`w-5 h-5 ${favorites.has(service._id) ? 'fill-current' : ''}`} />
+                            <Heart className={`w-5 h-5 ${isInWishlist(service._id) ? 'fill-current' : ''}`} />
                           </button>
                         </div>
                         <img
@@ -457,11 +466,10 @@ const ServicesPage = () => {
                                 {[...Array(5)].map((_, i) => (
                                   <Star
                                     key={i}
-                                    className={`w-4 h-4 ${
-                                      i < Math.floor(service.rating || 0)
+                                    className={`w-4 h-4 ${i < Math.floor(service.rating || 0)
                                         ? 'text-yellow-400 fill-current'
                                         : 'text-gray-300'
-                                    }`}
+                                      }`}
                                   />
                                 ))}
                                 <span className="text-xs text-gray-600 ml-1">
@@ -528,14 +536,14 @@ const ServicesPage = () => {
                           </div>
                           <div className="absolute top-4 right-4 z-10">
                             <button
-                              onClick={() => toggleFavorite(service._id)}
-                              className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${
-                                favorites.has(service._id)
+                              onClick={() => handleWishlistToggle(service._id)}
+                              disabled={wishlistLoading}
+                              className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${isInWishlist(service._id)  // Changed from isInWishlist.has() to isInWishlist()
                                   ? 'bg-red-500 text-white'
                                   : 'bg-white/80 text-gray-600 hover:bg-white hover:text-red-500'
-                              }`}
+                                }`}
                             >
-                              <Heart className={`w-5 h-5 ${favorites.has(service._id) ? 'fill-current' : ''}`} />
+                              <Heart className={`w-5 h-5 ${isInWishlist(service._id) ? 'fill-current' : ''}`} />
                             </button>
                           </div>
                           <img
@@ -579,11 +587,10 @@ const ServicesPage = () => {
                                     {[...Array(5)].map((_, i) => (
                                       <Star
                                         key={i}
-                                        className={`w-4 h-4 ${
-                                          i < Math.floor(service.rating || 0)
+                                        className={`w-4 h-4 ${i < Math.floor(service.rating || 0)
                                             ? 'text-yellow-400 fill-current'
                                             : 'text-gray-300'
-                                        }`}
+                                          }`}
                                       />
                                     ))}
                                     <span className="text-xs text-gray-600 ml-1">
@@ -621,7 +628,7 @@ const ServicesPage = () => {
 
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-2">
-                              <div className="flex space-x-2"> 
+                              <div className="flex space-x-2">
                                 {service.images.slice(0, 3).map((image, imgIndex) => (
                                   <div key={imgIndex} className="relative group/thumb cursor-pointer">
                                     <img
