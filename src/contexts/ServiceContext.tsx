@@ -188,7 +188,12 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const deleteService = async (id: string) => {
     try {
       setLoadingServices(true);
-      await api.delete(`/${id}`);
+      if (!token) throw new Error('User not authenticated');
+      await api.delete(`/${id}`,{
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ Include Bearer token
+        },
+      });
       setServices(services.filter(service => service._id !== id));
       if (currentService?._id === id) {
         setCurrentService(null);
@@ -276,6 +281,7 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const value: ServiceContextType = {
     // Service Management
+    setServices,
     services,
     currentService,
     loadingServices,

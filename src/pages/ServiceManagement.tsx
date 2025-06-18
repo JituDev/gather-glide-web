@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Navbar from '@/components/Navbar';
+import { useAdmin } from '@/contexts/AdminContext';
 
 interface ServiceFormData {
     title: string;
@@ -33,11 +34,13 @@ const ServiceManagement = () => {
         deleteService,
         getVendorServices
     } = useService();
-
+    const [subCategories, setSubCategories] = useState<string[]>([]);
     const { vendorId } = useVendor();
-    const { user } = useAuth();
-    const navigate = useNavigate();
+    const { getCategories, categories } = useAdmin();
 
+    useEffect(() => {
+        getCategories();
+    }, [])
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [currentServiceId, setCurrentServiceId] = useState<string | null>(null);
@@ -86,6 +89,14 @@ const ServiceManagement = () => {
             ...prev,
             [name]: value
         }));
+
+        if (name === 'category') {
+            const selectedCategory = categories.find((cat) => cat._id === value);
+            setSubCategories(selectedCategory?.subCategories || []);
+
+            // Reset subCategory on category change
+            setFormData((prev) => ({ ...prev, subCategory: '' }));
+        }
 
         // Clear validation error when user types
         if (validationErrors[name as keyof ServiceFormData]) {
@@ -231,20 +242,20 @@ const ServiceManagement = () => {
         }
     };
 
-    const categories = [
-        { id: 'photography', name: 'Photography' },
-        { id: 'videography', name: 'Videography' },
-        { id: 'catering', name: 'Catering' },
-        { id: 'decoration', name: 'Decoration' },
-        { id: 'venue', name: 'Venue' },
-    ];
+    // const categories = [
+    //     { id: 'photography', name: 'Photography' },
+    //     { id: 'videography', name: 'Videography' },
+    //     { id: 'catering', name: 'Catering' },
+    //     { id: 'decoration', name: 'Decoration' },
+    //     { id: 'venue', name: 'Venue' },
+    // ];
 
-    const subCategories = [
-        { id: 'wedding', name: 'Wedding' },
-        { id: 'birthday', name: 'Birthday' },
-        { id: 'corporate', name: 'Corporate' },
-        { id: 'engagement', name: 'Engagement' },
-    ];
+    // const subCategories = [
+    //     { id: 'wedding', name: 'Wedding' },
+    //     { id: 'birthday', name: 'Birthday' },
+    //     { id: 'corporate', name: 'Corporate' },
+    //     { id: 'engagement', name: 'Engagement' },
+    // ];
 
     return (
         <>
@@ -376,11 +387,12 @@ const ServiceManagement = () => {
                                             >
                                                 <option value="">Select a category</option>
                                                 {categories.map((cat) => (
-                                                    <option key={cat.id} value={cat.id}>
-                                                        {cat.name}
+                                                    <option key={cat._id} value={cat._id}>
+                                                        {cat.title}
                                                     </option>
                                                 ))}
                                             </select>
+
                                             {validationErrors.category && (
                                                 <p className="text-red-500 text-sm mt-1">{validationErrors.category}</p>
                                             )}
@@ -395,12 +407,13 @@ const ServiceManagement = () => {
                                                 className={`w-full px-3 py-2 border rounded-lg ${validationErrors.subCategory ? 'border-red-500' : 'border-gray-300'}`}
                                             >
                                                 <option value="">Select a sub-category</option>
-                                                {subCategories.map((subCat) => (
-                                                    <option key={subCat.id} value={subCat.id}>
-                                                        {subCat.name}
+                                                {subCategories.map((sub, index) => (
+                                                    <option key={index} value={sub}>
+                                                        {sub}
                                                     </option>
                                                 ))}
                                             </select>
+
                                             {validationErrors.subCategory && (
                                                 <p className="text-red-500 text-sm mt-1">{validationErrors.subCategory}</p>
                                             )}

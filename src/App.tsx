@@ -27,6 +27,7 @@ import { AdminProvider } from "./contexts/AdminContext.js";
 import { VendorProvider } from "./contexts/VendorContext.js";
 import { ServiceProvider } from "./contexts/ServiceContext.js";
 import ServiceManagement from "./pages/ServiceManagement.js";
+import ServicesPage from "./pages/Venues";
 
 
 const App = () => (
@@ -43,7 +44,7 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Homepage />} />
                   <Route path="/login" element={<Login />} />
-                  <Route path="/venues" element={<Venues />} />
+                  <Route path="/ServicesPage" element={<ServicesPage />} />
                   <Route path="/catering" element={<Catering />} />
                   <Route path="/light-studio" element={<LightStudio />} />
                   <Route path="/wedding-venues" element={<WeddingVenues />} />
