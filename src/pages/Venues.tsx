@@ -62,7 +62,7 @@ const ServicesPage = () => {
   const [serviceType, setServiceType] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
-  const [viewMode, setViewMode] = useState('grid');
+  const [viewMode, setViewMode] = useState('list');
   const [favorites, setFavorites] = useState(new Set<string>());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -516,7 +516,7 @@ const ServicesPage = () => {
                   {filteredServices?.map((service) => (
                     <div
                       key={service._id}
-                      className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 group"
+                      className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 group  h-[470px] lg:h-[200px]"
                     >
                       <div className="flex flex-col lg:flex-row">
                         {/* Image Section */}

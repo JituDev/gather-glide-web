@@ -22,6 +22,7 @@ interface ServiceFormData {
     instagram?: string;
     twitter?: string;
     images: FileList | null;
+    existingImages?: string[]; // For edit mode
 }
 
 const ServiceManagement = () => {
@@ -41,10 +42,13 @@ const ServiceManagement = () => {
     useEffect(() => {
         getCategories();
     }, [])
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [currentServiceId, setCurrentServiceId] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+    const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
     const [formData, setFormData] = useState<ServiceFormData>({
         title: '',
@@ -60,7 +64,8 @@ const ServiceManagement = () => {
         facebook: '',
         instagram: '',
         twitter: '',
-        images: null
+        images: null,
+        existingImages: []
     });
 
     const [validationErrors, setValidationErrors] = useState<Partial<ServiceFormData>>({});
@@ -108,11 +113,67 @@ const ServiceManagement = () => {
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
+    if (e.target.files && e.target.files.length > 0) {
+        const newFiles = Array.from(e.target.files);
+        
+        // Combine existing files with new files (if any)
+        const existingFiles = formData.images ? Array.from(formData.images) : [];
+        const allFiles = [...existingFiles, ...newFiles];
+        
+        // Validate total number of files (max 10 including existing)
+        const totalFiles = allFiles.length + (formData.existingImages?.length || 0) - filesToRemove.length;
+        if (totalFiles > 10) {
+            toast.error(`Maximum 10 images allowed. You have ${totalFiles} selected.`);
+            return;
+        }
+
+        // Create new FileList using DataTransfer
+        const dataTransfer = new DataTransfer();
+        allFiles.forEach(file => dataTransfer.items.add(file));
+        
+        setFormData(prev => ({
+            ...prev,
+            images: dataTransfer.files
+        }));
+
+        // Create preview URLs for all files (existing previews + new files)
+        const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+        setImagePreviews(prev => [...prev, ...newPreviews]);
+    }
+};
+
+    const handleRemoveImage = (index: number, isExisting: boolean) => {
+        if (isExisting && formData.existingImages) {
+            // Mark existing image for removal
+            const imageToRemove = formData.existingImages[index];
+            setFilesToRemove(prev => [...prev, imageToRemove]);
+            
+            // Remove from existing images preview
+            const updatedExisting = [...formData.existingImages];
+            updatedExisting.splice(index, 1);
             setFormData(prev => ({
                 ...prev,
-                images: e.target.files
+                existingImages: updatedExisting
             }));
+        } else {
+            // Remove from new files
+            const updatedPreviews = [...imagePreviews];
+            updatedPreviews.splice(index, 1);
+            setImagePreviews(updatedPreviews);
+            
+            // Update FileList (this is a bit tricky since FileList is read-only)
+            if (formData.images) {
+                const filesArray = Array.from(formData.images);
+                filesArray.splice(index, 1);
+                
+                // Create new FileList using DataTransfer
+                const dataTransfer = new DataTransfer();
+                filesArray.forEach(file => dataTransfer.items.add(file));
+                setFormData(prev => ({
+                    ...prev,
+                    images: dataTransfer.files
+                }));
+            }
         }
     };
 
@@ -126,6 +187,18 @@ const ServiceManagement = () => {
         if (!formData.category) errors.category = 'Category is required';
         if (!formData.subCategory) errors.subCategory = 'Sub-category is required';
         if (!formData.location) errors.location = 'Location is required';
+        
+        // For new services, at least one image is required
+        if (!isEditMode && (!formData.images || formData.images.length === 0)) {
+            errors.images = 'At least one image is required';
+        }
+        
+        // For editing, either existing images or new images must be present
+        if (isEditMode && 
+            (!formData.existingImages || formData.existingImages.length === 0) && 
+            (!formData.images || formData.images.length === 0)) {
+            errors.images = 'At least one image is required';
+        }
 
         setValidationErrors(errors);
         return Object.keys(errors).length === 0;
@@ -146,8 +219,11 @@ const ServiceManagement = () => {
             facebook: '',
             instagram: '',
             twitter: '',
-            images: null
+            images: null,
+            existingImages: []
         });
+        setImagePreviews([]);
+        setFilesToRemove([]);
         setValidationErrors({});
     };
 
@@ -174,7 +250,8 @@ const ServiceManagement = () => {
             facebook: service.socialLinks?.facebook || '',
             instagram: service.socialLinks?.instagram || '',
             twitter: service.socialLinks?.twitter || '',
-            images: null
+            images: null,
+            existingImages: service.images || []
         });
         setIsModalOpen(true);
     };
@@ -194,8 +271,10 @@ const ServiceManagement = () => {
             formDataToSend.append('subCategory', formData.subCategory);
             formDataToSend.append('tags', formData.tags);
             formDataToSend.append('location', formData.location);
+            
             if (formData.phone) formDataToSend.append('phone', formData.phone);
             if (formData.website) formDataToSend.append('website', formData.website);
+            
             if (formData.facebook || formData.instagram || formData.twitter) {
                 const socialLinks = {
                     ...(formData.facebook && { facebook: formData.facebook }),
@@ -204,6 +283,13 @@ const ServiceManagement = () => {
                 };
                 formDataToSend.append('socialLinks', JSON.stringify(socialLinks));
             }
+
+            // Add images to be removed (for edit mode)
+            if (isEditMode && filesToRemove.length > 0) {
+                formDataToSend.append('imagesToRemove', JSON.stringify(filesToRemove));
+            }
+
+            // Add new images
             if (formData.images) {
                 for (let i = 0; i < formData.images.length; i++) {
                     formDataToSend.append('galleryImages', formData.images[i]);
@@ -226,6 +312,13 @@ const ServiceManagement = () => {
         }
     };
 
+    // Clean up image preview URLs when component unmounts
+    useEffect(() => {
+        return () => {
+            imagePreviews.forEach(preview => URL.revokeObjectURL(preview));
+        };
+    }, [imagePreviews]);
+
     const handleDelete = async (id: string) => {
         if (window.confirm('Are you sure you want to delete this service?')) {
             setIsDeleting(true);
@@ -241,21 +334,6 @@ const ServiceManagement = () => {
             }
         }
     };
-
-    // const categories = [
-    //     { id: 'photography', name: 'Photography' },
-    //     { id: 'videography', name: 'Videography' },
-    //     { id: 'catering', name: 'Catering' },
-    //     { id: 'decoration', name: 'Decoration' },
-    //     { id: 'venue', name: 'Venue' },
-    // ];
-
-    // const subCategories = [
-    //     { id: 'wedding', name: 'Wedding' },
-    //     { id: 'birthday', name: 'Birthday' },
-    //     { id: 'corporate', name: 'Corporate' },
-    //     { id: 'engagement', name: 'Engagement' },
-    // ];
 
     return (
         <>
@@ -392,7 +470,6 @@ const ServiceManagement = () => {
                                                     </option>
                                                 ))}
                                             </select>
-
                                             {validationErrors.category && (
                                                 <p className="text-red-500 text-sm mt-1">{validationErrors.category}</p>
                                             )}
@@ -413,7 +490,6 @@ const ServiceManagement = () => {
                                                     </option>
                                                 ))}
                                             </select>
-
                                             {validationErrors.subCategory && (
                                                 <p className="text-red-500 text-sm mt-1">{validationErrors.subCategory}</p>
                                             )}
@@ -553,18 +629,64 @@ const ServiceManagement = () => {
                                         <label className="block text-gray-700 mb-1">
                                             {isEditMode ? 'Add More Images' : 'Images*'}
                                         </label>
+                                        
+                                        {/* Image upload input */}
                                         <input
                                             type="file"
                                             name="images"
                                             onChange={handleFileChange}
                                             multiple
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                            accept="image/*"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2"
                                         />
-                                        {!isEditMode && !formData.images && validationErrors.images && (
+                                        
+                                        {/* Image previews */}
+                                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 mt-2">
+                                            {/* Existing images (edit mode) */}
+                                            {isEditMode && formData.existingImages?.map((img, index) => (
+                                                <div key={`existing-${index}`} className="relative group">
+                                                    <img
+                                                        src={img}
+                                                        alt={`Existing ${index}`}
+                                                        className="w-full h-24 object-cover rounded border border-gray-200"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleRemoveImage(index, true)}
+                                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            
+                                            {/* New image previews */}
+                                            {imagePreviews.map((preview, index) => (
+                                                <div key={`new-${index}`} className="relative group">
+                                                    <img
+                                                        src={preview}
+                                                        alt={`Preview ${index}`}
+                                                        className="w-full h-24 object-cover rounded border border-gray-200"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleRemoveImage(index, false)}
+                                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        
+                                        {/* Validation and help text */}
+                                        {validationErrors.images && (
                                             <p className="text-red-500 text-sm mt-1">{validationErrors.images}</p>
                                         )}
                                         <p className="text-gray-500 text-sm mt-1">
                                             Upload high-quality images of your service (first image will be featured)
+                                            <br />
+                                            Maximum 10 images allowed ({(formData.existingImages?.length || 0) + (formData.images?.length || 0) - filesToRemove.length}/10)
                                         </p>
                                     </div>
 
@@ -590,7 +712,6 @@ const ServiceManagement = () => {
                 )}
             </div>
         </>
-
     );
 };
 

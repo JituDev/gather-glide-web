@@ -80,7 +80,7 @@ const AdminProfile = () => {
       formData.append('title', newCategory.title);
       formData.append('subCategories', newCategory.subCategories);
       if (categoryImage) {
-        formData.append('image', categoryImage);
+        formData.append('categoryImage', categoryImage);
       }
 
       await createCategory(formData);
@@ -405,7 +405,7 @@ const AdminProfile = () => {
                         <h3 className="font-medium text-gray-700 mb-2">Offer Details</h3>
                         <p className="text-gray-600 mb-4">{currentOffer.description}</p>
                         <div className="space-y-2">
-                          <p><span className="font-medium">Discount:</span> {currentOffer.discount}%</p>
+                          <p><span className="font-medium">Discount:</span> {currentOffer.discountPercentage}%</p>
                           <p><span className="font-medium">Valid Till:</span> {format(new Date(currentOffer.validTill), 'PPP')}</p>
                           <p><span className="font-medium">Status:</span>
                             <span className={`ml-2 px-2 py-1 rounded-full text-xs ${currentOffer.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
@@ -453,7 +453,7 @@ const AdminProfile = () => {
                         <div className="flex justify-between items-start">
                           <div>
                             <h3 className="font-bold text-lg text-gray-800">{offer.title}</h3>
-                            <p className="text-purple-600 font-medium">{offer.discount}% Discount</p>
+                            <p className="text-purple-600 font-medium">{offer.discountPercentage}% Discount</p>
                           </div>
                           <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
                             Active

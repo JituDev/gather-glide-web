@@ -85,8 +85,8 @@ const Navbar = () => {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8 mx-auto">
-            <Link to="/" className="hover:text-purple-200 transition-colors flex items-center">
-              <Home className="w-4 h-4 mr-1" /> HOME
+            <Link to="/ServicesPage" className="hover:text-purple-200 transition-colors flex items-center">
+              <Home className="w-4 h-4 mr-1" /> SERVICES
             </Link>
             <Link to="/bookings" className="hover:text-purple-200 transition-colors flex items-center">
               <Calendar className="w-4 h-4 mr-1" /> BOOKINGS

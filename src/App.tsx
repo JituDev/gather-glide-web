@@ -7,8 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { EventProvider } from "./contexts/EventContext";
 import Homepage from "./pages/Homepage";
 import Login from "./pages/Login";
-import Venues from "./pages/Venues";
-import VenueDetail from "./pages/VenueDetail.js";
 import Catering from "./pages/Catering";
 import LightStudio from "./pages/LightStudio";
 import WeddingVenues from "./pages/WeddingVenues";
@@ -28,6 +26,7 @@ import { VendorProvider } from "./contexts/VendorContext.js";
 import { ServiceProvider } from "./contexts/ServiceContext.js";
 import ServiceManagement from "./pages/ServiceManagement.js";
 import ServicesPage from "./pages/Venues";
+import ServiceDetail from "./pages/VenueDetail.js";
 
 
 const App = () => (
@@ -48,7 +47,7 @@ const App = () => (
                   <Route path="/catering" element={<Catering />} />
                   <Route path="/light-studio" element={<LightStudio />} />
                   <Route path="/wedding-venues" element={<WeddingVenues />} />
-                  <Route path="/venue/:id" element={<VenueDetail />} />
+                  <Route path="/services/:id" element={<ServiceDetail />} />
                   {/* <Route path="/profile" element={<EventWalaProfiles />} /> */}
                   <Route path="/help" element={<HelpSupportPage />} />
                   <Route path="/userOffer" element={<UserOffersPage />} />

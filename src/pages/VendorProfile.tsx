@@ -405,9 +405,9 @@ const VendorProfile = () => {
               {offers.filter(o => o.isActive).map((offer) => (
                 <div key={offer._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div>
-                    <p className="font-medium">{offer.title}</p>
+                    <p className="font-medium">{offer?.title}</p>
                     <p className="text-sm text-gray-600">
-                      {typeof offer.service === 'object' ? offer.service.title : 'Service'}
+                      {typeof offer.service === 'object' ? offer?.service?.title : 'Service'}
                     </p>
                   </div>
                   <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
