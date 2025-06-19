@@ -1,21 +1,12 @@
-
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-// import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { EventProvider } from "./contexts/EventContext";
 import Homepage from "./pages/Homepage";
 import Login from "./pages/Login";
-import Catering from "./pages/Catering";
-import LightStudio from "./pages/LightStudio";
-import WeddingVenues from "./pages/WeddingVenues";
 import NotFound from "./pages/NotFound";
-// import EventWalaProfiles from './pages/ProfilePage.js'
 import HelpSupportPage from "./pages/HelpSupportPage.js";
 import UserOffersPage from "./pages/UserOffersPage.js";
 import VendorCreateOfferPage from "./pages/VendorCreateOfferPage .js";
-import VendorsPage from "./pages/VendorsPage.js";
 import { AuthProvider } from "./contexts/AuthContext.js";
 import UserProfile from "./pages/UserProfile.js";
 import VendorProfile from "./pages/VendorProfile.js";
@@ -29,39 +20,48 @@ import ServicesPage from "./pages/Venues";
 import ServiceDetail from "./pages/VenueDetail.js";
 import { WishlistProvider } from "./contexts/WishlistContext.js";
 import WishlistPage from "./pages/WishlistPage.js";
+import VendorPage from "./pages/VendorPage.js";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 const App = () => (
   // <QueryClientProvider client={queryClient}>
+
   <TooltipProvider>
     <EventProvider>
-      <Toaster />
-      <Sonner />
       <BrowserRouter>
         <AuthProvider>
           <AdminProvider>
             <VendorProvider>
               <ServiceProvider>
                 <WishlistProvider>
+                  <ToastContainer 
+                    position="top-right"
+                    autoClose={3000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="colored"
+                  />
                 <Routes>
                   <Route path="/" element={<Homepage />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/ServicesPage" element={<ServicesPage />} />
-                  <Route path="/catering" element={<Catering />} />
-                  <Route path="/light-studio" element={<LightStudio />} />
-                  <Route path="/wedding-venues" element={<WeddingVenues />} />
                   <Route path="/services/:id" element={<ServiceDetail />} />
-                  {/* <Route path="/profile" element={<EventWalaProfiles />} /> */}
                   <Route path="/help" element={<HelpSupportPage />} />
                   <Route path="/userOffer" element={<UserOffersPage />} />
                   <Route path="/vendorOffer" element={<VendorCreateOfferPage />} />
-                  <Route path="/vendors/:category" element={<VendorsPage />} />
                   <Route path="/userprofile" element={<UserProfile />} />
                   <Route path="/vendorprofile" element={<VendorProfile />} />
                   <Route path="/adminprofile" element={<AdminProfile />} />
                   <Route path="/admin/login" element={<AdminAuthForm />} />
                   <Route path="/wishlist" element={<WishlistPage />} />
-                  <Route path="/servicemanagent" element={<ServiceManagement />} />
+                  <Route path="/vendor/:id" element={<VendorPage />} />
+                  <Route path="/servicemanagement" element={<ServiceManagement />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

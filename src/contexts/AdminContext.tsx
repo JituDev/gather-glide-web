@@ -221,7 +221,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const getOffer = async (id: string) => {
     try {
       setLoadingOffers(true);
-      const response = await api.get(`/api/admin/offers/${id}`);
+      const response = await api.get(`/api/offers/${id}`);
       setCurrentOffer(response.data.data);
       return response.data.data;
     } catch (error) {

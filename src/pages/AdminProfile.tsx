@@ -391,7 +391,7 @@ const AdminProfile = () => {
                 <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                   <div className="p-6">
                     <div className="flex justify-between items-start mb-4">
-                      <h2 className="text-2xl font-bold text-gray-800">{currentOffer.title}</h2>
+                      <h2 className="text-2xl font-bold text-gray-800">{currentOffer?.title}</h2>
                       <button
                         onClick={() => setSelectedOffer(null)}
                         className="text-gray-500 hover:text-gray-700"
@@ -403,14 +403,14 @@ const AdminProfile = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <h3 className="font-medium text-gray-700 mb-2">Offer Details</h3>
-                        <p className="text-gray-600 mb-4">{currentOffer.description}</p>
+                        <p className="text-gray-600 mb-4">{currentOffer?.description}</p>
                         <div className="space-y-2">
-                          <p><span className="font-medium">Discount:</span> {currentOffer.discountPercentage}%</p>
-                          <p><span className="font-medium">Valid Till:</span> {format(new Date(currentOffer.validTill), 'PPP')}</p>
+                          <p><span className="font-medium">Discount:</span> {currentOffer?.discountPercentage}%</p>
+                          <p><span className="font-medium">Valid Till:</span> {format(new Date(currentOffer?.validTill), 'PPP')}</p>
                           <p><span className="font-medium">Status:</span>
-                            <span className={`ml-2 px-2 py-1 rounded-full text-xs ${currentOffer.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            <span className={`ml-2 px-2 py-1 rounded-full text-xs ${currentOffer?.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                               }`}>
-                              {currentOffer.isActive ? 'Active' : 'Inactive'}
+                              {currentOffer?.isActive ? 'Active' : 'Inactive'}
                             </span>
                           </p>
                         </div>
@@ -419,17 +419,17 @@ const AdminProfile = () => {
                       <div>
                         <h3 className="font-medium text-gray-700 mb-2">Vendor Information</h3>
                         <div className="bg-gray-50 p-4 rounded-lg">
-                          <p className="font-medium">{currentOffer.vendor.name}</p>
-                          <p className="text-gray-600">{currentOffer.vendor.email}</p>
-                          {currentOffer.vendor.phone && (
-                            <p className="text-gray-600">{currentOffer.vendor.phone}</p>
+                          <p className="font-medium">{currentOffer?.vendor.name}</p>
+                          <p className="text-gray-600">{currentOffer?.vendor.email}</p>
+                          {currentOffer?.vendor.phone && (
+                            <p className="text-gray-600">{currentOffer?.vendor.phone}</p>
                           )}
                         </div>
 
                         <h3 className="font-medium text-gray-700 mt-4 mb-2">Service Details</h3>
                         <div className="bg-gray-50 p-4 rounded-lg">
-                          <p className="font-medium">{currentOffer.service.title}</p>
-                          <p className="text-gray-600">{currentOffer.service.location}</p>
+                          <p className="font-medium">{currentOffer?.service.title}</p>
+                          <p className="text-gray-600">{currentOffer?.service.location}</p>
                         </div>
                       </div>
                     </div>
@@ -465,10 +465,10 @@ const AdminProfile = () => {
                             <p className="text-sm text-gray-600">Valid till: {format(new Date(offer.validTill), 'PP')}</p>
                           </div>
                           <div>
-                            <p className="text-sm text-gray-600">Vendor: {offer.vendor.name}</p>
+                            <p className="text-sm text-gray-600">Vendor: {offer?.vendor?.name}</p>
                           </div>
                           <div>
-                            <p className="text-sm text-gray-600">Service: {offer.service.title}</p>
+                            <p className="text-sm text-gray-600">Service: {offer?.service?.title}</p>
                           </div>
                         </div>
 

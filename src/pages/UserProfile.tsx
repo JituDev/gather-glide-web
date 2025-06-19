@@ -31,10 +31,10 @@ const UserProfile = () => {
     useEffect(() => {
         if (user) {
             setFormData({
-                name: user.name || "",
-                email: user.email || "",
-                phoneNumber: user.phoneNumber || "",
-                address: user.address || ""
+                name: user?.name || "",
+                email: user?.email || "",
+                phoneNumber: user?.phoneNumber || "",
+                address: user?.address || ""
             });
         }
     }, [user]);
@@ -68,7 +68,7 @@ const UserProfile = () => {
         { id: 'personal', label: 'Personal Information', icon: User },
         { id: 'bookings', label: 'My Bookings', icon: Calendar },
         { id: 'reviews', label: 'My Reviews', icon: Star },
-        { id: 'wishlist', label: 'Wishlisted Vendors', icon: Star },
+        // { id: 'wishlist', label: 'Wishlisted Vendors', icon: Star },
         { id: 'logout', label: 'Logout', icon: Settings }
     ];
 
@@ -111,7 +111,7 @@ const UserProfile = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
                         <input
                             type="text"
-                            value={user.role}
+                            value={user?.role}
                             disabled
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600"
                         />
@@ -272,74 +272,74 @@ const UserProfile = () => {
         </div>
     );
 
-    const renderWishlist = () => (
-        <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Wishlisted Vendors</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[
-                    {
-                        name: "Premium Decorators",
-                        category: "Decoration",
-                        rating: 4.8,
-                        location: "Bhubaneswar",
-                        price: "₹10,000 - ₹50,000"
-                    },
-                    {
-                        name: "Elite Caterers",
-                        category: "Catering",
-                        rating: 4.9,
-                        location: "Cuttack",
-                        price: "₹200 - ₹800 per plate"
-                    },
-                    {
-                        name: "Melody Music",
-                        category: "DJ & Music",
-                        rating: 4.7,
-                        location: "Bhubaneswar",
-                        price: "₹5,000 - ₹25,000"
-                    },
-                    {
-                        name: "Capture Moments",
-                        category: "Photography",
-                        rating: 4.6,
-                        location: "Puri",
-                        price: "₹15,000 - ₹40,000"
-                    }
-                ].map((vendor, index) => (
-                    <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1">
-                                <h3 className="font-semibold text-gray-800 text-lg">{vendor.name}</h3>
-                                <p className="text-purple-600 text-sm font-medium">{vendor.category}</p>
-                                <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                                    <span className="flex items-center">
-                                        <MapPin className="w-4 h-4 mr-1" />
-                                        {vendor.location}
-                                    </span>
-                                    <span className="flex items-center">
-                                        <Star className="w-4 h-4 mr-1 text-yellow-400 fill-current" />
-                                        {vendor.rating}
-                                    </span>
-                                </div>
-                                <p className="text-sm text-gray-600 mt-1">{vendor.price}</p>
-                            </div>
-                            <button className="text-red-500 hover:text-red-700 transition-colors">
-                                <Star className="w-5 h-5 fill-current" />
-                            </button>
-                        </div>
-                        <div className="flex space-x-2">
-                            <button className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg transition-colors text-sm font-medium">
-                                Book Now
-                            </button>
-                            <button className="flex-1 border border-purple-600 text-purple-600 hover:bg-purple-50 py-2 px-4 rounded-lg transition-colors text-sm font-medium">
-                                View Details
-                            </button>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
+    // const renderWishlist = () => (
+    //     <div className="bg-white rounded-xl shadow-lg p-6">
+    //         <h2 className="text-2xl font-bold text-gray-800 mb-6">Wishlisted Vendors</h2>
+    //         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    //             {[
+    //                 {
+    //                     name: "Premium Decorators",
+    //                     category: "Decoration",
+    //                     rating: 4.8,
+    //                     location: "Bhubaneswar",
+    //                     price: "₹10,000 - ₹50,000"
+    //                 },
+    //                 {
+    //                     name: "Elite Caterers",
+    //                     category: "Catering",
+    //                     rating: 4.9,
+    //                     location: "Cuttack",
+    //                     price: "₹200 - ₹800 per plate"
+    //                 },
+    //                 {
+    //                     name: "Melody Music",
+    //                     category: "DJ & Music",
+    //                     rating: 4.7,
+    //                     location: "Bhubaneswar",
+    //                     price: "₹5,000 - ₹25,000"
+    //                 },
+    //                 {
+    //                     name: "Capture Moments",
+    //                     category: "Photography",
+    //                     rating: 4.6,
+    //                     location: "Puri",
+    //                     price: "₹15,000 - ₹40,000"
+    //                 }
+    //             ].map((vendor, index) => (
+    //                 <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+    //                     <div className="flex items-start justify-between mb-3">
+    //                         <div className="flex-1">
+    //                             <h3 className="font-semibold text-gray-800 text-lg">{vendor.name}</h3>
+    //                             <p className="text-purple-600 text-sm font-medium">{vendor.category}</p>
+    //                             <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+    //                                 <span className="flex items-center">
+    //                                     <MapPin className="w-4 h-4 mr-1" />
+    //                                     {vendor.location}
+    //                                 </span>
+    //                                 <span className="flex items-center">
+    //                                     <Star className="w-4 h-4 mr-1 text-yellow-400 fill-current" />
+    //                                     {vendor.rating}
+    //                                 </span>
+    //                             </div>
+    //                             <p className="text-sm text-gray-600 mt-1">{vendor.price}</p>
+    //                         </div>
+    //                         <button className="text-red-500 hover:text-red-700 transition-colors">
+    //                             <Star className="w-5 h-5 fill-current" />
+    //                         </button>
+    //                     </div>
+    //                     <div className="flex space-x-2">
+    //                         <button className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg transition-colors text-sm font-medium">
+    //                             Book Now
+    //                         </button>
+    //                         <button className="flex-1 border border-purple-600 text-purple-600 hover:bg-purple-50 py-2 px-4 rounded-lg transition-colors text-sm font-medium">
+    //                             View Details
+    //                         </button>
+    //                     </div>
+    //                 </div>
+    //             ))}
+    //         </div>
+    //     </div>
+    // );
 
     const renderContent = () => {
         switch (activeSection) {
@@ -349,8 +349,8 @@ const UserProfile = () => {
                 return renderBookings();
             case 'reviews':
                 return renderReviews();
-            case 'wishlist':
-                return renderWishlist();
+            // case 'wishlist':
+            //     return renderWishlist();
             case 'logout':
                 return (
                     <div className="bg-white rounded-xl shadow-lg p-6 text-center">
@@ -392,8 +392,8 @@ const UserProfile = () => {
                         </div>
 
                         <div className="flex-1 text-center md:text-left">
-                            <h1 className="text-3xl font-bold text-gray-800 mb-2">{user.name}</h1>
-                            <p className="text-gray-600 mb-4">{user.email}</p>
+                            <h1 className="text-3xl font-bold text-gray-800 mb-2">{user?.name}</h1>
+                            <p className="text-gray-600 mb-4">{user?.email}</p>
 
                             <div className="flex flex-wrap justify-center md:justify-start gap-4 mb-4">
                                 <div className="flex items-center text-blue-600">
@@ -407,7 +407,7 @@ const UserProfile = () => {
                                 <div className="flex items-center text-gray-600">
                                     <User className="w-4 h-4 mr-1" />
                                     <span className="text-sm">
-                                        Member since {new Date(user.createdAt).toLocaleDateString('en-GB', {
+                                        Member since {new Date(user?.createdAt).toLocaleDateString('en-GB', {
                                             day: '2-digit',
                                             month: 'long',
                                             year: 'numeric',

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Percent, 
-  Calendar, 
-  MapPin, 
+import {
+  Percent,
+  Calendar,
+  MapPin,
   Image as ImageIcon,
   X,
   ChevronDown,
@@ -14,22 +14,37 @@ import {
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useVendor } from '@/contexts/VendorContext';
-// import { useVendor } from '@/context/VendorContext';
+import { useService } from '@/contexts/ServiceContext';
+import { useAuth } from '@/contexts/AuthContext';
+
+interface Service {
+  _id: string;
+  title: string;
+  minPrice: string;
+  maxPrice: string;
+}
 
 const VendorOffersPage = () => {
-  const { 
-    offers, 
-    loadingOffers, 
-    errorOffers, 
-    getMyOffers, 
-    createOffer, 
-    updateOffer, 
+  const {
+    offers,
+    loadingOffers,
+    errorOffers,
+    getMyOffers,
+    createOffer,
+    updateOffer,
     deleteOffer,
-    toggleOfferStatus
+    toggleOfferStatus,
   } = useVendor();
 
-  const [activeTab, setActiveTab] = useState('view'); // 'view' or 'create'
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  const {
+    vendorServices,
+    getVendorServices,
+    loadingVendorServices
+  } = useService();
+  const { user } = useAuth();
+  const vendorId = user?._id;
+  const [activeTab, setActiveTab] = useState<'view' | 'create'>('view');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [formData, setFormData] = useState({
     title: '',
     service: '',
@@ -42,20 +57,26 @@ const VendorOffersPage = () => {
     isActive: true
   });
   const [editingOfferId, setEditingOfferId] = useState<string | null>(null);
-
-  const categories = [
-    "Wedding Planning",
-    "Photography",
-    "Tent & Decor",
-    "Catering",
-    "Entertainment",
-    "Beauty",
-    "Venues"
-  ];
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
 
   useEffect(() => {
     getMyOffers();
-  }, []);
+    getVendorServices(vendorId); // Fetch vendor services when component mounts
+  }, [vendorId]);
+
+  useEffect(() => {
+    // When service is selected in form, update the original price
+    if (formData.service && vendorServices) {
+      const service = vendorServices.find(s => s._id === formData.service);
+      if (service) {
+        setSelectedService(service);
+        setFormData(prev => ({
+          ...prev,
+          originalPrice: service.minPrice
+        }));
+      }
+    }
+  }, [formData.service, vendorServices]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -83,9 +104,10 @@ const VendorOffersPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const formDataToSend = new FormData();
     formDataToSend.append('title', formData.title);
+    formDataToSend.append('service', formData.service);
     formDataToSend.append('description', formData.description);
     formDataToSend.append('originalPrice', formData.originalPrice);
     formDataToSend.append('discountPercentage', formData.discountPercentage);
@@ -93,7 +115,7 @@ const VendorOffersPage = () => {
     formDataToSend.append('termsConditions', formData.termsConditions);
     formDataToSend.append('isActive', String(formData.isActive));
     if (formData.bannerImage) {
-      formDataToSend.append('bannerImage', formData.bannerImage);
+      formDataToSend.append('categoryImage', formData.bannerImage);
     }
 
     try {
@@ -102,7 +124,7 @@ const VendorOffersPage = () => {
       } else {
         await createOffer(formDataToSend);
       }
-      
+
       resetForm();
       setActiveTab('view');
     } catch (error) {
@@ -124,6 +146,7 @@ const VendorOffersPage = () => {
       isActive: true
     });
     setEditingOfferId(null);
+    setSelectedService(null);
   };
 
   const calculateOfferPrice = (original: string, discount: string) => {
@@ -197,7 +220,7 @@ const VendorOffersPage = () => {
         <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 flex justify-center items-center">
           <div className="text-center text-red-500">
             <p>Error loading offers: {errorOffers}</p>
-            <button 
+            <button
               onClick={getMyOffers}
               className="mt-4 bg-purple-800 text-white px-4 py-2 rounded-lg"
             >
@@ -220,15 +243,15 @@ const VendorOffersPage = () => {
               <h1 className="text-3xl font-bold text-gray-900">My Offers</h1>
               <p className="text-gray-600">Manage your special offers and promotions</p>
             </div>
-            
+
             <div className="flex gap-3">
-              <button 
+              <button
                 onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
                 className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-600'}`}
               >
                 {viewMode === 'grid' ? <List className="w-5 h-5" /> : <Grid className="w-5 h-5" />}
               </button>
-              
+
               <button
                 onClick={() => {
                   resetForm();
@@ -287,18 +310,17 @@ const VendorOffersPage = () => {
                   {offers.map((offer) => (
                     <div key={offer._id} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200">
                       <div className="relative">
-                        <img 
-                          src={offer.bannerImage || "https://via.placeholder.com/500x300?text=No+Image"} 
-                          alt={offer.title} 
+                        <img
+                          src={offer.bannerImage || "https://via.placeholder.com/500x300?text=No+Image"}
+                          alt={offer.title}
                           className="w-full h-48 object-cover"
                         />
                         <div className="absolute top-2 right-2 bg-purple-800 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center">
                           <Percent className="w-3 h-3 mr-1" />
-                          {offer.discountPercentage}% OFF
+                          {offer?.discountPercentage}% OFF
                         </div>
-                        <div className={`absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-bold ${
-                          offer.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                        }`}>
+                        <div className={`absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-bold ${offer.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                          }`}>
                           {offer.isActive ? 'Active' : 'Inactive'}
                         </div>
                       </div>
@@ -307,15 +329,15 @@ const VendorOffersPage = () => {
                         <div className="flex justify-between items-start mb-2">
                           <h3 className="text-lg font-bold text-gray-900">{offer.title}</h3>
                           <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                            {typeof offer.service === 'object' ? offer.service.title : 'Service'}
+                            {typeof offer.service === 'object' ? offer?.service?.title : 'Service'}
                           </span>
                         </div>
 
-                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{offer.description}</p>
+                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{offer?.description}</p>
 
                         <div className="flex justify-between items-center mb-3">
                           <div>
-                            <span className="text-gray-500 line-through text-sm">₹{offer.originalPrice}</span>
+                            <span className="text-gray-500 line-through text-sm">₹{offer?.originalPrice}</span>
                             <span className="text-purple-800 font-bold ml-2">
                               ₹{offer.discountedPrice}
                             </span>
@@ -330,13 +352,12 @@ const VendorOffersPage = () => {
                             Created: {new Date(offer.createdAt).toLocaleDateString()}
                           </div>
                           <div className="flex gap-2">
-                            <button 
+                            <button
                               onClick={() => handleToggleStatus(offer._id)}
-                              className={`p-1.5 rounded-full ${
-                                offer.isActive 
-                                  ? 'text-yellow-600 hover:bg-yellow-50' 
+                              className={`p-1.5 rounded-full ${offer.isActive
+                                  ? 'text-yellow-600 hover:bg-yellow-50'
                                   : 'text-green-600 hover:bg-green-50'
-                              }`}
+                                }`}
                               title={offer.isActive ? 'Deactivate' : 'Activate'}
                             >
                               {offer.isActive ? (
@@ -350,14 +371,14 @@ const VendorOffersPage = () => {
                                 </svg>
                               )}
                             </button>
-                            <button 
+                            <button
                               onClick={() => handleEditOffer(offer._id)}
                               className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full"
                               title="Edit"
                             >
                               <Edit className="w-4 h-4" />
                             </button>
-                            <button 
+                            <button
                               onClick={() => handleDeleteOffer(offer._id)}
                               className="p-1.5 text-red-600 hover:bg-red-50 rounded-full"
                               title="Delete"
@@ -390,9 +411,9 @@ const VendorOffersPage = () => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <div className="flex-shrink-0 h-10 w-10">
-                                <img 
-                                  src={offer.bannerImage || "https://via.placeholder.com/40?text=No+Image"} 
-                                  alt={offer.title} 
+                                <img
+                                  src={offer.bannerImage || "https://via.placeholder.com/40?text=No+Image"}
+                                  alt={offer.title}
                                   className="h-10 w-10 rounded-md object-cover"
                                 />
                               </div>
@@ -416,21 +437,19 @@ const VendorOffersPage = () => {
                             {new Date(offer.validTill).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              offer.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                            }`}>
+                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${offer.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                              }`}>
                               {offer.isActive ? 'Active' : 'Inactive'}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div className="flex gap-2">
-                              <button 
+                              <button
                                 onClick={() => handleToggleStatus(offer._id)}
-                                className={`p-1 rounded-full ${
-                                  offer.isActive 
-                                    ? 'text-yellow-600 hover:bg-yellow-50' 
+                                className={`p-1 rounded-full ${offer.isActive
+                                    ? 'text-yellow-600 hover:bg-yellow-50'
                                     : 'text-green-600 hover:bg-green-50'
-                                }`}
+                                  }`}
                                 title={offer.isActive ? 'Deactivate' : 'Activate'}
                               >
                                 {offer.isActive ? (
@@ -444,14 +463,14 @@ const VendorOffersPage = () => {
                                   </svg>
                                 )}
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleEditOffer(offer._id)}
                                 className="text-blue-600 hover:text-blue-900"
                                 title="Edit"
                               >
                                 <Edit className="w-4 h-4" />
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleDeleteOffer(offer._id)}
                                 className="text-red-600 hover:text-red-900"
                                 title="Delete"
@@ -480,7 +499,7 @@ const VendorOffersPage = () => {
                 {/* Basic Information */}
                 <div className="space-y-4">
                   <h2 className="text-lg font-semibold text-gray-800 border-b pb-2">Offer Details</h2>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Offer Title *</label>
                     <input
@@ -503,14 +522,26 @@ const VendorOffersPage = () => {
                         onChange={handleInputChange}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none"
                         required
+                        disabled={loadingVendorServices}
                       >
                         <option value="">Select service</option>
-                        {categories.map((category, index) => (
-                          <option key={index} value={category}>{category}</option>
-                        ))}
+                        {loadingVendorServices ? (
+                          <option>Loading services...</option>
+                        ) : (
+                          vendorServices?.map((service) => (
+                            <option key={service._id} value={service._id}>
+                              {service.title} (₹{service.minPrice} - ₹{service.maxPrice})
+                            </option>
+                          ))
+                        )}
                       </select>
                       <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
                     </div>
+                    {selectedService && (
+                      <p className="mt-1 text-sm text-gray-500">
+                        Using minimum price of {selectedService.title} (₹{selectedService.minPrice}) as base price
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -530,7 +561,7 @@ const VendorOffersPage = () => {
                 {/* Pricing */}
                 <div className="space-y-4">
                   <h2 className="text-lg font-semibold text-gray-800 border-b pb-2">Pricing</h2>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Original Price (₹) *</label>
@@ -569,7 +600,7 @@ const VendorOffersPage = () => {
                     <div className="bg-gray-50 p-3 rounded-lg">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Offer Price</label>
                       <div className="text-xl font-bold text-purple-800">
-                        {calculateOfferPrice(formData.originalPrice, formData.discountPercentage) ? 
+                        {calculateOfferPrice(formData.originalPrice, formData.discountPercentage) ?
                           `₹${calculateOfferPrice(formData.originalPrice, formData.discountPercentage)}` : '--'}
                       </div>
                     </div>
@@ -579,7 +610,7 @@ const VendorOffersPage = () => {
                 {/* Validity */}
                 <div className="space-y-4">
                   <h2 className="text-lg font-semibold text-gray-800 border-b pb-2">Validity</h2>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Valid Until *</label>
                     <div className="relative">
@@ -613,13 +644,13 @@ const VendorOffersPage = () => {
                 {/* Images */}
                 <div className="space-y-4">
                   <h2 className="text-lg font-semibold text-gray-800 border-b pb-2">Banner Image</h2>
-                  
+
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                     <div className="flex flex-col items-center justify-center">
                       <ImageIcon className="w-12 h-12 text-gray-400 mb-2" />
                       <p className="text-sm text-gray-600 mb-2">
-                        {formData.bannerImage 
-                          ? formData.bannerImage.name 
+                        {formData.bannerImage
+                          ? formData.bannerImage.name
                           : 'Upload a banner image for your offer'}
                       </p>
                       <label className="cursor-pointer bg-purple-800 hover:bg-purple-900 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
@@ -654,7 +685,7 @@ const VendorOffersPage = () => {
                       id="isActive"
                       name="isActive"
                       checked={formData.isActive}
-                      onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+                      onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                       className="h-4 w-4 text-purple-800 focus:ring-purple-500 border-gray-300 rounded"
                     />
                     <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">

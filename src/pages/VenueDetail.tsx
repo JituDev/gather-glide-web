@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  Heart, 
-  Share2, 
-  Star, 
-  MapPin, 
-  Users, 
-  Calendar, 
-  DollarSign, 
-  Home, 
-  Wifi, 
-  Car, 
-  Utensils, 
-  Music, 
+import {
+  ArrowLeft,
+  Heart,
+  Share2,
+  Star,
+  MapPin,
+  Users,
+  Calendar,
+  DollarSign,
+  Home,
+  Wifi,
+  Car,
+  Utensils,
+  Music,
   Camera,
   Phone,
   Mail,
@@ -33,7 +33,7 @@ const ServiceDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getService, currentService, loadingServices, errorServices } = useService();
-  
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -131,17 +131,17 @@ const ServiceDetail = () => {
 
   // Features based on tags
   const features = [
-  { icon: Utensils, name: 'Catering', color: 'text-orange-500' },
-  { icon: Music, name: 'Entertainment', color: 'text-purple-500' },
-  { icon: Home, name: 'Venue', color: 'text-indigo-500' },
-  { icon: Wifi, name: 'WiFi', color: 'text-blue-500' },
-  { icon: Car, name: 'Parking', color: 'text-green-500' },
-  { icon: Camera, name: 'Photography', color: 'text-pink-500' }
-]
-.filter(feature => 
-  currentService.tags?.some(tag => tag.toLowerCase().includes(feature.name.toLowerCase()))
-)
-.slice(0, 6); // slice here, after filter
+    { icon: Utensils, name: 'Catering', color: 'text-orange-500' },
+    { icon: Music, name: 'Entertainment', color: 'text-purple-500' },
+    { icon: Home, name: 'Venue', color: 'text-indigo-500' },
+    { icon: Wifi, name: 'WiFi', color: 'text-blue-500' },
+    { icon: Car, name: 'Parking', color: 'text-green-500' },
+    { icon: Camera, name: 'Photography', color: 'text-pink-500' }
+  ]
+    .filter(feature =>
+      currentService.tags?.some(tag => tag.toLowerCase().includes(feature.name.toLowerCase()))
+    )
+    .slice(0, 6); // slice here, after filter
 
 
   return (
@@ -151,7 +151,7 @@ const ServiceDetail = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <button 
+              <button
                 onClick={() => navigate('/ServicesPage')}
                 className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors"
               >
@@ -160,11 +160,10 @@ const ServiceDetail = () => {
               </button>
             </div>
             <div className="flex items-center space-x-3">
-              <button 
+              <button
                 onClick={() => setIsFavorite(!isFavorite)}
-                className={`p-2 rounded-full transition-all duration-300 ${
-                  isFavorite ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-500'
-                }`}
+                className={`p-2 rounded-full transition-all duration-300 ${isFavorite ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-500'
+                  }`}
               >
                 <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
               </button>
@@ -187,7 +186,7 @@ const ServiceDetail = () => {
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-              
+
               {/* Image Navigation */}
               <button
                 onClick={prevImage}
@@ -201,12 +200,12 @@ const ServiceDetail = () => {
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
-              
+
               {/* Image Counter */}
               <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
                 {currentImageIndex + 1} / {currentService.images.length}
               </div>
-              
+
               {/* View Gallery Button */}
               <button
                 onClick={() => setIsGalleryOpen(true)}
@@ -237,7 +236,7 @@ const ServiceDetail = () => {
                     <MapPin className="w-5 h-5 mr-2 text-blue-500" />
                     <span>{currentService.location}</span>
                   </div>
-                  
+
                   <div className="flex items-center space-x-6 mb-4">
                     <div className="flex items-center">
                       <Users className="w-5 h-5 mr-2 text-purple-500" />
@@ -254,7 +253,7 @@ const ServiceDetail = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="text-right">
                   <div className="text-2xl font-bold text-gray-900">
                     {formatPrice(parseInt(currentService.minPrice))} - {formatPrice(parseInt(currentService.maxPrice))}
@@ -264,14 +263,14 @@ const ServiceDetail = () => {
                   )}
                 </div>
               </div>
-              
+
               <p className="text-gray-700 leading-relaxed">{currentService.description}</p>
             </div>
 
             {/* Features */}
             <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Features & Amenities</h2>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
                 {features.map((feature, index) => (
                   <div key={index} className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
@@ -280,7 +279,7 @@ const ServiceDetail = () => {
                   </div>
                 ))}
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {currentService.tags?.map((tag, index) => (
                   <div key={index} className="flex items-center space-x-2">
@@ -301,7 +300,7 @@ const ServiceDetail = () => {
                   <span className="text-gray-600">(156 reviews)</span>
                 </div>
               </div>
-              
+
               {/* Existing Reviews */}
               <div className="space-y-6 mb-8">
                 {reviews.map((review) => (
@@ -333,7 +332,7 @@ const ServiceDetail = () => {
                   </div>
                 ))}
               </div>
-              
+
               {/* Write Review */}
               <div className="bg-gray-50 rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Write a Review</h3>
@@ -384,7 +383,7 @@ const ServiceDetail = () => {
                 </div>
                 <div className="text-sm text-gray-600">Starting price</div>
               </div>
-              
+
               <button
                 onClick={() => setShowBookingForm(true)}
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl"
@@ -392,7 +391,7 @@ const ServiceDetail = () => {
                 <Calendar className="w-5 h-5 inline mr-2" />
                 Book Now
               </button>
-              
+
               <div className="mt-4 space-y-3">
                 {currentService.pricePerPlate && (
                   <div className="flex items-center justify-between text-sm">
@@ -446,15 +445,25 @@ const ServiceDetail = () => {
                   </div>
                 </div>
               </div>
+
+              {/* View Vendor Details Button */}
+              <div className="mt-6">
+                <button
+                  onClick={() => navigate(`/vendor/${currentService.vendor._id}`)}
+                  className="w-full text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                >
+                  View Vendor Details
+                </button>
+              </div>
             </div>
 
             {/* Website */}
             {currentService.website && (
               <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Website</h3>
-                <a 
-                  href={currentService.website} 
-                  target="_blank" 
+                <a
+                  href={currentService.website}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline break-all"
                 >
@@ -475,14 +484,14 @@ const ServiceDetail = () => {
           >
             <X className="w-8 h-8" />
           </button>
-          
+
           <div className="max-w-4xl w-full">
             <img
               src={currentService.images[currentImageIndex]}
               alt={currentService.title}
               className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
             />
-            
+
             <div className="flex items-center justify-between mt-4">
               <button
                 onClick={prevImage}
@@ -490,11 +499,11 @@ const ServiceDetail = () => {
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
-              
+
               <div className="text-white">
                 {currentImageIndex + 1} / {currentService.images.length}
               </div>
-              
+
               <button
                 onClick={nextImage}
                 className="bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-all duration-300"
@@ -502,15 +511,14 @@ const ServiceDetail = () => {
                 <ChevronRight className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="grid grid-cols-8 gap-2 mt-4">
               {currentService.images.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`aspect-square rounded-lg overflow-hidden ${
-                    index === currentImageIndex ? 'ring-2 ring-white' : 'opacity-60 hover:opacity-80'
-                  }`}
+                  className={`aspect-square rounded-lg overflow-hidden ${index === currentImageIndex ? 'ring-2 ring-white' : 'opacity-60 hover:opacity-80'
+                    }`}
                 >
                   <img
                     src={image}
@@ -537,7 +545,7 @@ const ServiceDetail = () => {
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Event Date</label>
@@ -562,7 +570,7 @@ const ServiceDetail = () => {
                   rows={3}
                 />
               </div>
-              
+
               <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-semibold">
                 Submit Booking Request
               </button>

@@ -301,8 +301,8 @@ const ServicesPage = () => {
                     <div
                       key={category._id}
                       className={`flex items-center space-x-4 p-3 rounded-xl cursor-pointer transition-all duration-300 hover:shadow-md ${selectedCategory === category._id
-                          ? 'bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200'
-                          : 'hover:bg-gray-50'
+                        ? 'bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200'
+                        : 'hover:bg-gray-50'
                         }`}
                       onClick={() => setSelectedCategory(selectedCategory === category._id ? '' : category._id)}
                     >
@@ -318,13 +318,12 @@ const ServicesPage = () => {
                         )}
                       </div>
                       <div className="flex-1">
-                        <h4 className={`font-semibold ${selectedCategory === category._id ? 'text-blue-600' : 'text-gray-700'
-                          }`}>
+                        <h4 className={`font-semibold ${selectedCategory === category._id ? 'text-blue-600' : 'text-gray-700'}`}>
                           {category.title}
                         </h4>
-                        <p className="text-sm text-gray-500">
-                          {services?.filter(s => s.category._id === category._id).length} services
-                        </p>
+                        {/* <p className="text-sm text-gray-500">
+                          {category.count || services?.filter(s => s.category._id === category._id).length} services
+                        </p> */}
                       </div>
                     </div>
                   ))}
@@ -344,21 +343,6 @@ const ServicesPage = () => {
                         <p className="font-medium text-gray-900">{range.name}</p>
                         <p className="text-sm text-gray-500">{range.range}</p>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Services by Type */}
-              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-                <h3 className="text-lg font-bold text-gray-900 mb-6">Service Types</h3>
-                <div className="grid grid-cols-1 gap-4">
-                  {serviceTypes?.map(type => (
-                    <div key={type} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition-all duration-300 group">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Home className="w-5 h-5 text-purple-600" />
-                      </div>
-                      <span className="font-medium text-gray-700 group-hover:text-blue-600 transition-colors">{type}</span>
                     </div>
                   ))}
                 </div>
@@ -419,8 +403,8 @@ const ServicesPage = () => {
                             onClick={() => handleWishlistToggle(service._id)}
                             disabled={wishlistLoading}
                             className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${isInWishlist(service._id)  // Changed from isInWishlist.has() to isInWishlist()
-                                ? 'bg-red-500 text-white'
-                                : 'bg-white/80 text-gray-600 hover:bg-white hover:text-red-500'
+                              ? 'bg-red-500 text-white'
+                              : 'bg-white/80 text-gray-600 hover:bg-white hover:text-red-500'
                               }`}
                           >
                             <Heart className={`w-5 h-5 ${isInWishlist(service._id) ? 'fill-current' : ''}`} />
@@ -467,8 +451,8 @@ const ServicesPage = () => {
                                   <Star
                                     key={i}
                                     className={`w-4 h-4 ${i < Math.floor(service.rating || 0)
-                                        ? 'text-yellow-400 fill-current'
-                                        : 'text-gray-300'
+                                      ? 'text-yellow-400 fill-current'
+                                      : 'text-gray-300'
                                       }`}
                                   />
                                 ))}
@@ -496,9 +480,23 @@ const ServicesPage = () => {
                         <div className="mt-auto">
                           <div className="flex items-center justify-between">
                             <div className="text-right">
-                              <div className="text-xl font-bold text-gray-900">
-                                {formatPrice(service.minPrice)} - {formatPrice(service.maxPrice)}
-                              </div>
+                              {service.offer ? (
+                                <div className="space-y-1">
+                                  <div className="text-sm line-through text-gray-400">
+                                    {formatPrice(service.minPrice)} - {formatPrice(service.maxPrice)}
+                                  </div>
+                                  <div className="text-xl font-bold text-gray-900">
+                                    {formatPrice(service.offer.discountedPrice)} - {formatPrice(service.maxPrice - (service.maxPrice * service.offer.discountPercentage / 100))}
+                                  </div>
+                                  <div className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full inline-block">
+                                    {service.offer.discountPercentage}% OFF
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="text-xl font-bold text-gray-900">
+                                  {formatPrice(service.minPrice)} - {formatPrice(service.maxPrice)}
+                                </div>
+                              )}
                               {service.pricePerPlate && (
                                 <div className="text-xs text-gray-600">
                                   per plate: {formatPrice(service.pricePerPlate)}
@@ -539,8 +537,8 @@ const ServicesPage = () => {
                               onClick={() => handleWishlistToggle(service._id)}
                               disabled={wishlistLoading}
                               className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${isInWishlist(service._id)  // Changed from isInWishlist.has() to isInWishlist()
-                                  ? 'bg-red-500 text-white'
-                                  : 'bg-white/80 text-gray-600 hover:bg-white hover:text-red-500'
+                                ? 'bg-red-500 text-white'
+                                : 'bg-white/80 text-gray-600 hover:bg-white hover:text-red-500'
                                 }`}
                             >
                               <Heart className={`w-5 h-5 ${isInWishlist(service._id) ? 'fill-current' : ''}`} />
@@ -588,8 +586,8 @@ const ServicesPage = () => {
                                       <Star
                                         key={i}
                                         className={`w-4 h-4 ${i < Math.floor(service.rating || 0)
-                                            ? 'text-yellow-400 fill-current'
-                                            : 'text-gray-300'
+                                          ? 'text-yellow-400 fill-current'
+                                          : 'text-gray-300'
                                           }`}
                                       />
                                     ))}
@@ -615,9 +613,23 @@ const ServicesPage = () => {
                             </div>
 
                             <div className="text-right ml-4">
-                              <div className="text-xl font-bold text-gray-900">
-                                {formatPrice(service.minPrice)} - {formatPrice(service.maxPrice)}
-                              </div>
+                              {service.offer ? (
+                                <div className="space-y-1">
+                                  <div className="text-sm line-through text-gray-400">
+                                    {formatPrice(service.minPrice)} - {formatPrice(service.maxPrice)}
+                                  </div>
+                                  <div className="text-xl font-bold text-gray-900">
+                                    {formatPrice(service.offer.discountedPrice)} - {formatPrice(service.maxPrice - (service.maxPrice * service.offer.discountPercentage / 100))}
+                                  </div>
+                                  <div className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full inline-block">
+                                    {service.offer.discountPercentage}% OFF
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="text-xl font-bold text-gray-900">
+                                  {formatPrice(service.minPrice)} - {formatPrice(service.maxPrice)}
+                                </div>
+                              )}
                               {service.pricePerPlate && (
                                 <div className="text-xs text-gray-600">
                                   per plate: {formatPrice(service.pricePerPlate)}
