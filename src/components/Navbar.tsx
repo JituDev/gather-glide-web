@@ -100,7 +100,9 @@ const Navbar = () => {
   // Admin-specific nav items
   const adminNavItems = [
     // Add admin-specific items if needed
-    { path: "/bookingmanagement", icon: Calendar, label: "BOOKING MGMT" }
+    { path: "/bookingmanagement", icon: Calendar, label: "BOOKING MGMT" },
+    { path: "admin/support", icon: HelpCircle, label: "SUPPORT MGMT" },
+
   ];
 
   const getRoleSpecificNavItems = () => {

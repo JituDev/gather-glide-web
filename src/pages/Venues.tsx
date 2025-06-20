@@ -59,6 +59,7 @@ interface Category {
 const ServicesPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [serviceType, setServiceType] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
@@ -87,33 +88,44 @@ const ServicesPage = () => {
     setServices
   } = useService();
 
-  // Fetch services based on filters
-  const fetchServices = async () => {
-    try {
-      setLoading(true);
-      setError('');
-
-      let response;
-      if (selectedCategory) {
-        response = await getServicesByCategory(selectedCategory, locationFilter, searchTerm);
-      } else if (searchTerm || locationFilter) {
-        response = await searchServices(searchTerm, locationFilter, selectedCategory);
-      } else {
-        response = await getAllServices();
-      }
-
-      setServices(response);
-    } catch (err) {
-      setError('Failed to fetch services. Please try again.');
-      console.error('Error fetching services:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // ✅ Debounce logic
   useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 1000); // 500ms delay
+
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // Fetch services based on filters
+
+  // ✅ API call based on debounced search
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        let response;
+        if (selectedCategory) {
+          response = await getServicesByCategory(selectedCategory, locationFilter, debouncedSearchTerm);
+        } else if (debouncedSearchTerm || locationFilter) {
+          response = await searchServices(debouncedSearchTerm, locationFilter, selectedCategory);
+        } else {
+          response = await getAllServices();
+        }
+
+        setServices(response);
+      } catch (err) {
+        setError('Failed to fetch services. Please try again.');
+        console.error('Error fetching services:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchServices();
-  }, [selectedCategory, searchTerm, locationFilter]);
+  }, [selectedCategory, debouncedSearchTerm, locationFilter]); // ✅ Note: using `debouncedSearchTerm` only
 
   useEffect(() => {
     getCategories();

@@ -3,16 +3,28 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 // Define types
+type BlockDetails = {
+  blockedAt?: Date;
+  blockedBy?: string;
+  unblockedAt?: Date;
+  unblockedBy?: string;
+  reason?: string;
+};
+
 type User = {
   id: string;
   name: string;
   email: string;
   role: 'user' | 'vendor' | 'admin';
   isApproved?: boolean;
+  isBlocked?: boolean;
+  blockDetails?: BlockDetails;
   category?: string;
   profilePhoto?: string;
-  businessName? : string;
-  address? :string;
+  businessName?: string;
+  address?: string;
+  phoneNumber?: string;
+  createdAt?: string;
 };
 
 type AuthContextType = {
@@ -29,16 +41,21 @@ type AuthContextType = {
   hasRole: (role: User['role']) => boolean;
   isVendorApproved: () => boolean;
   setError: (error: string | null) => void;
+  // Admin functions
+  getUsers: (queryParams?: GetUsersQueryParams) => Promise<PaginatedUsersResponse>;
+  getUser: (id: string) => Promise<User>;
+  blockUser: (id: string, reason: string) => Promise<User>;
+  unblockUser: (id: string) => Promise<User>;
 };
 
 type RegisterData = {
   name: string;
   email: string;
   password: string;
-  phoneNumber : string;
+  phoneNumber: string;
   role: 'user' | 'vendor' | 'admin';
   category?: string;
-  businessName?:string;
+  businessName?: string;
 };
 
 type LoginData = {
@@ -52,6 +69,27 @@ type ResetPasswordData = {
   newPassword: string;
 };
 
+// Types for admin user management
+type GetUsersQueryParams = {
+  role?: 'user' | 'vendor' | 'admin';
+  isApproved?: boolean;
+  isBlocked?: boolean;
+  page?: number;
+  limit?: number;
+};
+
+type PaginatedUsersResponse = {
+  success: boolean;
+  count: number;
+  total: number;
+  pagination: {
+    page: number;
+    limit: number;
+    pages: number;
+  };
+  data: User[];
+};
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -59,7 +97,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const token = localStorage.getItem('token') || null ;
+  const token = localStorage.getItem('token') || null;
 
   // Initialize axios with base URL from .env
   const api = axios.create({
@@ -214,26 +252,115 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Update user profile
   const updateProfile = async (updatedData: Partial<User>) => {
-  setLoading(true);
-  setError(null);
-  try {
-    const response = await api.put(
-      '/api/auth/update-profile',
-      updatedData,
-      {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.put(
+        '/api/auth/update-profile',
+        updatedData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setUser(response.data.data);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Profile update failed');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Admin: Get all users with pagination
+  const getUsers = async (queryParams: GetUsersQueryParams = {}) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { page = 1, limit = 10, role, isApproved } = queryParams;
+      
+      const params = new URLSearchParams();
+      if (role) params.append('role', role);
+      if (isApproved !== undefined) params.append('isApproved', String(isApproved));
+      params.append('page', String(page));
+      params.append('limit', String(limit));
+
+      const response = await api.get(`/api/auth/users?${params.toString()}`,{
         headers: {
+          'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
         },
-      }
-    );
-    setUser(response.data.data);
-  } catch (err: any) {
-    setError(err.response?.data?.message || 'Profile update failed');
-    throw err;
-  } finally {
-    setLoading(false);
-  }
-};
+      });
+      return response.data;
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to fetch users');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Admin: Get single user
+  const getUser = async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.get(`/api/auth/users/${id}`,{
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data.data;
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to fetch user');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Admin: Block a user
+  const blockUser = async (id: string, reason: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.put(`/api/admin/users/${id}/block`, { reason },{
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data.data;
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to block user');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Admin: Unblock a user
+  const unblockUser = async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.put(`/api/admin/users/${id}/unblock`,{},{
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data.data;
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to unblock user');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   // Check if user is authenticated
   const isAuthenticated = () => {
@@ -265,7 +392,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAuthenticated,
         hasRole,
         isVendorApproved,
-        setError
+        setError,
+        // Admin functions
+        getUsers,
+        getUser,
+        blockUser,
+        unblockUser,
       }}
     >
       {children}

@@ -50,13 +50,13 @@ const ServiceDetail = () => {
 
   const nextImage = () => {
     if (currentService?.images) {
-      setCurrentImageIndex((prev) => (prev + 1) % currentService.images.length);
+      setCurrentImageIndex((prev) => (prev + 1) % currentService?.images.length);
     }
   };
 
   const prevImage = () => {
     if (currentService?.images) {
-      setCurrentImageIndex((prev) => (prev - 1 + currentService.images.length) % currentService.images.length);
+      setCurrentImageIndex((prev) => (prev - 1 + currentService?.images.length) % currentService?.images.length);
     }
   };
 
@@ -139,9 +139,11 @@ const ServiceDetail = () => {
     { icon: Camera, name: 'Photography', color: 'text-pink-500' }
   ]
     .filter(feature =>
-      currentService.tags?.some(tag => tag.toLowerCase().includes(feature.name.toLowerCase()))
+      currentService?.tags?.some(tag =>
+        tag.toLowerCase().includes(feature.name.toLowerCase())
+      )
     )
-    .slice(0, 6); // slice here, after filter
+    .slice(0, 6); // slice should be called on the filtered array
 
 
   return (
@@ -162,8 +164,7 @@ const ServiceDetail = () => {
             <div className="flex items-center space-x-3">
               <button
                 onClick={() => setIsFavorite(!isFavorite)}
-                className={`p-2 rounded-full transition-all duration-300 ${isFavorite ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-500'
-                  }`}
+                className={`p-2 rounded-full transition-all duration-300 ${isFavorite ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-500'}`}
               >
                 <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
               </button>
@@ -178,11 +179,11 @@ const ServiceDetail = () => {
       {/* Hero Section */}
       <div className="relative">
         <div className="h-96 overflow-hidden">
-          {currentService.images?.length > 0 ? (
+          {currentService?.images?.length > 0 ? (
             <>
               <img
-                src={currentService.images[currentImageIndex]}
-                alt={currentService.title}
+                src={currentService?.images[currentImageIndex]}
+                alt={currentService?.title}
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
@@ -203,7 +204,7 @@ const ServiceDetail = () => {
 
               {/* Image Counter */}
               <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-                {currentImageIndex + 1} / {currentService.images.length}
+                {currentImageIndex + 1} / {currentService?.images.length}
               </div>
 
               {/* View Gallery Button */}
@@ -231,20 +232,20 @@ const ServiceDetail = () => {
             <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
               <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6">
                 <div className="flex-1">
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">{currentService.title}</h1>
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">{currentService?.title}</h1>
                   <div className="flex items-center text-gray-600 mb-4">
                     <MapPin className="w-5 h-5 mr-2 text-blue-500" />
-                    <span>{currentService.location}</span>
+                    <span>{currentService?.location}</span>
                   </div>
 
                   <div className="flex items-center space-x-6 mb-4">
                     <div className="flex items-center">
                       <Users className="w-5 h-5 mr-2 text-purple-500" />
-                      <span className="text-sm text-gray-600">Vendor: {currentService.vendor.name}</span>
+                      <span className="text-sm text-gray-600">Vendor: {currentService?.vendor?.name}</span>
                     </div>
                     <div className="flex items-center">
                       <Home className="w-5 h-5 mr-2 text-green-500" />
-                      <span className="text-sm text-gray-600">{currentService.category.title}</span>
+                      <span className="text-sm text-gray-600">{currentService?.category.title}</span>
                     </div>
                     <div className="flex items-center">
                       <Star className="w-5 h-5 mr-1 text-yellow-400 fill-current" />
@@ -255,16 +256,52 @@ const ServiceDetail = () => {
                 </div>
 
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-gray-900">
-                    {formatPrice(parseInt(currentService.minPrice))} - {formatPrice(parseInt(currentService.maxPrice))}
-                  </div>
-                  {currentService.pricePerPlate && (
-                    <div className="text-sm text-gray-600">per plate: {formatPrice(parseInt(currentService.pricePerPlate))}</div>
+                  {currentService?.offer ? (
+                    <div className="space-y-1">
+                      <div className="text-sm line-through text-gray-400">
+                        {formatPrice(parseInt(currentService?.minPrice))} - {formatPrice(parseInt(currentService?.maxPrice))}
+                      </div>
+                      <div className="text-2xl font-bold text-gray-900">
+                        {formatPrice(currentService?.offer.discountedPrice)} - {formatPrice(
+                          typeof currentService?.maxPrice === 'string'
+                            ? parseInt(currentService?.maxPrice) - (parseInt(currentService?.maxPrice) * currentService?.offer.discountPercentage / 100)
+                            : currentService?.maxPrice - (currentService?.maxPrice * currentService?.offer.discountPercentage / 100)
+                        )}
+
+                      </div>
+                      <div className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full inline-block">
+                        {currentService?.offer.discountPercentage}% OFF
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-2xl font-bold text-gray-900">
+                      {formatPrice(parseInt(currentService?.minPrice))} - {formatPrice(parseInt(currentService?.maxPrice))}
+                    </div>
+                  )}
+                  {currentService?.pricePerPlate && (
+                    <div className="text-sm text-gray-600">per plate: {formatPrice(parseInt(currentService?.pricePerPlate))}</div>
                   )}
                 </div>
               </div>
 
-              <p className="text-gray-700 leading-relaxed">{currentService.description}</p>
+              {/* Offer Banner */}
+              {currentService?.offer && (
+                <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100 flex items-center">
+                  <div className="flex-shrink-0 mr-4">
+                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                      {currentService?.offer.discountPercentage}% OFF
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">Special Offer</h4>
+                    <p className="text-sm text-gray-600">
+                      Valid until {new Date(currentService?.offer.validTill).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <p className="text-gray-700 leading-relaxed">{currentService?.description}</p>
             </div>
 
             {/* Features */}
@@ -281,7 +318,7 @@ const ServiceDetail = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {currentService.tags?.map((tag, index) => (
+                {currentService?.tags?.map((tag, index) => (
                   <div key={index} className="flex items-center space-x-2">
                     <CheckCircle className="w-5 h-5 text-green-500" />
                     <span className="text-gray-700">{tag}</span>
@@ -378,9 +415,29 @@ const ServiceDetail = () => {
             {/* Booking Card */}
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
               <div className="text-center mb-6">
-                <div className="text-2xl font-bold text-gray-900 mb-1">
-                  {formatPrice(parseInt(currentService.minPrice))} - {formatPrice(parseInt(currentService.maxPrice))}
-                </div>
+                {currentService?.offer ? (
+                  <div className="space-y-2">
+                    <div className="text-sm line-through text-gray-400">
+                      {formatPrice(parseInt(currentService?.minPrice))} - {formatPrice(parseInt(currentService?.maxPrice))}
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {formatPrice(currentService?.offer.discountedPrice)} - {formatPrice(
+                        typeof currentService?.maxPrice === 'string'
+                          ? parseInt(currentService?.maxPrice) - (parseInt(currentService?.maxPrice) * currentService?.offer.discountPercentage / 100)
+                          : currentService?.maxPrice - (currentService?.maxPrice * currentService?.offer.discountPercentage / 100)
+                      )}
+
+
+                    </div>
+                    <div className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full inline-block">
+                      {currentService?.offer.discountPercentage}% OFF
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-2xl font-bold text-gray-900">
+                    {formatPrice(parseInt(currentService?.minPrice))} - {formatPrice(parseInt(currentService?.maxPrice))}
+                  </div>
+                )}
                 <div className="text-sm text-gray-600">Starting price</div>
               </div>
 
@@ -392,22 +449,36 @@ const ServiceDetail = () => {
                 Book Now
               </button>
 
+              {/* Offer Details */}
+              {currentService?.offer && (
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <div className="flex items-center space-x-2">
+                    <div className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs font-bold">
+                      {currentService?.offer.discountPercentage}% OFF
+                    </div>
+                    <span className="text-sm text-gray-700">
+                      Valid until {new Date(currentService?.offer.validTill).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              )}
+
               <div className="mt-4 space-y-3">
-                {currentService.pricePerPlate && (
+                {currentService?.pricePerPlate && (
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Per plate cost</span>
                     <span className="font-semibold text-gray-900">
-                      {formatPrice(parseInt(currentService.pricePerPlate))}
+                      {formatPrice(parseInt(currentService?.pricePerPlate))}
                     </span>
                   </div>
                 )}
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">Category</span>
-                  <span className="font-semibold text-gray-900">{currentService.category.title}</span>
+                  <span className="font-semibold text-gray-900">{currentService?.category.title}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">Sub-category</span>
-                  <span className="font-semibold text-gray-900">{currentService.subCategory}</span>
+                  <span className="font-semibold text-gray-900">{currentService?.subCategory}</span>
                 </div>
               </div>
             </div>
@@ -420,28 +491,28 @@ const ServiceDetail = () => {
                   <Phone className="w-5 h-5 text-blue-500" />
                   <div>
                     <div className="text-sm text-gray-600">Phone</div>
-                    <div className="font-medium text-gray-900">{currentService.phone}</div>
+                    <div className="font-medium text-gray-900">{currentService?.phone}</div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <Mail className="w-5 h-5 text-green-500" />
                   <div>
                     <div className="text-sm text-gray-600">Email</div>
-                    <div className="font-medium text-gray-900">{currentService.vendor.email || 'Not provided'}</div>
+                    <div className="font-medium text-gray-900">{currentService?.vendor?.email || 'Not provided'}</div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <User className="w-5 h-5 text-purple-500" />
                   <div>
                     <div className="text-sm text-gray-600">Vendor</div>
-                    <div className="font-medium text-gray-900">{currentService.vendor.name}</div>
+                    <div className="font-medium text-gray-900">{currentService?.vendor?.name}</div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <MapPin className="w-5 h-5 text-red-500" />
                   <div>
                     <div className="text-sm text-gray-600">Location</div>
-                    <div className="font-medium text-gray-900">{currentService.location}</div>
+                    <div className="font-medium text-gray-900">{currentService?.location}</div>
                   </div>
                 </div>
               </div>
@@ -449,7 +520,7 @@ const ServiceDetail = () => {
               {/* View Vendor Details Button */}
               <div className="mt-6">
                 <button
-                  onClick={() => navigate(`/vendor/${currentService.vendor._id}`)}
+                  onClick={() => navigate(`/vendor/${currentService?.vendor?._id}`)}
                   className="w-full text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                 >
                   View Vendor Details
@@ -458,16 +529,16 @@ const ServiceDetail = () => {
             </div>
 
             {/* Website */}
-            {currentService.website && (
+            {currentService?.website && (
               <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Website</h3>
                 <a
-                  href={currentService.website}
+                  href={currentService?.website}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline break-all"
                 >
-                  {currentService.website}
+                  {currentService?.website}
                 </a>
               </div>
             )}
@@ -476,7 +547,7 @@ const ServiceDetail = () => {
       </div>
 
       {/* Gallery Modal */}
-      {isGalleryOpen && currentService.images?.length > 0 && (
+      {isGalleryOpen && currentService?.images?.length > 0 && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
           <button
             onClick={() => setIsGalleryOpen(false)}
@@ -487,8 +558,8 @@ const ServiceDetail = () => {
 
           <div className="max-w-4xl w-full">
             <img
-              src={currentService.images[currentImageIndex]}
-              alt={currentService.title}
+              src={currentService?.images[currentImageIndex]}
+              alt={currentService?.title}
               className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
             />
 
@@ -501,7 +572,7 @@ const ServiceDetail = () => {
               </button>
 
               <div className="text-white">
-                {currentImageIndex + 1} / {currentService.images.length}
+                {currentImageIndex + 1} / {currentService?.images.length}
               </div>
 
               <button
@@ -513,12 +584,11 @@ const ServiceDetail = () => {
             </div>
 
             <div className="grid grid-cols-8 gap-2 mt-4">
-              {currentService.images.map((image, index) => (
+              {currentService?.images.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`aspect-square rounded-lg overflow-hidden ${index === currentImageIndex ? 'ring-2 ring-white' : 'opacity-60 hover:opacity-80'
-                    }`}
+                  className={`aspect-square rounded-lg overflow-hidden ${index === currentImageIndex ? 'ring-2 ring-white' : 'opacity-60 hover:opacity-80'}`}
                 >
                   <img
                     src={image}

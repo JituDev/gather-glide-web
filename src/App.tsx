@@ -23,6 +23,9 @@ import WishlistPage from "./pages/WishlistPage.js";
 import VendorPage from "./pages/VendorPage.js";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import AdminSupportPage from "./pages/AdminSupportPage.js";
+import { SupportProvider } from "./contexts/SupportContext.js";
+import AdminUserManagement from "./pages/AdminUserManagement.js";
 
 
 const App = () => (
@@ -36,6 +39,7 @@ const App = () => (
             <VendorProvider>
               <ServiceProvider>
                 <WishlistProvider>
+                  <SupportProvider>
                   <ToastContainer 
                     position="top-right"
                     autoClose={3000}
@@ -62,9 +66,12 @@ const App = () => (
                   <Route path="/wishlist" element={<WishlistPage />} />
                   <Route path="/vendor/:id" element={<VendorPage />} />
                   <Route path="/servicemanagement" element={<ServiceManagement />} />
+                  <Route path="/admin/support" element={<AdminSupportPage />} />
+                  <Route path="/admin/usermanagement" element={<AdminUserManagement />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
+                </SupportProvider>
                 </WishlistProvider>
               </ServiceProvider>
             </VendorProvider>

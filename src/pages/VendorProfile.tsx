@@ -19,28 +19,34 @@ import { useVendor } from "@/contexts/VendorContext";
 import { useAuth } from "@/contexts/AuthContext";
 
 const VendorProfile = () => {
+  
   const {
     currentVendor,
     loadingVendor,
     getVendor,
-    updateVendor,
     uploadGalleryImages,
+    deleteGalleryImage,
     uploadingImages,
     offers,
     loadingOffers,
     getMyOffers
   } = useVendor();
-  const { logout } = useAuth();
-  const { user } = useAuth();
+  const { logout, updateProfile, user } = useAuth();
   const [editMode, setEditMode] = useState(false);
   const [vendorForm, setVendorForm] = useState({
     name: '',
+    email: '',
     description: '',
-    category: ''
+    category: '',
+    businessName: '',
+    address: ''
   });
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [showImageUpload, setShowImageUpload] = useState(false);
-  const handleLogout = async ()=>{
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
+
+  const handleLogout = async () => {
     try {
       await logout();
     } catch (error) {
@@ -48,11 +54,11 @@ const VendorProfile = () => {
       console.log(error)
     }
   }
+
   // Fetch vendor data on component mount
   useEffect(() => {
     const fetchVendorData = async () => {
       try {
-        // Replace with actual vendor ID from auth context
         const vendorId = user?._id;
         await getVendor(vendorId);
         await getMyOffers();
@@ -69,19 +75,56 @@ const VendorProfile = () => {
     if (currentVendor) {
       setVendorForm({
         name: currentVendor.name || '',
+        email: currentVendor.email || '',
         description: currentVendor.description || '',
-        category: currentVendor.category || ''
+        category: currentVendor.category || '',
+        businessName: currentVendor.businessName || '',
+        address: currentVendor.address || ''
       });
+      if (currentVendor.profilePhoto && currentVendor.profilePhoto !== "default.jpg") {
+        setProfileImagePreview(currentVendor.profilePhoto);
+      }
     }
   }, [currentVendor]);
 
-  const handleUpdateVendor = async () => {
+  const handleUpdateProfile = async () => {
     try {
-      if (!currentVendor) return;
-      await updateVendor(currentVendor._id, vendorForm);
+      const formData = new FormData();
+
+      // Append all fields to formData
+      if (vendorForm.name) formData.append('name', vendorForm.name);
+      if (vendorForm.email) formData.append('email', vendorForm.email);
+      if (vendorForm.description) formData.append('description', vendorForm.description);
+      if (vendorForm.category) formData.append('category', vendorForm.category);
+      if (vendorForm.businessName) formData.append('businessName', vendorForm.businessName);
+      if (vendorForm.address) formData.append('address', vendorForm.address);
+      if (profileImage) formData.append('categoryImage', profileImage);
+
+      await updateProfile(formData);
       setEditMode(false);
+      setProfileImage(null); // Reset after upload
     } catch (error) {
-      console.error("Failed to update vendor:", error);
+      console.error("Failed to update profile:", error);
+    }
+  };
+
+  const handleDeleteImage = async (imageUrl: string) => {
+    if (!currentVendor) return;
+
+    try {
+      await deleteGalleryImage(currentVendor._id, imageUrl);
+      // Optional: Show success message
+    } catch (error) {
+      console.error('Failed to delete image:', error);
+      // Optional: Show error message
+    }
+  };
+
+  const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setProfileImage(file);
+      setProfileImagePreview(URL.createObjectURL(file));
     }
   };
 
@@ -97,13 +140,12 @@ const VendorProfile = () => {
   };
 
   const calculateSuccessRate = () => {
-    // Replace with actual calculation from your data
     if (currentVendor) {
-      const total = 156; // Replace with actual total bookings
-      const completed = 142; // Replace with actual completed events
+      const total = 156;
+      const completed = 142;
       return Math.round((completed / total) * 100);
     }
-    return 91; // Default value
+    return 91;
   };
 
   if (loadingVendor) {
@@ -131,15 +173,38 @@ const VendorProfile = () => {
         <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
           <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-6 lg:space-y-0 lg:space-x-8">
             <div className="relative">
-              <div className="w-40 h-40 bg-gradient-to-br from-purple-400 to-blue-500 rounded-xl flex items-center justify-center text-white text-5xl font-bold">
-                {currentVendor.name.substring(0, 2).toUpperCase()}
-              </div>
-              <button
-                onClick={() => setShowImageUpload(!showImageUpload)}
-                className="absolute bottom-2 right-2 bg-white rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow"
-              >
-                <Camera className="w-5 h-5 text-gray-600" />
-              </button>
+              {profileImagePreview ? (
+                <img
+                  src={profileImagePreview}
+                  alt="Profile"
+                  className="w-40 h-40 rounded-xl object-cover"
+                />
+              ) : (
+                <div className="w-40 h-40 bg-gradient-to-br from-purple-400 to-blue-500 rounded-xl flex items-center justify-center text-white text-5xl font-bold">
+                  {currentVendor.name.substring(0, 2).toUpperCase()}
+                </div>
+              )}
+              {editMode ? (
+                <div className="absolute bottom-2 right-2">
+                  <label htmlFor="profileImage" className="cursor-pointer bg-white rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow block">
+                    <Camera className="w-5 h-5 text-gray-600" />
+                    <input
+                      id="profileImage"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleProfileImageChange}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setEditMode(true)}
+                  className="absolute bottom-2 right-2 bg-white rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow"
+                >
+                  <Camera className="w-5 h-5 text-gray-600" />
+                </button>
+              )}
               {currentVendor.isApproved && (
                 <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-2">
                   <CheckCircle className="w-6 h-6 text-white" />
@@ -180,26 +245,28 @@ const VendorProfile = () => {
                   </div>
                 </div>
                 <button
-                        // key={item.id}
-                        onClick={handleLogout}
-                        className={` flex items-center bg-red-600 text-white space-x-3 px-4 py-3 rounded-lg transition-colors text-left`}
-                      >
-                        <Settings className="w-5 h-5" /><span></span>Logout 
-                        <span className="font-medium"></span>
-                      </button>
+                  onClick={handleLogout}
+                  className={`flex items-center bg-red-600 text-white space-x-3 px-4 py-3 rounded-lg transition-colors text-left`}
+                >
+                  <Settings className="w-5 h-5" /><span></span>Logout
+                  <span className="font-medium"></span>
+                </button>
 
                 <div className="flex space-x-2 mt-4 lg:mt-0">
-                  
                   {editMode ? (
                     <>
                       <button
-                        onClick={handleUpdateVendor}
+                        onClick={handleUpdateProfile}
                         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
                       >
                         Save Changes
                       </button>
                       <button
-                        onClick={() => setEditMode(false)}
+                        onClick={() => {
+                          setEditMode(false);
+                          setProfileImage(null);
+                          setProfileImagePreview(currentVendor.profilePhoto || null);
+                        }}
                         className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg transition-colors"
                       >
                         Cancel
@@ -207,7 +274,6 @@ const VendorProfile = () => {
                     </>
                   ) : (
                     <>
-                      
                       <button
                         onClick={() => setEditMode(true)}
                         className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
@@ -223,17 +289,51 @@ const VendorProfile = () => {
                 </div>
               </div>
 
-              <p className="text-gray-600 mb-4">{currentVendor.email}</p>
-
               {editMode ? (
-                <textarea
-                  value={vendorForm.description}
-                  onChange={(e) => setVendorForm({ ...vendorForm, description: e.target.value })}
-                  className="w-full p-2 border rounded text-gray-700 mb-6 h-24"
-                  placeholder="Enter your business description"
+                <input
+                  type="email"
+                  value={vendorForm.email}
+                  onChange={(e) => setVendorForm({ ...vendorForm, email: e.target.value })}
+                  className="w-full p-2 border rounded text-gray-700 mb-2"
+                  placeholder="Email"
                 />
               ) : (
-                <p className="text-gray-700 mb-6">{currentVendor.description || 'No description provided'}</p>
+                <p className="text-gray-600 mb-4">{currentVendor.email}</p>
+              )}
+
+              {editMode ? (
+                <div className="space-y-4 mb-6">
+                  <textarea
+                    value={vendorForm.description}
+                    onChange={(e) => setVendorForm({ ...vendorForm, description: e.target.value })}
+                    className="w-full p-2 border rounded text-gray-700"
+                    placeholder="Business description"
+                  />
+                  <input
+                    type="text"
+                    value={vendorForm.businessName}
+                    onChange={(e) => setVendorForm({ ...vendorForm, businessName: e.target.value })}
+                    className="w-full p-2 border rounded text-gray-700"
+                    placeholder="Business name"
+                  />
+                  <input
+                    type="text"
+                    value={vendorForm.address}
+                    onChange={(e) => setVendorForm({ ...vendorForm, address: e.target.value })}
+                    className="w-full p-2 border rounded text-gray-700"
+                    placeholder="Address"
+                  />
+                </div>
+              ) : (
+                <>
+                  <p className="text-gray-700 mb-2">{currentVendor.description || 'No description provided'}</p>
+                  {currentVendor.businessName && (
+                    <p className="text-gray-700 mb-2">Business: {currentVendor.businessName}</p>
+                  )}
+                  {currentVendor.address && (
+                    <p className="text-gray-700 mb-6">Address: {currentVendor.address}</p>
+                  )}
+                </>
               )}
 
               <div className="flex flex-wrap justify-center lg:justify-start gap-6">
@@ -317,6 +417,7 @@ const VendorProfile = () => {
           )}
         </div>
 
+        {/* Rest of the component remains the same */}
         {/* Stats Dashboard */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
           <div className="bg-white rounded-xl shadow-lg p-6">
@@ -376,12 +477,23 @@ const VendorProfile = () => {
           {currentVendor.galleryImages && currentVendor.galleryImages.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {currentVendor.galleryImages.map((image, index) => (
-                <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
+                <div key={index} className="relative aspect-square rounded-lg overflow-hidden group">
                   <img
                     src={image}
                     alt={`Gallery ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
+                  <button
+                    onClick={() => handleDeleteImage(image)}
+                    className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    disabled={uploadingImages}
+                  >
+                    {uploadingImages ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <X className="w-4 h-4" />
+                    )}
+                  </button>
                 </div>
               ))}
             </div>

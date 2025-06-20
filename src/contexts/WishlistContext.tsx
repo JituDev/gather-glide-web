@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
-import { toast } from 'react-toastify';
+// import {  toast } from 'react-// toastify';
 
 interface Service {
   _id: string;
@@ -89,17 +89,17 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             // Then fetch updated wishlist from server
             await getWishlist();
             
-            toast.success('Added to wishlist');
+            // toast.success('Added to wishlist');
         } catch (err: any) {
             const errorMessage = err.response?.data?.message ||
                 err.message ||
                 'Failed to add to wishlist';
             setError(errorMessage);
             console.error('Error adding to wishlist:', err);
-            toast.error(errorMessage);
+            // toast.error(errorMessage);
 
             if (err.response?.status === 401) {
-                toast.error('Session expired. Please login again.');
+                // toast.error('Session expired. Please login again.');
             }
         } finally {
             setLoading(false);
@@ -120,17 +120,17 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             // Then fetch updated wishlist from server
             await getWishlist();
             
-            toast.success('Removed from wishlist');
+            // toast.success('Removed from wishlist');
         } catch (err: any) {
             const errorMessage = err.response?.data?.message ||
                 err.message ||
                 'Failed to remove from wishlist';
             setError(errorMessage);
             console.error('Error removing from wishlist:', err);
-            toast.error(errorMessage);
+            // toast.error(errorMessage);
 
             if (err.response?.status === 401) {
-                toast.error('Session expired. Please login again.');
+                // toast.error('Session expired. Please login again.');
             }
         } finally {
             setLoading(false);

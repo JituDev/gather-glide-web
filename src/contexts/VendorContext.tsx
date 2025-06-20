@@ -177,6 +177,30 @@ export const VendorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   };
 
+  const deleteGalleryImage = async (id: string, imageUrl: string) => {
+  try {
+    setUploadingImages(true);
+    const response = await api.delete(`/api/vendors/${id}/gallery/delete`, {
+      data: { imageUrl } // Send image URL in request body
+    });
+
+    // Update current vendor's gallery images by removing the deleted image
+    if (currentVendor) {
+      setCurrentVendor({
+        ...currentVendor,
+        galleryImages: currentVendor.galleryImages?.filter(img => img !== imageUrl)
+      });
+    }
+
+    return response.data.data;
+  } catch (error) {
+    const err = error as AxiosError<{ message?: string }>;
+    throw new Error(err.response?.data?.message || 'Failed to delete image');
+  } finally {
+    setUploadingImages(false);
+  }
+};
+
   // Offer functions
   const getMyOffers = async () => {
     try {
@@ -270,6 +294,7 @@ export const VendorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     // Gallery Images
     uploadingImages,
     uploadGalleryImages,
+    deleteGalleryImage,
 
     // Offers
     offers,

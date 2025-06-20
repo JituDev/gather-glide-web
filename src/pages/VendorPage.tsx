@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { format } from 'date-fns';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useVendor } from '@/contexts/VendorContext';
-import { useAdmin } from '@/contexts/AdminContext';
 import { useService } from '@/contexts/ServiceContext';
 import Navbar from '@/components/Navbar';
+import { Star } from 'lucide-react';
 
 const VendorPage = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const { getVendor, currentVendor, loadingVendor, errorVendor } = useVendor();
     const { getVendorServices, vendorServices, loadingVendorServices } = useService();
     const [activeTab, setActiveTab] = useState('services');
@@ -15,13 +15,20 @@ const VendorPage = () => {
     useEffect(() => {
         if (id) {
             getVendor(id);
-            // getOffer(id);
             getVendorServices(id);
         }
     }, [id]);
-    useEffect(()=>{
-        console.log("vendorServices",vendorServices)
-    },[vendorServices])
+
+    const formatPrice = (price: string | number) => {
+        if (typeof price === 'string') {
+            price = parseFloat(price);
+        }
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            maximumFractionDigits: 0
+        }).format(price).replace('₹', '₹ ');
+    };
 
     if (loadingVendor) {
         return <div className="flex justify-center items-center h-screen">Loading vendor details...</div>;
@@ -35,11 +42,8 @@ const VendorPage = () => {
         return <div className="flex justify-center items-center h-screen">Vendor not found</div>;
     }
 
-
-
     return (
         <>
-
             <Navbar />
             <div className="min-h-screen bg-white">
                 {/* Header Section */}
@@ -48,40 +52,40 @@ const VendorPage = () => {
                         <div className="flex flex-col md:flex-row items-center gap-6">
                             <div className="w-32 h-32 rounded-full bg-white overflow-hidden border-4 border-sky-300">
                                 <img
-                                    src={currentVendor.profilePhoto || 'default.jpg'}
-                                    alt={currentVendor.name}
+                                    src={currentVendor?.profilePhoto || 'default.jpg'}
+                                    alt={currentVendor?.name}
                                     className="w-full h-full object-cover"
                                 />
                             </div>
                             <div className="flex-1">
-                                <h1 className="text-3xl font-bold">{currentVendor.name}</h1>
-                                <p className="text-sky-100 mt-2">{currentVendor.category}</p>
-                                <p className="mt-2">{currentVendor.description}</p>
+                                <h1 className="text-3xl font-bold">{currentVendor?.name}</h1>
+                                <p className="text-sky-100 mt-2">{currentVendor?.category}</p>
+                                <p className="mt-2">{currentVendor?.description}</p>
                                 <div className="flex flex-wrap gap-4 mt-4">
-                                    {currentVendor.email && (
+                                    {currentVendor?.email && (
                                         <div className="flex items-center">
                                             <span className="mr-2">📧</span>
-                                            <a href={`mailto:${currentVendor.email}`} className="hover:underline">
-                                                {currentVendor.email}
+                                            <a href={`mailto:${currentVendor?.email}`} className="hover:underline">
+                                                {currentVendor?.email}
                                             </a>
                                         </div>
                                     )}
-                                    {currentVendor.location && (
+                                    {currentVendor?.address && (
                                         <div className="flex items-center">
                                             <span className="mr-2">📍</span>
-                                            <span>{currentVendor.location}</span>
+                                            <span>{currentVendor?.address}</span>
                                         </div>
                                     )}
-                                    {currentVendor.website && (
+                                    {currentVendor?.website && (
                                         <div className="flex items-center">
                                             <span className="mr-2">🌐</span>
                                             <a
-                                                href={currentVendor.website.startsWith('http') ? currentVendor.website : `https://${currentVendor.website}`}
+                                                href={currentVendor?.website.startsWith('http') ? currentVendor?.website : `https://${currentVendor?.website}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="hover:underline"
                                             >
-                                                {currentVendor.website.replace(/^https?:\/\//, '')}
+                                                {currentVendor?.website.replace(/^https?:\/\//, '')}
                                             </a>
                                         </div>
                                     )}
@@ -92,11 +96,11 @@ const VendorPage = () => {
                 </div>
 
                 {/* Gallery Section */}
-                {currentVendor.galleryImages && currentVendor.galleryImages.length > 0 && (
+                {currentVendor?.galleryImages && currentVendor?.galleryImages.length > 0 && (
                     <div className="container mx-auto px-4 py-8">
                         <h2 className="text-2xl font-bold text-blue-800 mb-4">Gallery</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            {currentVendor.galleryImages.map((image, index) => (
+                            {currentVendor?.galleryImages.map((image, index) => (
                                 <div key={index} className="rounded-lg overflow-hidden shadow-md">
                                     <img
                                         src={image}
@@ -132,85 +136,108 @@ const VendorPage = () => {
                             {loadingVendorServices ? (
                                 <div className="flex justify-center py-8">Loading services...</div>
                             ) : vendorServices && vendorServices.length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                                     {vendorServices.map(service => (
-                                        <div key={service._id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow">
-                                            <div className="h-48 overflow-hidden relative">
+                                        <div key={service._id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 group h-full flex flex-col">
+                                            {/* Image Section */}
+                                            <div className="relative h-48 overflow-hidden">
+                                                {service.offer && (
+                                                    <div className="absolute top-4 left-4 z-10">
+                                                        <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
+                                                            {service.offer.discountPercentage}% OFF
+                                                        </span>
+                                                    </div>
+                                                )}
                                                 {service.images && service.images.length > 0 ? (
                                                     <img
                                                         src={service.images[0]}
                                                         alt={service.title}
-                                                        className="w-full h-full object-cover"
+                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                                     />
                                                 ) : (
                                                     <div className="w-full h-full bg-gray-100 flex items-center justify-center">
                                                         <span className="text-gray-400">No Image</span>
                                                     </div>
                                                 )}
-                                                {/* Discount Badge */}
-                                                {service.offer && (
-                                                    <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-md text-sm font-bold">
-                                                        {service.offer.discountPercentage}% OFF
-                                                    </div>
-                                                )}
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                             </div>
-                                            <div className="p-4">
-                                                <h3 className="text-xl font-bold text-blue-800">{service.title}</h3>
-                                                <p className="text-gray-600 mt-2">{service.description}</p>
 
-                                                {/* Price Section */}
-                                                <div className="mt-4">
-                                                    {service.offer ? (
-                                                        <div className="space-y-1">
-                                                            <div className="flex items-center">
-                                                                <span className="text-blue-600 font-bold">
-                                                                    ₹{service.offer.discountedPrice} - ₹{Math.round(service.maxPrice - (service.maxPrice * service.offer.discountPercentage / 100))}
+                                            {/* Content Section */}
+                                            <div className="p-6 flex flex-col flex-grow">
+                                                <div className="flex-grow">
+                                                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                                                        {service.title}
+                                                    </h3>
+                                                    <div className="flex items-center text-gray-600 mb-2">
+                                                        <span className="text-sm">{service.location}</span>
+                                                    </div>
+
+                                                    {service.rating && (
+                                                        <div className="flex items-center mb-3">
+                                                            <div className="flex items-center mr-3">
+                                                                {[...Array(5)].map((_, i) => (
+                                                                    <Star
+                                                                        key={i}
+                                                                        className={`w-4 h-4 ${i < Math.floor(service.rating || 0)
+                                                                            ? 'text-yellow-400 fill-current'
+                                                                            : 'text-gray-300'
+                                                                            }`}
+                                                                    />
+                                                                ))}
+                                                                <span className="text-xs text-gray-600 ml-1">
+                                                                    {service.rating} ({service.reviews || 0} reviews)
                                                                 </span>
-                                                                <span className="ml-2 text-sm text-gray-500 line-through">
-                                                                    ₹{service.minPrice} - ₹{service.maxPrice}
-                                                                </span>
-                                                            </div>
-                                                            <div className="text-green-600 text-sm font-medium">
-                                                                Save {service.offer.discountPercentage}% on this service
                                                             </div>
                                                         </div>
-                                                    ) : (
-                                                        <span className="text-blue-600 font-bold">
-                                                            ₹{service.minPrice} - ₹{service.maxPrice}
-                                                        </span>
+                                                    )}
+
+                                                    {service.tags && service.tags.length > 0 && (
+                                                        <div className="flex flex-wrap gap-1 mb-4">
+                                                            {service.tags.map((tag, index) => (
+                                                                <span
+                                                                    key={index}
+                                                                    className="bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium border border-blue-100"
+                                                                >
+                                                                    {tag}
+                                                                </span>
+                                                            ))}
+                                                        </div>
                                                     )}
                                                 </div>
 
-                                                <div className="mt-2 flex items-center justify-between">
-                                                    <span className="bg-sky-100 text-sky-800 px-3 py-1 rounded-full text-sm">
-                                                        {service.subCategory}
-                                                    </span>
-                                                </div>
+                                                <div className="mt-auto">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="text-right">
+                                                            {service.offer ? (
+                                                                <div className="space-y-1">
+                                                                    <div className="text-sm line-through text-gray-400">
+                                                                        {formatPrice(service.minPrice)} - {formatPrice(service.maxPrice)}
+                                                                    </div>
+                                                                    <div className="text-xl font-bold text-gray-900">
+                                                                        {formatPrice(service.offer.discountedPrice)} - {formatPrice(
+                                                                            typeof service.maxPrice === 'string'
+                                                                                ? parseFloat(service.maxPrice) - (parseFloat(service.maxPrice) * service.offer.discountPercentage / 100)
+                                                                                : service.maxPrice - (service.maxPrice * service.offer.discountPercentage / 100)
+                                                                        )}
 
-                                                {service.tags && service.tags.length > 0 && (
-                                                    <div className="mt-3 flex flex-wrap gap-2">
-                                                        {service.tags.map((tag, index) => (
-                                                            <span key={index} className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
-                                                                {tag}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                )}
-
-                                                <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-                                                    <div className="flex items-center text-sm text-gray-500">
-                                                        <span>📍 {service.location}</span>
-                                                    </div>
-                                                    {service.website && (
-                                                        <a
-                                                            href={service.website.startsWith('http') ? service.website : `https://${service.website}`}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="text-blue-600 hover:underline text-sm"
+                                                                    </div>
+                                                                    <div className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full inline-block">
+                                                                        Save {service.offer.discountPercentage}%
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="text-xl font-bold text-gray-900">
+                                                                    {formatPrice(service.minPrice)} - {formatPrice(service.maxPrice)}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <button
+                                                            onClick={() => navigate(`/services/${service._id}`)}
+                                                            className="flex items-center space-x-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-sm hover:shadow-md text-sm"
                                                         >
-                                                            Visit Website
-                                                        </a>
-                                                    )}
+                                                            <span>View</span>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -231,7 +258,6 @@ const VendorPage = () => {
                 </div>
             </div>
         </>
-
     );
 };
 
