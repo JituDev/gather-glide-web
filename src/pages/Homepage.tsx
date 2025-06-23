@@ -3,10 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Calendar, Music, Users, MapPin, Camera, ChevronLeft, ChevronRight, Star, Award, Clock, Heart, Home, Gift, User, HelpCircle, Phone } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import Loader from '@/components/Loader';
 
 
 const Homepage = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+
 
   const handleLearnMore = (title: string) => {
     // Convert title to URL-friendly format (e.g., "LIGHT & SOUND" -> "light-sound")
@@ -18,6 +21,18 @@ const Homepage = () => {
   const [currentImageIndices, setCurrentImageIndices] = useState([0, 0, 0, 0, 0]);
   const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0);
   const [city, setCity] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Simulate loading time (replace with actual loading logic)
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 3000); // 3 seconds for demo, adjust as needed
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  
+
 
   useEffect(() => {
     if ('geolocation' in navigator) {
@@ -195,6 +210,9 @@ const Homepage = () => {
     return visible;
   };
 
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <div className="min-h-screen">
@@ -202,53 +220,53 @@ const Homepage = () => {
 
       {/* Hero Section */}
       <div className="relative h-screen overflow-hidden">
-      {/* Video Background */}
-      <video
-        autoPlay
-        loop
-        muted
-        className="absolute z-0 w-auto min-w-full min-h-full max-w-none object-contain"
-      >
-        <source src="/hero.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
+        {/* Video Background */}
+        <video
+          autoPlay
+          loop
+          muted
+          className="absolute z-0 w-auto min-w-full min-h-full max-w-none object-contain"
+        >
+          <source src="/hero.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
 
-      {/* Overlay Content */}
-      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-        <div className="text-center text-white px-4">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 animate-fade-in">We Create Unforgettable Events
-            {/* {city
+        {/* Overlay Content */}
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="text-center text-white px-4">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 animate-fade-in">We Create Unforgettable Events
+              {/* {city
               ? `Unforgettable Events in ${city}`
               : 'We Create Unforgettable Events'} */}
-          </h1>
+            </h1>
 
-          {/* Search Input */}
-          <div className="max-w-2xl mx-auto mb-8">
-            <div className="flex flex-col md:flex-row items-center bg-white bg-opacity-90 rounded-lg overflow-hidden shadow-xl">
-              <input
-                type="text"
-                placeholder="Find Your Perfect Event Experience"
-                className="flex-1 px-6 py-4 text-gray-900 outline-none text-lg"
-              />
-              <select className="px-4 py-4 text-gray-900 border-l border-gray-200 bg-gray-50">
-                <option>All Categories</option>
-                <option>Wedding</option>
-                <option>Corporate</option>
-                <option>Birthday</option>
-              </select>
-              <Button className="bg-purple-600 hover:bg-purple-700 px-8 py-4 mx-4 rounded-none text-lg font-semibold transition-all duration-300 hover:shadow-lg">
-                Search
-              </Button>
+            {/* Search Input */}
+            <div className="max-w-2xl mx-auto mb-8">
+              <div className="flex flex-col md:flex-row items-center bg-white bg-opacity-90 rounded-lg overflow-hidden shadow-xl">
+                <input
+                  type="text"
+                  placeholder="Find Your Perfect Event Experience"
+                  className="flex-1 px-6 py-4 text-gray-900 outline-none text-lg"
+                />
+                <select className="px-4 py-4 text-gray-900 border-l border-gray-200 bg-gray-50">
+                  <option>All Categories</option>
+                  <option>Wedding</option>
+                  <option>Corporate</option>
+                  <option>Birthday</option>
+                </select>
+                <Button className="bg-purple-600 hover:bg-purple-700 px-8 py-4 mx-4 rounded-none text-lg font-semibold transition-all duration-300 hover:shadow-lg">
+                  Search
+                </Button>
+              </div>
             </div>
-          </div>
 
-          {/* Subtext */}
-          <p className="text-xl md:text-2xl max-w-3xl mx-auto animate-fade-in-delay">
-            From intimate gatherings to grand celebrations, we bring your vision to life
-          </p>
+            {/* Subtext */}
+            <p className="text-xl md:text-2xl max-w-3xl mx-auto animate-fade-in-delay">
+              From intimate gatherings to grand celebrations, we bring your vision to life
+            </p>
+          </div>
         </div>
       </div>
-    </div>
 
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -316,7 +334,7 @@ const Homepage = () => {
 
           {/* 3D Carousel */}
           <div className="relative max-w-6xl mx-auto mb-16 h-96 overflow-hidden">
-  <div className="relative w-full h-full flex items-center justify-center perspective-1000 overflow-hidden">
+            <div className="relative w-full h-full flex items-center justify-center perspective-1000 overflow-hidden">
 
               {getVisibleTestimonials().map((testimonial, index) => {
                 const position = testimonial.position;

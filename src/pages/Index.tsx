@@ -1,9 +1,10 @@
-
 import Header from '../components/Header';
 import Hero from '../components/Hero';
 import FeaturedEvents from '../components/FeaturedEvents';
-
+import Loader from '@/components/Loader';
 const Index = () => {
+  
+
   return (
     <div className="min-h-screen">
       <Header />

@@ -95,7 +95,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ReactNode | null>(null);
   const navigate = useNavigate();
   const token = localStorage.getItem('token') || null;
 
@@ -168,34 +168,56 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Login user
   const login = async (data: LoginData) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.post('/api/auth/login', data);
-      const { token } = response.data;
-      console.log("token",token)
-      localStorage.setItem('token', token);
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setUser(response.data.data);
-
-      // Redirect based on role
-      if (response.data.data.role === 'admin') {
-        navigate('/adminprofile');
-      } else if (response.data.data.role === 'vendor') {
-        navigate('/vendorprofile');
-      } else {
-        navigate('/');
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed');
-      console.log("err",err)
-      throw err;
-    } finally {
+  setLoading(true);
+  setError(null);
+  try {
+    const response = await api.post('/api/auth/login', data);
+    const { token } = response.data;
+    console.log("token", token);
+    localStorage.setItem('token', token);
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    
+    const userData = response.data.data.user;
+    
+    if (userData.isBlocked) {
+      localStorage.removeItem('token');
+      setError(
+        <span>
+          Your account has been blocked by admin. 
+          <a 
+            href="/help" 
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/help');
+            }}
+            style={{ color: '#1890ff', textDecoration: 'underline', marginLeft: '5px' }}
+          >
+            Click here
+          </a> for support.
+        </span>
+      );
       setLoading(false);
+      return;
     }
-  };
+    
+    setUser(userData);
+
+    if (userData.role === 'admin') {
+      navigate('/adminprofile');
+    } else if (userData.role === 'vendor') {
+      navigate('/vendorprofile');
+    } else {
+      navigate('/');
+    }
+  } catch (err: any) {
+    setError(err.response?.data?.error || 'Login failed');
+    console.log("err", err);
+    throw err;
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Logout user
   const logout = async () => {
