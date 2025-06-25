@@ -9,12 +9,22 @@ import Loader from '@/components/Loader';
 const Homepage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
+  // Add state for manual location input
+  const [manualLocation, setManualLocation] = useState('');
+  const [isFirstVisit, setIsFirstVisit] = useState(true);
 
 
   const handleLearnMore = (title: string) => {
     // Convert title to URL-friendly format (e.g., "LIGHT & SOUND" -> "light-sound")
     const categoryPath = title.toLowerCase().replace(' & ', '-').replace(' ', '-');
     navigate(`/vendors/${categoryPath}`);
+  };
+  // Function to handle manual location search
+  const handleLocationSearch = () => {
+    if (manualLocation.trim()) {
+      const firstWord = manualLocation.split(' ')[0];
+      navigate('/ServicesPage', { state: { location: firstWord } });
+    }
   };
   // State for service card image animation
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -31,11 +41,10 @@ const Homepage = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  
-
-
-  useEffect(() => {
-    if ('geolocation' in navigator) {
+useEffect(() => {
+    const hasVisited = sessionStorage.getItem('hasVisited');
+    
+    if (isFirstVisit && !hasVisited && 'geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
@@ -45,15 +54,18 @@ const Homepage = () => {
           const data = await res.json();
           const cityName =
             data.address.city || data.address.town || data.address.village || null;
-          setCity(cityName);
+          
+          sessionStorage.setItem('hasVisited', 'true');
+          navigate('/ServicesPage', { state: { location: cityName } });
         },
         (error) => {
           console.error('Location permission denied or error:', error.message);
+          sessionStorage.setItem('hasVisited', 'true');
         }
       );
     }
-  }, []);
-
+    setIsFirstVisit(false);
+  }, [navigate, isFirstVisit]);
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex(prev => (prev + 1) % 3); // Assuming 3 images per service
@@ -240,23 +252,20 @@ const Homepage = () => {
               : 'We Create Unforgettable Events'} */}
             </h1>
 
-            {/* Search Input */}
             <div className="max-w-2xl mx-auto mb-8">
               <div className="flex flex-col md:flex-row items-center bg-white bg-opacity-90 rounded-lg overflow-hidden shadow-xl">
                 <input
                   type="text"
-                  placeholder="Find Your Perfect Event Experience"
+                  placeholder="Enter your location (e.g. Mumbai)"
                   className="flex-1 px-6 py-4 text-gray-900 outline-none text-lg"
-                  value={city}
+                  value={manualLocation}
+                  onChange={(e) => setManualLocation(e.target.value)}
                 />
-                <select className="px-4 py-4 text-gray-900 border-l border-gray-200 bg-gray-50">
-                  <option>All Categories</option>
-                  <option>Wedding</option>
-                  <option>Corporate</option>
-                  <option>Birthday</option>
-                </select>
-                <Button className="bg-purple-600 hover:bg-purple-700 px-8 py-4 mx-4 rounded-none text-lg font-semibold transition-all duration-300 hover:shadow-lg">
-                  Search
+                <Button
+                  onClick={handleLocationSearch}
+                  className="bg-purple-600 hover:bg-purple-700 px-8 py-4 mx-4 rounded-none text-lg font-semibold transition-all duration-300 hover:shadow-lg"
+                >
+                  Find Services
                 </Button>
               </div>
             </div>

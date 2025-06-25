@@ -79,8 +79,16 @@ const Navbar = () => {
 
   // Common nav items for all roles
   const commonNavItems = [
-    { path: "/ServicesPage", icon: Home, label: "SERVICES" },
-  ];
+  { 
+    path: "/ServicesPage", 
+    icon: Home, 
+    label: "SERVICES",
+    onClick: (navigate) => {
+      // Clear any existing location state
+      navigate('/ServicesPage', { state: {} });
+    }
+  },
+];
 
   // User-specific nav items
   const userNavItems = [
@@ -150,7 +158,7 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-8 mx-auto">
             {/* Common items */}
             {commonNavItems.map((item, index) => (
-              <Link key={index} to={item.path} className="hover:text-purple-200 transition-colors flex items-center">
+              <Link key={index} to={item.path} onClick={() => item.onClick && item.onClick(navigate)} className="hover:text-purple-200 transition-colors flex items-center">
                 <item.icon className="w-4 h-4 mr-1" /> {item.label}
               </Link>
             ))}

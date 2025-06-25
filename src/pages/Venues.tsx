@@ -15,7 +15,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAdmin } from '@/contexts/AdminContext';
 import { useService } from '@/contexts/ServiceContext';
 import { useWishlist } from '@/contexts/WishlistContext';
@@ -58,11 +58,13 @@ interface Category {
 
 const ServicesPage = () => {
   const navigate = useNavigate();
+  const locationState = useLocation().state;
+  const [locationFilter, setLocationFilter] = useState(locationState?.location || '');
+  const [hasAppliedInitialFilter, setHasAppliedInitialFilter] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [serviceType, setServiceType] = useState('');
-  const [locationFilter, setLocationFilter] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
   const [viewMode, setViewMode] = useState('list');
   const [favorites, setFavorites] = useState(new Set<string>());
@@ -77,6 +79,7 @@ const ServicesPage = () => {
       await addToWishlist(id);
     }
   };
+
 
 
   const { getCategories, categories } = useAdmin();
@@ -97,11 +100,29 @@ const ServicesPage = () => {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // Fetch services based on filters
+  useEffect(() => {
+    console.log("locationFilter", locationFilter)
+  }, [locationFilter])
 
+
+  useEffect(() => {
+    if (locationState?.location && !hasAppliedInitialFilter) {
+      const firstWord = locationState.location.split(' ')[0];
+      setLocationFilter(firstWord);
+      setHasAppliedInitialFilter(true);
+    } else if (!locationState && !hasAppliedInitialFilter) {
+      // Explicitly fetch all services when no location state is present
+      getAllServices();
+      setHasAppliedInitialFilter(true);
+    }
+  }, [locationState]);
+
+  
   // ✅ API call based on debounced search
   useEffect(() => {
     const fetchServices = async () => {
+      console.log("object")
+
       try {
         setLoading(true);
         setError('');
@@ -124,8 +145,11 @@ const ServicesPage = () => {
       }
     };
 
-    fetchServices();
-  }, [selectedCategory, debouncedSearchTerm, locationFilter]); // ✅ Note: using `debouncedSearchTerm` only
+    // If we have a location from state, trigger search immediately
+    if (locationState?.location) {
+      fetchServices();
+    }
+  }, [selectedCategory, debouncedSearchTerm, locationFilter, locationState?.location]);
 
   useEffect(() => {
     getCategories();
@@ -162,32 +186,36 @@ const ServicesPage = () => {
     setSelectedCategory('');
     setServiceType('');
     setLocationFilter('');
+    // Force a refresh of all services
+    getAllServices().then(services => {
+      setServices(services);
+    });
   };
-
   const filteredServices = services?.filter(service => {
-    console.log("filteredServices",service)
+    console.log("filteredServices", service)
     // Filter by category if selected
-    if (selectedCategory && service.category._id !== selectedCategory) return false;
+    if (selectedCategory && service?.category._id !== selectedCategory) return false;
 
     // Filter by search term if entered
     // if (searchTerm &&
-    //   !service.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    //   !service.description.toLowerCase().includes(searchTerm.toLowerCase())) {
+    //   !service?.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    //   !service?.description.toLowerCase().includes(searchTerm.toLowerCase())) {
     //   return false;
     // }
 
     // Filter by location if selected
-    if (locationFilter && !service.location.toLowerCase().includes(locationFilter.toLowerCase())) {
+    if (locationFilter && !service?.location.toLowerCase().includes(locationFilter.toLowerCase())) {
       return false;
     }
 
     // Filter by service type if selected
-    if (serviceType && service.type !== serviceType) return false;
+    if (serviceType && service?.type !== serviceType) return false;
 
     return true;
   });
 
   if (loading && services?.length === 0) {
+    console.log("loading", loading, "services", services)
     return (
       <>
         <Navbar />
@@ -375,6 +403,7 @@ const ServicesPage = () => {
                   <p className="text-gray-600">Showing {filteredServices?.length} results matching your criteria</p>
                 </div>
 
+
                 <div className="flex items-center space-x-4">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -383,9 +412,19 @@ const ServicesPage = () => {
                       placeholder="Search services..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-3 w-full md:w-80 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
+                      className="pl-10 pr-4 py-3 w-full md:w-64 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
                     />
                   </div>
+
+                  {/* Add this new button */}
+                  <button
+                    onClick={clearFilters}
+                    className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-sm hover:shadow-md"
+                  >
+                    <Eye className="w-4 h-4" />
+                    <span>Show All</span>
+                  </button>
+
                   <button
                     onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
                     className="flex items-center space-x-2 bg-white border border-gray-200 px-4 py-3 rounded-xl hover:bg-gray-50 transition-all shadow-sm"
@@ -401,7 +440,7 @@ const ServicesPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                   {filteredServices?.map((service) => (
                     <div
-                      key={service._id}
+                      key={service?._id}
                       className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 group h-full flex flex-col"
                     >
                       {/* Image Section */}
@@ -413,19 +452,19 @@ const ServicesPage = () => {
                         </div>
                         <div className="absolute top-4 right-4 z-10">
                           <button
-                            onClick={() => handleWishlistToggle(service._id)}
+                            onClick={() => handleWishlistToggle(service?._id)}
                             disabled={wishlistLoading}
-                            className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${isInWishlist(service._id)  // Changed from isInWishlist.has() to isInWishlist()
+                            className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${isInWishlist(service?._id)  // Changed from isInWishlist.has() to isInWishlist()
                               ? 'bg-red-500 text-white'
                               : 'bg-white/80 text-gray-600 hover:bg-white hover:text-red-500'
                               }`}
                           >
-                            <Heart className={`w-5 h-5 ${isInWishlist(service._id) ? 'fill-current' : ''}`} />
+                            <Heart className={`w-5 h-5 ${isInWishlist(service?._id) ? 'fill-current' : ''}`} />
                           </button>
                         </div>
                         <img
-                          src={service.images[0] || "https://via.placeholder.com/600x400?text=No+Image"}
-                          alt={service.title}
+                          src={service?.images[0] || "https://images.pexels.com/photos/1042152/pexels-photo-1042152.jpeg"}
+                          alt={service?.title}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -435,50 +474,50 @@ const ServicesPage = () => {
                       <div className="p-6 flex flex-col flex-grow">
                         <div className="flex-grow">
                           <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                            {service.title}
+                            {service?.title}
                           </h3>
                           <div className="flex items-center text-gray-600 mb-2">
                             <MapPin className="w-4 h-4 mr-2 text-blue-500" />
-                            <span className="text-sm">{service.location}</span>
+                            <span className="text-sm">{service?.location}</span>
                           </div>
 
-                          {service.capacity && (
+                          {service?.capacity && (
                             <div className="flex items-center space-x-3 mb-3">
                               <div className="flex items-center">
                                 <Users className="w-4 h-4 mr-1 text-purple-500" />
-                                <span className="text-xs text-gray-600">{service.capacity}</span>
+                                <span className="text-xs text-gray-600">{service?.capacity}</span>
                               </div>
-                              {service.space && (
+                              {service?.space && (
                                 <div className="flex items-center">
                                   <Home className="w-4 h-4 mr-1 text-green-500" />
-                                  <span className="text-xs text-gray-600">{service.space}</span>
+                                  <span className="text-xs text-gray-600">{service?.space}</span>
                                 </div>
                               )}
                             </div>
                           )}
 
-                          {service.rating && (
+                          {service?.rating && (
                             <div className="flex items-center mb-3">
                               <div className="flex items-center mr-3">
                                 {[...Array(5)].map((_, i) => (
                                   <Star
                                     key={i}
-                                    className={`w-4 h-4 ${i < Math.floor(service.rating || 0)
+                                    className={`w-4 h-4 ${i < Math.floor(service?.rating || 0)
                                       ? 'text-yellow-400 fill-current'
                                       : 'text-gray-300'
                                       }`}
                                   />
                                 ))}
                                 <span className="text-xs text-gray-600 ml-1">
-                                  {service.rating} ({service.reviews || 0} reviews)
+                                  {service?.rating} ({service?.reviews || 0} reviews)
                                 </span>
                               </div>
                             </div>
                           )}
 
-                          {service.tags && service.tags.length > 0 && (
+                          {service?.tags && service?.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1 mb-4">
-                              {service.tags?.map((feature, index) => (
+                              {service?.tags?.map((feature, index) => (
                                 <span
                                   key={index}
                                   className="bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium border border-blue-100"
@@ -493,31 +532,31 @@ const ServicesPage = () => {
                         <div className="mt-auto">
                           <div className="flex items-center justify-between">
                             <div className="text-right">
-                              {service.offer ? (
+                              {service?.offer ? (
                                 <div className="space-y-1">
                                   <div className="text-sm line-through text-gray-400">
-                                    {formatPrice(service.minPrice)} - {formatPrice(service.maxPrice)}
+                                    {formatPrice(service?.minPrice)} - {formatPrice(service?.maxPrice)}
                                   </div>
                                   <div className="text-xl font-bold text-gray-900">
-                                    {formatPrice(service.offer.discountedPrice)} - {formatPrice(service.maxPrice - (service.maxPrice * service.offer.discountPercentage / 100))}
+                                    {formatPrice(service?.offer.discountedPrice)} - {formatPrice(service?.maxPrice - (service?.maxPrice * service?.offer.discountPercentage / 100))}
                                   </div>
                                   <div className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full inline-block">
-                                    {service.offer.discountPercentage}% OFF
+                                    {service?.offer.discountPercentage}% OFF
                                   </div>
                                 </div>
                               ) : (
                                 <div className="text-xl font-bold text-gray-900">
-                                  {formatPrice(service.minPrice)} - {formatPrice(service.maxPrice)}
+                                  {formatPrice(service?.minPrice)} - {formatPrice(service?.maxPrice)}
                                 </div>
                               )}
-                              {service.pricePerPlate && (
+                              {service?.pricePerPlate && (
                                 <div className="text-xs text-gray-600">
-                                  per plate: {formatPrice(service.pricePerPlate)}
+                                  per plate: {formatPrice(service?.pricePerPlate)}
                                 </div>
                               )}
                             </div>
                             <button
-                              onClick={() => navigate(`/services/${service._id}`)}
+                              onClick={() => navigate(`/services/${service?._id}`)}
                               className="flex items-center space-x-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-sm hover:shadow-md text-sm"
                             >
                               <Eye className="w-3 h-3" />
@@ -534,12 +573,12 @@ const ServicesPage = () => {
                 <div className="space-y-6">
                   {filteredServices?.map((service) => (
                     <div
-                      key={service._id}
-                      className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 group  h-[470px] lg:h-[200px]"
+                      key={service?._id}
+                      className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 group  h-[470px] lg:h-[230px]"
                     >
-                      <div className="flex flex-col lg:flex-row">
+                      <div className="flex flex-col lg:flex-row h-full">
                         {/* Image Section */}
-                        <div className="lg:w-64 relative overflow-hidden h-48 lg:h-auto">
+                        <div className="lg:w-64 relative overflow-hidden h-full">
                           <div className="absolute top-4 left-4 z-10">
                             <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
                               Featured
@@ -547,19 +586,19 @@ const ServicesPage = () => {
                           </div>
                           <div className="absolute top-4 right-4 z-10">
                             <button
-                              onClick={() => handleWishlistToggle(service._id)}
+                              onClick={() => handleWishlistToggle(service?._id)}
                               disabled={wishlistLoading}
-                              className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${isInWishlist(service._id)  // Changed from isInWishlist.has() to isInWishlist()
+                              className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${isInWishlist(service?._id)  // Changed from isInWishlist.has() to isInWishlist()
                                 ? 'bg-red-500 text-white'
                                 : 'bg-white/80 text-gray-600 hover:bg-white hover:text-red-500'
                                 }`}
                             >
-                              <Heart className={`w-5 h-5 ${isInWishlist(service._id) ? 'fill-current' : ''}`} />
+                              <Heart className={`w-5 h-5 ${isInWishlist(service?._id) ? 'fill-current' : ''}`} />
                             </button>
                           </div>
                           <img
-                            src={service.images[0] || "https://via.placeholder.com/600x400?text=No+Image"}
-                            alt={service.title}
+                            src={service?.images[0] || "https://images.pexels.com/photos/1042152/pexels-photo-1042152.jpeg"}
+                            alt={service?.title}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -570,50 +609,50 @@ const ServicesPage = () => {
                           <div className="flex justify-between items-start mb-4">
                             <div className="flex-1">
                               <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                                {service.title}
+                                {service?.title}
                               </h3>
                               <div className="flex items-center text-gray-600 mb-2">
                                 <MapPin className="w-4 h-4 mr-2 text-blue-500" />
-                                <span className="text-sm">{service.location}</span>
+                                <span className="text-sm">{service?.location}</span>
                               </div>
 
-                              {service.capacity && (
+                              {service?.capacity && (
                                 <div className="flex items-center space-x-3 mb-3">
                                   <div className="flex items-center">
                                     <Users className="w-4 h-4 mr-1 text-purple-500" />
-                                    <span className="text-xs text-gray-600">{service.capacity}</span>
+                                    <span className="text-xs text-gray-600">{service?.capacity}</span>
                                   </div>
-                                  {service.space && (
+                                  {service?.space && (
                                     <div className="flex items-center">
                                       <Home className="w-4 h-4 mr-1 text-green-500" />
-                                      <span className="text-xs text-gray-600">{service.space}</span>
+                                      <span className="text-xs text-gray-600">{service?.space}</span>
                                     </div>
                                   )}
                                 </div>
                               )}
 
-                              {service.rating && (
+                              {service?.rating && (
                                 <div className="flex items-center mb-3">
                                   <div className="flex items-center mr-3">
                                     {[...Array(5)].map((_, i) => (
                                       <Star
                                         key={i}
-                                        className={`w-4 h-4 ${i < Math.floor(service.rating || 0)
+                                        className={`w-4 h-4 ${i < Math.floor(service?.rating || 0)
                                           ? 'text-yellow-400 fill-current'
                                           : 'text-gray-300'
                                           }`}
                                       />
                                     ))}
                                     <span className="text-xs text-gray-600 ml-1">
-                                      {service.rating} ({service.reviews || 0} reviews)
+                                      {service?.rating} ({service?.reviews || 0} reviews)
                                     </span>
                                   </div>
                                 </div>
                               )}
 
-                              {service.tags && service.tags.length > 0 && (
+                              {service?.tags && service?.tags.length > 0 && (
                                 <div className="flex flex-wrap gap-1 mb-4">
-                                  {service.tags?.map((feature, index) => (
+                                  {service?.tags?.map((feature, index) => (
                                     <span
                                       key={index}
                                       className="bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium border border-blue-100"
@@ -626,26 +665,26 @@ const ServicesPage = () => {
                             </div>
 
                             <div className="text-right ml-4">
-                              {service.offer ? (
+                              {service?.offer ? (
                                 <div className="space-y-1">
                                   <div className="text-sm line-through text-gray-400">
-                                    {formatPrice(service.minPrice)} - {formatPrice(service.maxPrice)}
+                                    {formatPrice(service?.minPrice)} - {formatPrice(service?.maxPrice)}
                                   </div>
                                   <div className="text-xl font-bold text-gray-900">
-                                    {formatPrice(service.offer.discountedPrice)} - {formatPrice(service.maxPrice - (service.maxPrice * service.offer.discountPercentage / 100))}
+                                    {formatPrice(service?.offer.discountedPrice)} - {formatPrice(service?.maxPrice - (service?.maxPrice * service?.offer.discountPercentage / 100))}
                                   </div>
                                   <div className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full inline-block">
-                                    {service.offer.discountPercentage}% OFF
+                                    {service?.offer.discountPercentage}% OFF
                                   </div>
                                 </div>
                               ) : (
                                 <div className="text-xl font-bold text-gray-900">
-                                  {formatPrice(service.minPrice)} - {formatPrice(service.maxPrice)}
+                                  {formatPrice(service?.minPrice)} - {formatPrice(service?.maxPrice)}
                                 </div>
                               )}
-                              {service.pricePerPlate && (
+                              {service?.pricePerPlate && (
                                 <div className="text-xs text-gray-600">
-                                  per plate: {formatPrice(service.pricePerPlate)}
+                                  per plate: {formatPrice(service?.pricePerPlate)}
                                 </div>
                               )}
                             </div>
@@ -654,20 +693,20 @@ const ServicesPage = () => {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-2">
                               <div className="flex space-x-2">
-                                {service.images.slice(0, 3).map((image, imgIndex) => (
+                                {service?.images.slice(0, 3).map((image, imgIndex) => (
                                   <div key={imgIndex} className="relative group/thumb cursor-pointer">
                                     <img
-                                      src={image || "https://via.placeholder.com/100x75?text=No+Image"}
-                                      alt={`${service.title} ${imgIndex + 1}`}
+                                      src={image || "https://images.pexels.com/photos/1042152/pexels-photo-1042152.jpeg"}
+                                      alt={`${service?.title} ${imgIndex + 1}`}
                                       className="w-16 h-12 object-cover rounded-lg shadow-sm group-hover/thumb:shadow-md transition-all duration-300 transform group-hover/thumb:scale-105"
                                     />
                                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/thumb:opacity-100 transition-opacity duration-300 rounded-lg"></div>
                                   </div>
                                 ))}
-                                {service.images.length > 3 && (
+                                {service?.images.length > 3 && (
                                   <div className="w-16 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:from-blue-50 hover:to-purple-50 transition-all duration-300">
                                     <span className="text-gray-500 text-xs">
-                                      +{service.images.length - 3}
+                                      +{service?.images.length - 3}
                                     </span>
                                   </div>
                                 )}
@@ -676,7 +715,7 @@ const ServicesPage = () => {
 
                             <div className="flex space-x-2">
                               <button
-                                onClick={() => navigate(`/services/${service._id}`)}
+                                onClick={() => navigate(`/services/${service?._id}`)}
                                 className="flex items-center space-x-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-sm hover:shadow-md text-sm"
                               >
                                 <Eye className="w-3 h-3" />
