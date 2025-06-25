@@ -93,6 +93,7 @@ const ServicesPage = () => {
 
   // ✅ Debounce logic
   useEffect(() => {
+    console.log("searchTerm",searchTerm)
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
     }, 1000); // 500ms delay
@@ -106,55 +107,49 @@ const ServicesPage = () => {
 
 
   useEffect(() => {
-    if (locationState?.location && !hasAppliedInitialFilter) {
-      const firstWord = locationState.location.split(' ')[0];
-      setLocationFilter(firstWord);
-      setHasAppliedInitialFilter(true);
-    } else if (!locationState && !hasAppliedInitialFilter) {
-      // Explicitly fetch all services when no location state is present
-      getAllServices();
-      setHasAppliedInitialFilter(true);
-    }
-  }, [locationState]);
+  if (locationState?.location && !hasAppliedInitialFilter) {
+    const firstWord = locationState.location.split(' ')[0];
+    setLocationFilter(firstWord);
+    setHasAppliedInitialFilter(true);
+  } else if (!hasAppliedInitialFilter) {
+    // Always fetch services on initial load
+    getAllServices();
+    setHasAppliedInitialFilter(true);
+  }
+}, [locationState]);
 
-  
-  // ✅ API call based on debounced search
-  useEffect(() => {
-    const fetchServices = async () => {
-      console.log("object")
+ // ✅ API call based on debounced search and filters
+useEffect(() => {
+  const fetchServices = async () => {
+    try {
+      setLoading(true);
+      setError('');
 
-      try {
-        setLoading(true);
-        setError('');
-
-        let response;
-        if (selectedCategory) {
-          response = await getServicesByCategory(selectedCategory, locationFilter, debouncedSearchTerm);
-        } else if (debouncedSearchTerm || locationFilter) {
-          response = await searchServices(debouncedSearchTerm, locationFilter, selectedCategory);
-        } else {
-          response = await getAllServices();
-        }
-
-        // setServices(response);
-      } catch (err) {
-        setError('Failed to fetch services. Please try again.');
-        console.error('Error fetching services:', err);
-      } finally {
-        setLoading(false);
+      let response;
+      if (selectedCategory) {
+        response = await getServicesByCategory(selectedCategory, locationFilter, debouncedSearchTerm);
+      } else if (debouncedSearchTerm || locationFilter) {
+        response = await searchServices(debouncedSearchTerm, locationFilter, selectedCategory);
+      } else {
+        response = await getAllServices();
       }
-    };
 
-    // If we have a location from state, trigger search immediately
-    if (locationState?.location) {
-      fetchServices();
+      setServices(response); // Make sure to set the services from response
+    } catch (err) {
+      setError('Failed to fetch services. Please try again.');
+      console.error('Error fetching services:', err);
+    } finally {
+      setLoading(false);
     }
-  }, [selectedCategory, debouncedSearchTerm, locationFilter, locationState?.location]);
+  };
+
+  // Always fetch services when filters change, not just when locationState exists
+  fetchServices();
+}, [selectedCategory, debouncedSearchTerm, locationFilter]);
 
   useEffect(() => {
     getCategories();
   }, []);
-
   const serviceTypes = ['Banquet Halls', 'Resort', 'Premium Properties', 'Luxury Properties'];
   const budgetRanges = [
     { name: 'Budget Friendly', range: '₹50K - ₹1L', color: 'bg-green-100 text-green-600' },
@@ -162,16 +157,6 @@ const ServicesPage = () => {
     { name: 'Premium Properties', range: '₹3L - ₹5L', color: 'bg-purple-100 text-purple-600' },
     { name: 'Luxury Properties', range: '₹5L+', color: 'bg-pink-100 text-pink-600' }
   ];
-
-  const toggleFavorite = (serviceId: string) => {
-    const newFavorites = new Set(favorites);
-    if (newFavorites.has(serviceId)) {
-      newFavorites.delete(serviceId);
-    } else {
-      newFavorites.add(serviceId);
-    }
-    setFavorites(newFavorites);
-  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -182,17 +167,16 @@ const ServicesPage = () => {
   };
 
   const clearFilters = () => {
-    setSearchTerm('');
-    setSelectedCategory('');
-    setServiceType('');
-    setLocationFilter('');
-    // Force a refresh of all services
-    getAllServices().then(services => {
-      setServices(services);
-    });
-  };
-  const filteredServices = services?.filter(service => {
-    console.log("filteredServices", service)
+  setSearchTerm('');
+  setSelectedCategory('');
+  setServiceType('');
+  setLocationFilter('');
+  // Fetch all services when clearing filters
+  getAllServices().then(services => {
+    setServices(services);
+  });
+};
+  const Filteredservices = services?.filter(service => {
     // Filter by category if selected
     if (selectedCategory && service?.category._id !== selectedCategory) return false;
 
@@ -400,7 +384,7 @@ const ServicesPage = () => {
                       ? categories.find(c => c._id === selectedCategory)?.title || 'Selected Services'
                       : 'All Services'}
                   </h2>
-                  <p className="text-gray-600">Showing {filteredServices?.length} results matching your criteria</p>
+                  <p className="text-gray-600">Showing {services?.length} results matching your criteria</p>
                 </div>
 
 
@@ -438,7 +422,7 @@ const ServicesPage = () => {
               {/* Service Cards - Grid View */}
               {viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                  {filteredServices?.map((service) => (
+                  {services?.map((service) => (
                     <div
                       key={service?._id}
                       className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 group h-full flex flex-col"
@@ -571,7 +555,7 @@ const ServicesPage = () => {
               ) : (
                 /* Service Cards - List View */
                 <div className="space-y-6">
-                  {filteredServices?.map((service) => (
+                  {services?.map((service) => (
                     <div
                       key={service?._id}
                       className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 group  h-[470px] lg:h-[230px]"
@@ -734,7 +718,7 @@ const ServicesPage = () => {
                 </div>
               )}
 
-              {filteredServices?.length === 0 && (
+              {services?.length === 0 && (
                 <div className="text-center py-16">
                   <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
                     <Search className="w-12 h-12 text-blue-500" />
