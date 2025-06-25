@@ -247,6 +247,7 @@ const Homepage = () => {
                   type="text"
                   placeholder="Find Your Perfect Event Experience"
                   className="flex-1 px-6 py-4 text-gray-900 outline-none text-lg"
+                  value={city}
                 />
                 <select className="px-4 py-4 text-gray-900 border-l border-gray-200 bg-gray-50">
                   <option>All Categories</option>

@@ -101,6 +101,7 @@ const Navbar = () => {
   const adminNavItems = [
     // Add admin-specific items if needed
     { path: "/bookingmanagement", icon: Calendar, label: "BOOKING MGMT" },
+    { path: "/admin/usermanagement", icon: User, label: "USER MGMT" },
     { path: "admin/support", icon: HelpCircle, label: "SUPPORT MGMT" },
 
   ];

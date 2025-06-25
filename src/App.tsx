@@ -1,6 +1,5 @@
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { EventProvider } from "./contexts/EventContext";
 import Homepage from "./pages/Homepage";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
@@ -26,13 +25,13 @@ import 'react-toastify/dist/ReactToastify.css';
 import AdminSupportPage from "./pages/AdminSupportPage.js";
 import { SupportProvider } from "./contexts/SupportContext.js";
 import AdminUserManagement from "./pages/AdminUserManagement.js";
+import ProtectedRoute from "./components/ProtectedRoute.js";
 
 
 const App = () => (
   // <QueryClientProvider client={queryClient}>
 
   <TooltipProvider>
-    <EventProvider>
       <BrowserRouter>
         <AuthProvider>
           <AdminProvider>
@@ -40,46 +39,59 @@ const App = () => (
               <ServiceProvider>
                 <WishlistProvider>
                   <SupportProvider>
-                  <ToastContainer 
-                    position="top-right"
-                    autoClose={3000}
-                    hideProgressBar={false}
-                    newestOnTop={false}
-                    closeOnClick
-                    pauseOnFocusLoss
-                    draggable
-                    pauseOnHover
-                    theme="colored"
-                  />
-                <Routes>
-                  <Route path="/" element={<Homepage />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/ServicesPage" element={<ServicesPage />} />
-                  <Route path="/services/:id" element={<ServiceDetail />} />
-                  <Route path="/help" element={<HelpSupportPage />} />
-                  <Route path="/userOffer" element={<UserOffersPage />} />
-                  <Route path="/vendorOffer" element={<VendorCreateOfferPage />} />
-                  <Route path="/userprofile" element={<UserProfile />} />
-                  <Route path="/vendorprofile" element={<VendorProfile />} />
-                  <Route path="/adminprofile" element={<AdminProfile />} />
-                  <Route path="/admin/login" element={<AdminAuthForm />} />
-                  <Route path="/wishlist" element={<WishlistPage />} />
-                  <Route path="/vendor/:id" element={<VendorPage />} />
-                  <Route path="/servicemanagement" element={<ServiceManagement />} />
-                  <Route path="/admin/support" element={<AdminSupportPage />} />
-                  <Route path="/admin/usermanagement" element={<AdminUserManagement />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-                </SupportProvider>
+                    <ToastContainer 
+                      position="top-right"
+                      autoClose={3000}
+                      hideProgressBar={false}
+                      newestOnTop={false}
+                      closeOnClick
+                      pauseOnFocusLoss
+                      draggable
+                      pauseOnHover
+                      theme="colored"
+                    />
+                    <Routes>
+                      {/* Public Routes */}
+                      <Route path="/" element={<Homepage />} />
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/ServicesPage" element={<ServicesPage />} />
+                      <Route path="/services/:id" element={<ServiceDetail />} />
+                      <Route path="/help" element={<HelpSupportPage />} />
+                      <Route path="/userOffer" element={<UserOffersPage />} />
+                      <Route path="/vendor/:id" element={<VendorPage />} />
+                      <Route path="/admin/login" element={<AdminAuthForm />} />
+
+                      {/* User-only Routes */}
+                      <Route element={<ProtectedRoute allowedRoles={['user']} />}>
+                        <Route path="/userprofile" element={<UserProfile />} />
+                        <Route path="/wishlist" element={<WishlistPage />} />
+                      </Route>
+
+                      {/* Vendor-only Routes */}
+                      <Route element={<ProtectedRoute allowedRoles={['vendor']} />}>
+                        <Route path="/vendorprofile" element={<VendorProfile />} />
+                        <Route path="/vendorOffer" element={<VendorCreateOfferPage />} />
+                        <Route path="/servicemanagement" element={<ServiceManagement />} />
+                        <Route path="/wishlist" element={<WishlistPage />} />
+                      </Route>
+
+                      {/* Admin-only Routes */}
+                      <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+                        <Route path="/admin/support" element={<AdminSupportPage />} />
+                        <Route path="/admin/usermanagement" element={<AdminUserManagement />} />
+                        <Route path="/adminprofile" element={<AdminProfile />} />
+                      </Route>
+
+                      {/* Catch-all route */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </SupportProvider>
                 </WishlistProvider>
               </ServiceProvider>
             </VendorProvider>
           </AdminProvider>
         </AuthProvider>
-
       </BrowserRouter>
-    </EventProvider>
   </TooltipProvider>
   // </QueryClientProvider>
 );

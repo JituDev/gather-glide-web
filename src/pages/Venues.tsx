@@ -115,7 +115,7 @@ const ServicesPage = () => {
           response = await getAllServices();
         }
 
-        setServices(response);
+        // setServices(response);
       } catch (err) {
         setError('Failed to fetch services. Please try again.');
         console.error('Error fetching services:', err);
@@ -165,15 +165,16 @@ const ServicesPage = () => {
   };
 
   const filteredServices = services?.filter(service => {
+    console.log("filteredServices",service)
     // Filter by category if selected
     if (selectedCategory && service.category._id !== selectedCategory) return false;
 
     // Filter by search term if entered
-    if (searchTerm &&
-      !service.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !service.description.toLowerCase().includes(searchTerm.toLowerCase())) {
-      return false;
-    }
+    // if (searchTerm &&
+    //   !service.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    //   !service.description.toLowerCase().includes(searchTerm.toLowerCase())) {
+    //   return false;
+    // }
 
     // Filter by location if selected
     if (locationFilter && !service.location.toLowerCase().includes(locationFilter.toLowerCase())) {

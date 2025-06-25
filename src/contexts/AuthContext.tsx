@@ -386,7 +386,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Check if user is authenticated
   const isAuthenticated = () => {
-    return !!user;
+    return !!user && !user.isBlocked  && !!localStorage.getItem('token');
   };
 
   // Check user role

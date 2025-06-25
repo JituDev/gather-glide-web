@@ -244,24 +244,29 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const searchServices = async (query: string, location?: string, category?: string) => {
-    try {
-      setLoadingSearch(true);
-      setErrorSearch(null);
-      const params = new URLSearchParams({ q: query });
-      if (location) params.append('location', location);
-      if (category) params.append('category', category);
+  try {
+    setLoadingSearch(true);
+    setErrorSearch(null);
+    const params = new URLSearchParams({ q: query });
+    if (location) params.append('location', location);
+    if (category) params.append('category', category);
 
-      const response = await api.get(`/search?${params.toString()}`);
-      setSearchResults(response.data.data);
-      return response.data.data;
-    } catch (error) {
-      const err = error as AxiosError<{ message?: string }>;
-      setErrorSearch(err.response?.data?.message || 'Failed to search services');
-      throw err;
-    } finally {
-      setLoadingSearch(false);
-    }
-  };
+    const response = await api.get(`/search?${params.toString()}`);
+    // Ensure we don't set null or undefined
+    const data = response.data.data || [];
+    console.log("data",data);
+    setServices(data);
+    setSearchResults(data);
+    return data;
+  } catch (error) {
+    const err = error as AxiosError<{ message?: string }>;
+    setErrorSearch(err.response?.data?.message || 'Failed to search services');
+    // Return empty array instead of throwing if you want to handle it gracefully
+    return [];
+  } finally {
+    setLoadingSearch(false);
+  }
+};
 
   const getAllServices = async () => {
     try {
