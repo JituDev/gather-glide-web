@@ -9,6 +9,7 @@ import Loader from '@/components/Loader';
 const Homepage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
+  const [cityName, setCityName] = useState(null);
   // Add state for manual location input
   const [manualLocation, setManualLocation] = useState('');
   const [isFirstVisit, setIsFirstVisit] = useState(true);
@@ -41,9 +42,9 @@ const Homepage = () => {
     return () => clearTimeout(timer);
   }, []);
 
-useEffect(() => {
+  useEffect(() => {
     const hasVisited = sessionStorage.getItem('hasVisited');
-    
+
     if (isFirstVisit && !hasVisited && 'geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
@@ -52,11 +53,11 @@ useEffect(() => {
             `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
           );
           const data = await res.json();
-          const cityName =
+          const city =
             data.address.city || data.address.town || data.address.village || null;
-          
+
+          setCityName(city.split(' ')[0]); // Store the city name in state
           sessionStorage.setItem('hasVisited', 'true');
-          navigate('/ServicesPage', { state: { location: cityName } });
         },
         (error) => {
           console.error('Location permission denied or error:', error.message);
@@ -228,7 +229,7 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen">
-      <Navbar />
+      <Navbar cityName={cityName} />
 
       {/* Hero Section */}
       <div className="relative h-screen overflow-hidden">

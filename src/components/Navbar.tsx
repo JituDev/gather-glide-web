@@ -1,14 +1,32 @@
 import { useEffect, useState } from "react";
 import { Calendar, Gift, HelpCircle, Home, Menu, X, ChevronDown, Heart, User, Briefcase, Shield } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
+import { MapPin as LocationIcon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { getSavedCity } from "@/utils/cityStorage";
 
-const Navbar = () => {
+const Navbar = ({ cityName: propCityName = null  }) => {
+  const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isVendorDropdownOpen, setIsVendorDropdownOpen] = useState(false);
   const { user } = useAuth();
   const [displayName, setDisplayName] = useState("");
+   const [localCityName, setLocalCityName] = useState(null);
+
+  useEffect(() => {
+    // Check for city name from props first
+    if (propCityName) {
+      setLocalCityName(propCityName);
+    } else {
+      // Fall back to localStorage
+      const savedCity = getSavedCity();
+      if (savedCity) {
+        setLocalCityName(savedCity);
+      }
+    }
+  }, [propCityName]);
+
 
   useEffect(() => {
     if (user) {
@@ -70,8 +88,6 @@ const Navbar = () => {
         "Wedding Catering",
         "Party Catering",
         "Corporate Catering",
-        // "Traditional Cuisine",
-        // "Multi-Cuisine",
         "Dessert Catering"
       ]
     }
@@ -79,16 +95,16 @@ const Navbar = () => {
 
   // Common nav items for all roles
   const commonNavItems = [
-  { 
-    path: "/ServicesPage", 
-    icon: Home, 
-    label: "SERVICES",
-    onClick: (navigate) => {
-      // Clear any existing location state
-      navigate('/ServicesPage', { state: {} });
-    }
-  },
-];
+    {
+      path: "/ServicesPage",
+      icon: Home,
+      label: "SERVICES",
+      onClick: (navigate) => {
+        // Clear any existing location state
+        navigate('/ServicesPage', { state: {} });
+      }
+    },
+  ];
 
   // User-specific nav items
   const userNavItems = [
@@ -226,6 +242,14 @@ const Navbar = () => {
           <button onClick={toggleMenu} className="md:hidden text-white">
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
+          {localCityName && (
+    <button
+      onClick={() => navigate('/ServicesPage', { state: { location: localCityName } })}
+      className="hover:text-purple-200 transition-colors flex items-center px-2"
+    >
+      <LocationIcon className="w-4 h-4 mr-1" /> {localCityName}
+    </button>
+  )}
 
           {/* Profile/Login Button */}
           {user ? (
@@ -244,6 +268,7 @@ const Navbar = () => {
             </Link>
           )}
         </div>
+
 
         {/* Mobile Menu */}
         {isMenuOpen && (

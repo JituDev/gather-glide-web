@@ -31,6 +31,7 @@ type AuthContextType = {
   user: User | null;
   loading: boolean;
   error: string | null;
+  cityName: string | null;
   register: (data: RegisterData, profilePhoto?: File) => Promise<void>;
   login: (data: LoginData) => Promise<void>;
   logout: () => Promise<void>;
@@ -41,6 +42,7 @@ type AuthContextType = {
   hasRole: (role: User['role']) => boolean;
   isVendorApproved: () => boolean;
   setError: (error: string | null) => void;
+  setCityName: (cityName : string | null) => void;
   // Admin functions
   getUsers: (queryParams?: GetUsersQueryParams) => Promise<PaginatedUsersResponse>;
   getUser: (id: string) => Promise<User>;
@@ -95,6 +97,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [cityName, setCityName] = useState(null);
   const [error, setError] = useState<ReactNode | null>(null);
   const navigate = useNavigate();
   const token = localStorage.getItem('token') || null;

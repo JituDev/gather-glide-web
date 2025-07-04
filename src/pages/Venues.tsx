@@ -8,11 +8,8 @@ import {
   Calendar,
   DollarSign,
   Home,
-  Filter,
-  ChevronDown,
   Heart,
   Eye,
-  ArrowRight
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -65,9 +62,7 @@ const ServicesPage = () => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [serviceType, setServiceType] = useState('');
-  const [filterOpen, setFilterOpen] = useState(false);
   const [viewMode, setViewMode] = useState('list');
-  const [favorites, setFavorites] = useState(new Set<string>());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { isInWishlist, addToWishlist, removeFromWishlist, loading: wishlistLoading } = useWishlist();
@@ -178,7 +173,7 @@ useEffect(() => {
 };
   const Filteredservices = services?.filter(service => {
     // Filter by category if selected
-    if (selectedCategory && service?.category._id !== selectedCategory) return false;
+    if (selectedCategory && service?.category?._id !== selectedCategory) return false;
 
     // Filter by search term if entered
     // if (searchTerm &&
@@ -238,7 +233,7 @@ useEffect(() => {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
 
         {/* Enhanced Filter Bar */}
-        <div className="sticky top-0 z-40 bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        {/* <div className="sticky top-0 z-40 bg-gradient-to-br from-blue-50 via-white to-purple-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center space-x-3 flex-wrap">
@@ -312,7 +307,7 @@ useEffect(() => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex gap-8">
@@ -324,12 +319,12 @@ useEffect(() => {
                 <div className="space-y-4">
                   {categories?.map(category => (
                     <div
-                      key={category._id}
+                      key={category?._id}
                       className={`flex items-center space-x-4 p-3 rounded-xl cursor-pointer transition-all duration-300 hover:shadow-md ${selectedCategory === category._id
                         ? 'bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200'
                         : 'hover:bg-gray-50'
                         }`}
-                      onClick={() => setSelectedCategory(selectedCategory === category._id ? '' : category._id)}
+                      onClick={() => setSelectedCategory(selectedCategory === category?._id ? '' : category?._id)}
                     >
                       <div className="w-14 h-14 rounded-xl overflow-hidden shadow-md bg-gray-100 flex items-center justify-center">
                         {category.image ? (
@@ -406,7 +401,7 @@ useEffect(() => {
                     className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-sm hover:shadow-md"
                   >
                     <Eye className="w-4 h-4" />
-                    <span>Show All</span>
+                    <span>Clear All Filters</span>
                   </button>
 
                   <button
@@ -429,11 +424,11 @@ useEffect(() => {
                     >
                       {/* Image Section */}
                       <div className="relative h-48 overflow-hidden">
-                        <div className="absolute top-4 left-4 z-10">
+                        {/* <div className="absolute top-4 left-4 z-10">
                           <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
                             Featured
                           </span>
-                        </div>
+                        </div> */}
                         <div className="absolute top-4 right-4 z-10">
                           <button
                             onClick={() => handleWishlistToggle(service?._id)}
@@ -563,11 +558,11 @@ useEffect(() => {
                       <div className="flex flex-col lg:flex-row h-full">
                         {/* Image Section */}
                         <div className="lg:w-64 relative overflow-hidden h-full">
-                          <div className="absolute top-4 left-4 z-10">
+                          {/* <div className="absolute top-4 left-4 z-10">
                             <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
                               Featured
                             </span>
-                          </div>
+                          </div> */}
                           <div className="absolute top-4 right-4 z-10">
                             <button
                               onClick={() => handleWishlistToggle(service?._id)}
