@@ -18,11 +18,22 @@ interface ServiceFormData {
     location: string;
     phone?: string;
     website?: string;
-    facebook?: string;
-    instagram?: string;
-    twitter?: string;
+    socialLinks?: {
+        facebook?: string;
+        instagram?: string;
+        twitter?: string;
+    };
+    details: Record<string, any>;
+    faqs: Array<{ question: string; answer: string }>;
     images: FileList | null;
-    existingImages?: string[]; // For edit mode
+    existingImages?: string[];
+}
+
+interface DynamicField {
+    key: string;
+    label: string;
+    type: string;
+    required?: boolean;
 }
 
 const ServiceManagement = () => {
@@ -35,9 +46,12 @@ const ServiceManagement = () => {
         deleteService,
         getVendorServices
     } = useService();
-    const [subCategories, setSubCategories] = useState<string[]>([]);
     const { vendorId } = useVendor();
     const { getCategories, categories } = useAdmin();
+    const [subCategories, setSubCategories] = useState<string[]>([]);
+    const [dynamicFields, setDynamicFields] = useState<DynamicField[]>([]);
+    const [faqs, setFaqs] = useState<Array<{ question: string; answer: string }>>([]);
+    const [newFaq, setNewFaq] = useState({ question: '', answer: '' });
 
     useEffect(() => {
         getCategories();
@@ -61,15 +75,14 @@ const ServiceManagement = () => {
         location: '',
         phone: '',
         website: '',
-        facebook: '',
-        instagram: '',
-        twitter: '',
+        details: {},
+        faqs: [],
         images: null,
         existingImages: []
     });
 
-    const [validationErrors, setValidationErrors] = useState<Partial<ServiceFormData>>({});
 
+    const [validationErrors, setValidationErrors] = useState<Partial<ServiceFormData>>({});
     // Fetch vendor services on component mount
     useEffect(() => {
         if (vendorId) {
@@ -98,9 +111,14 @@ const ServiceManagement = () => {
         if (name === 'category') {
             const selectedCategory = categories.find((cat) => cat._id === value);
             setSubCategories(selectedCategory?.subCategories || []);
+            setDynamicFields(selectedCategory?.config?.fields || []);
 
-            // Reset subCategory on category change
-            setFormData((prev) => ({ ...prev, subCategory: '' }));
+            // Reset subCategory and details on category change
+            setFormData(prev => ({
+                ...prev,
+                subCategory: '',
+                details: {}
+            }));
         }
 
         // Clear validation error when user types
@@ -112,42 +130,54 @@ const ServiceManagement = () => {
         }
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-        const newFiles = Array.from(e.target.files);
-        
-        // Combine existing files with new files (if any)
-        const existingFiles = formData.images ? Array.from(formData.images) : [];
-        const allFiles = [...existingFiles, ...newFiles];
-        
-        // Validate total number of files (max 10 including existing)
-        const totalFiles = allFiles.length + (formData.existingImages?.length || 0) - filesToRemove.length;
-        if (totalFiles > 10) {
-            toast.error(`Maximum 10 images allowed. You have ${totalFiles} selected.`);
-            return;
-        }
-
-        // Create new FileList using DataTransfer
-        const dataTransfer = new DataTransfer();
-        allFiles.forEach(file => dataTransfer.items.add(file));
-        
+    const handleDynamicFieldChange = (key: string, value: any) => {
         setFormData(prev => ({
             ...prev,
-            images: dataTransfer.files
+            details: {
+                ...prev.details,
+                [key]: value
+            }
         }));
+    };
 
-        // Create preview URLs for all files (existing previews + new files)
-        const newPreviews = newFiles.map(file => URL.createObjectURL(file));
-        setImagePreviews(prev => [...prev, ...newPreviews]);
-    }
-};
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const newFiles = Array.from(e.target.files);
+
+            // Combine existing files with new files (if any)
+            const existingFiles = formData.images ? Array.from(formData.images) : [];
+            const allFiles = [...existingFiles, ...newFiles];
+
+            // Validate total number of files (max 10 including existing)
+            const totalFiles = allFiles.length + (formData.existingImages?.length || 0) - filesToRemove.length;
+            if (totalFiles > 10) {
+                toast.error(`Maximum 10 images allowed. You have ${totalFiles} selected.`);
+                return;
+            }
+
+            // Create new FileList using DataTransfer
+            const dataTransfer = new DataTransfer();
+            allFiles.forEach(file => dataTransfer.items.add(file));
+
+            setFormData(prev => ({
+                ...prev,
+                images: dataTransfer.files
+            }));
+
+            // Create preview URLs for all files (existing previews + new files)
+            const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+            setImagePreviews(prev => [...prev, ...newPreviews]);
+        }
+    };
+
+
 
     const handleRemoveImage = (index: number, isExisting: boolean) => {
         if (isExisting && formData.existingImages) {
             // Mark existing image for removal
             const imageToRemove = formData.existingImages[index];
             setFilesToRemove(prev => [...prev, imageToRemove]);
-            
+
             // Remove from existing images preview
             const updatedExisting = [...formData.existingImages];
             updatedExisting.splice(index, 1);
@@ -160,12 +190,12 @@ const ServiceManagement = () => {
             const updatedPreviews = [...imagePreviews];
             updatedPreviews.splice(index, 1);
             setImagePreviews(updatedPreviews);
-            
+
             // Update FileList (this is a bit tricky since FileList is read-only)
             if (formData.images) {
                 const filesArray = Array.from(formData.images);
                 filesArray.splice(index, 1);
-                
+
                 // Create new FileList using DataTransfer
                 const dataTransfer = new DataTransfer();
                 filesArray.forEach(file => dataTransfer.items.add(file));
@@ -175,6 +205,28 @@ const ServiceManagement = () => {
                 }));
             }
         }
+    };
+
+
+    const addFaq = () => {
+        if (newFaq.question && newFaq.answer) {
+            setFaqs([...faqs, newFaq]);
+            setFormData(prev => ({
+                ...prev,
+                faqs: [...prev.faqs, newFaq]
+            }));
+            setNewFaq({ question: '', answer: '' });
+        }
+    };
+
+    const removeFaq = (index: number) => {
+        const updatedFaqs = [...faqs];
+        updatedFaqs.splice(index, 1);
+        setFaqs(updatedFaqs);
+        setFormData(prev => ({
+            ...prev,
+            faqs: updatedFaqs
+        }));
     };
 
     const validateForm = () => {
@@ -187,15 +239,23 @@ const ServiceManagement = () => {
         if (!formData.category) errors.category = 'Category is required';
         if (!formData.subCategory) errors.subCategory = 'Sub-category is required';
         if (!formData.location) errors.location = 'Location is required';
-        
+
+        // Validate dynamic required fields
+        dynamicFields.forEach(field => {
+            if (field.required && !formData.details[field.key]) {
+                errors.details = errors.details || {};
+                errors.details[field.key] = `${field.label} is required`;
+            }
+        });
+
         // For new services, at least one image is required
         if (!isEditMode && (!formData.images || formData.images.length === 0)) {
             errors.images = 'At least one image is required';
         }
-        
+
         // For editing, either existing images or new images must be present
-        if (isEditMode && 
-            (!formData.existingImages || formData.existingImages.length === 0) && 
+        if (isEditMode &&
+            (!formData.existingImages || formData.existingImages.length === 0) &&
             (!formData.images || formData.images.length === 0)) {
             errors.images = 'At least one image is required';
         }
@@ -203,6 +263,7 @@ const ServiceManagement = () => {
         setValidationErrors(errors);
         return Object.keys(errors).length === 0;
     };
+
 
     const resetForm = () => {
         setFormData({
@@ -216,16 +277,19 @@ const ServiceManagement = () => {
             location: '',
             phone: '',
             website: '',
-            facebook: '',
-            instagram: '',
-            twitter: '',
+            details: {},
+            faqs: [],
             images: null,
             existingImages: []
         });
         setImagePreviews([]);
         setFilesToRemove([]);
+        setDynamicFields([]);
+        setFaqs([]);
+        setNewFaq({ question: '', answer: '' });
         setValidationErrors({});
     };
+
 
     const handleOpenCreateModal = () => {
         setIsEditMode(false);
@@ -236,6 +300,31 @@ const ServiceManagement = () => {
     const handleOpenEditModal = (service: any) => {
         setIsEditMode(true);
         setCurrentServiceId(service._id);
+
+        // Parse details if it's a string
+        let parsedDetails = {};
+        if (typeof service.details === 'string') {
+            try {
+                parsedDetails = JSON.parse(service.details);
+            } catch {
+                parsedDetails = {};
+            }
+        } else if (typeof service.details === 'object') {
+            parsedDetails = service.details;
+        }
+
+        // Parse FAQs if it's a string
+        let parsedFaqs = [];
+        if (typeof service.faqs === 'string') {
+            try {
+                parsedFaqs = JSON.parse(service.faqs);
+            } catch {
+                parsedFaqs = [];
+            }
+        } else if (Array.isArray(service.faqs)) {
+            parsedFaqs = service.faqs;
+        }
+
         setFormData({
             title: service.title,
             description: service.description,
@@ -247,70 +336,93 @@ const ServiceManagement = () => {
             location: service.location,
             phone: service.phone || '',
             website: service.website || '',
-            facebook: service.socialLinks?.facebook || '',
-            instagram: service.socialLinks?.instagram || '',
-            twitter: service.socialLinks?.twitter || '',
+            details: parsedDetails,
+            faqs: parsedFaqs,
             images: null,
             existingImages: service.images || []
         });
+
+        // Set dynamic fields based on category
+        const selectedCategory = categories.find(cat =>
+            cat._id === (typeof service.category === 'object' ? service.category._id : service.category)
+        );
+        setDynamicFields(selectedCategory?.config?.fields || []);
+        setFaqs(parsedFaqs);
+
         setIsModalOpen(true);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+  e.preventDefault();
 
-        if (!validateForm()) return;
+  if (!validateForm()) return;
 
-        try {
-            const formDataToSend = new FormData();
-            formDataToSend.append('title', formData.title);
-            formDataToSend.append('description', formData.description);
-            formDataToSend.append('minPrice', formData.minPrice.toString());
-            formDataToSend.append('maxPrice', formData.maxPrice.toString());
-            formDataToSend.append('category', formData.category);
-            formDataToSend.append('subCategory', formData.subCategory);
-            formDataToSend.append('tags', formData.tags);
-            formDataToSend.append('location', formData.location);
-            
-            if (formData.phone) formDataToSend.append('phone', formData.phone);
-            if (formData.website) formDataToSend.append('website', formData.website);
-            
-            if (formData.facebook || formData.instagram || formData.twitter) {
-                const socialLinks = {
-                    ...(formData.facebook && { facebook: formData.facebook }),
-                    ...(formData.instagram && { instagram: formData.instagram }),
-                    ...(formData.twitter && { twitter: formData.twitter })
-                };
-                formDataToSend.append('socialLinks', JSON.stringify(socialLinks));
-            }
+  try {
+    const fd = new FormData();
+    
+    // Append all basic fields
+    fd.append('title', formData.title);
+    fd.append('description', formData.description);
+    fd.append('minPrice', formData.minPrice.toString());
+    fd.append('maxPrice', formData.maxPrice.toString());
+    fd.append('category', formData.category);
+    fd.append('subCategory', formData.subCategory);
+    fd.append('tags', formData.tags);
+    fd.append('location', formData.location);
 
-            // Add images to be removed (for edit mode)
-            if (isEditMode && filesToRemove.length > 0) {
-                formDataToSend.append('imagesToRemove', JSON.stringify(filesToRemove));
-            }
+    // Handle optional fields
+    if (formData.phone) fd.append('phone', formData.phone);
+    if (formData.website) fd.append('website', formData.website);
 
-            // Add new images
-            if (formData.images) {
-                for (let i = 0; i < formData.images.length; i++) {
-                    formDataToSend.append('galleryImages', formData.images[i]);
-                }
-            }
-
-            if (isEditMode && currentServiceId) {
-                await updateService(currentServiceId, formDataToSend);
-                toast.success('Service updated successfully');
-            } else {
-                await createService(formDataToSend);
-                toast.success('Service created successfully');
-            }
-
-            setIsModalOpen(false);
-            fetchVendorServices();
-        } catch (error) {
-            console.error('Error submitting service:', error);
-            toast.error(`Failed to ${isEditMode ? 'update' : 'create'} service`);
-        }
+    // Append social links if any exist
+    const socialLinks = {
+      ...(formData.socialLinks?.facebook && { facebook: formData.socialLinks.facebook }),
+      ...(formData.socialLinks?.instagram && { instagram: formData.socialLinks.instagram }),
+      ...(formData.socialLinks?.twitter && { twitter: formData.socialLinks.twitter })
     };
+    if (Object.keys(socialLinks).length > 0) {
+      fd.append('socialLinks', JSON.stringify(socialLinks));
+    }
+
+    // Append dynamic fields details
+    fd.append('details', JSON.stringify(formData.details));
+
+    // Append FAQs
+    fd.append('faqs', JSON.stringify(formData.faqs));
+
+    // Add images to be removed (for edit mode)
+    if (isEditMode && filesToRemove.length > 0) {
+      fd.append('removeImages', JSON.stringify(filesToRemove));
+    }
+
+    // Add new images - this is the critical fix
+    if (formData.images) {
+      const filesArray = Array.from(formData.images);
+      filesArray.forEach((file, index) => {
+        fd.append('galleryImages', file); // Use the same field name as expected by your backend
+      });
+    }
+
+    console.log('FormData contents:');
+    for (let [key, value] of fd.entries()) {
+      console.log(key, value);
+    }
+
+    if (isEditMode && currentServiceId) {
+      await updateService(currentServiceId, fd);
+      toast.success('Service updated successfully');
+    } else {
+      await createService(fd);
+      toast.success('Service created successfully');
+    }
+
+    setIsModalOpen(false);
+    fetchVendorServices();
+  } catch (error) {
+    console.error('Error submitting service:', error);
+    toast.error(`Failed to ${isEditMode ? 'update' : 'create'} service`);
+  }
+};
 
     // Clean up image preview URLs when component unmounts
     useEffect(() => {
@@ -334,6 +446,120 @@ const ServiceManagement = () => {
             }
         }
     };
+
+    // Render dynamic fields based on category configuration
+    const renderDynamicFields = () => {
+        return dynamicFields.map((field, index) => {
+            if (field.type === 'section') {
+                return (
+                    <div key={index} className="col-span-full mt-6 mb-4">
+                        <h3 className="text-lg font-semibold text-purple-800 border-b pb-2">
+                            {field.label}
+                        </h3>
+                    </div>
+                );
+            }
+
+            return (
+                <div key={field.key} className="col-span-full md:col-span-1">
+                    <label className="block text-gray-700 mb-1">
+                        {field.label}
+                        {field.required && <span className="text-red-500">*</span>}
+                    </label>
+                    {field.type === 'text' && (
+                        <input
+                            type="text"
+                            value={formData.details[field.key] || ''}
+                            onChange={(e) => handleDynamicFieldChange(field.key, e.target.value)}
+                            className={`w-full px-3 py-2 border rounded-lg ${validationErrors.details?.[field.key] ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                            required={field.required}
+                        />
+                    )}
+                    {field.type === 'number' && (
+                        <input
+                            type="number"
+                            value={formData.details[field.key] || ''}
+                            onChange={(e) => handleDynamicFieldChange(field.key, Number(e.target.value))}
+                            className={`w-full px-3 py-2 border rounded-lg ${validationErrors.details?.[field.key] ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                            required={field.required}
+                        />
+                    )}
+                    {field.type === 'boolean' && (
+                        <div className="flex items-center">
+                            <input
+                                type="checkbox"
+                                checked={!!formData.details[field.key]}
+                                onChange={(e) => handleDynamicFieldChange(field.key, e.target.checked)}
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                            <label className="ml-2 block text-sm text-gray-700">
+                                {field.label}
+                            </label>
+                        </div>
+                    )}
+                    {validationErrors.details?.[field.key] && (
+                        <p className="text-red-500 text-sm mt-1">{validationErrors.details[field.key]}</p>
+                    )}
+                </div>
+            );
+        });
+    };
+
+    // Render FAQs section
+    const renderFaqsSection = () => (
+        <div className="col-span-full mt-4">
+            <h3 className="text-lg font-semibold text-purple-800 mb-2">FAQs</h3>
+            <div className="space-y-4 mb-4">
+                {faqs.map((faq, index) => (
+                    <div key={index} className="bg-gray-50 p-3 rounded-lg">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="font-medium">{faq.question}</p>
+                                <p className="text-gray-600">{faq.answer}</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => removeFaq(index)}
+                                className="text-red-500 hover:text-red-700"
+                            >
+                                ×
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-gray-700 mb-1">Question</label>
+                    <input
+                        type="text"
+                        value={newFaq.question}
+                        onChange={(e) => setNewFaq({ ...newFaq, question: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    />
+                </div>
+                <div>
+                    <label className="block text-gray-700 mb-1">Answer</label>
+                    <input
+                        type="text"
+                        value={newFaq.answer}
+                        onChange={(e) => setNewFaq({ ...newFaq, answer: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    />
+                </div>
+            </div>
+            <button
+                type="button"
+                onClick={addFaq}
+                className="mt-2 bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-lg"
+            >
+                Add FAQ
+            </button>
+        </div>
+    );
+
 
     return (
         <>
@@ -423,7 +649,7 @@ const ServiceManagement = () => {
                 {/* Service Form Modal */}
                 {isModalOpen && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                             <div className="p-6">
                                 <div className="flex justify-between items-center mb-4">
                                     <h2 className="text-2xl font-bold text-purple-800">
@@ -524,6 +750,7 @@ const ServiceManagement = () => {
                                             )}
                                         </div>
 
+
                                         <div>
                                             <label className="block text-gray-700 mb-1">Maximum Price ($)*</label>
                                             <input
@@ -539,7 +766,6 @@ const ServiceManagement = () => {
                                             )}
                                         </div>
                                     </div>
-
                                     <div className="mb-4">
                                         <label className="block text-gray-700 mb-1">Description*</label>
                                         <textarea
@@ -553,6 +779,18 @@ const ServiceManagement = () => {
                                             <p className="text-red-500 text-sm mt-1">{validationErrors.description}</p>
                                         )}
                                     </div>
+
+                                    {/* Dynamic Fields Section */}
+                                    {dynamicFields.length > 0 && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                            {renderDynamicFields()}
+                                        </div>
+                                    )}
+
+                                    {/* FAQs Section */}
+                                    {renderFaqsSection()}
+
+
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                         <div>
@@ -629,7 +867,7 @@ const ServiceManagement = () => {
                                         <label className="block text-gray-700 mb-1">
                                             {isEditMode ? 'Add More Images' : 'Images*'}
                                         </label>
-                                        
+
                                         {/* Image upload input */}
                                         <input
                                             type="file"
@@ -639,7 +877,7 @@ const ServiceManagement = () => {
                                             accept="image/*"
                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2"
                                         />
-                                        
+
                                         {/* Image previews */}
                                         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 mt-2">
                                             {/* Existing images (edit mode) */}
@@ -659,7 +897,7 @@ const ServiceManagement = () => {
                                                     </button>
                                                 </div>
                                             ))}
-                                            
+
                                             {/* New image previews */}
                                             {imagePreviews.map((preview, index) => (
                                                 <div key={`new-${index}`} className="relative group">
@@ -678,7 +916,7 @@ const ServiceManagement = () => {
                                                 </div>
                                             ))}
                                         </div>
-                                        
+
                                         {/* Validation and help text */}
                                         {validationErrors.images && (
                                             <p className="text-red-500 text-sm mt-1">{validationErrors.images}</p>

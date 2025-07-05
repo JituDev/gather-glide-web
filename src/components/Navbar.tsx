@@ -126,7 +126,8 @@ const Navbar = ({ cityName: propCityName = null  }) => {
     // Add admin-specific items if needed
     { path: "/bookingmanagement", icon: Calendar, label: "BOOKING MGMT" },
     { path: "/admin/usermanagement", icon: User, label: "USER MGMT" },
-    { path: "admin/support", icon: HelpCircle, label: "SUPPORT MGMT" },
+    { path: "/admin/support", icon: HelpCircle, label: "SUPPORT MGMT" },
+    { path: "/admin/category_management", icon: Gift, label: "CATEGORY MGMT" },
 
   ];
 

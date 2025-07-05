@@ -26,6 +26,7 @@ import AdminSupportPage from "./pages/AdminSupportPage.js";
 import { SupportProvider } from "./contexts/SupportContext.js";
 import AdminUserManagement from "./pages/AdminUserManagement.js";
 import ProtectedRoute from "./components/ProtectedRoute.js";
+import AdminCategories from "./pages/AdminCategories.js";
 
 
 const App = () => (
@@ -60,6 +61,8 @@ const App = () => (
                       <Route path="/userOffer" element={<UserOffersPage />} />
                       <Route path="/vendor/:id" element={<VendorPage />} />
                       <Route path="/admin/login" element={<AdminAuthForm />} />
+                      <Route path="/admin/category_management" element={<AdminCategories />} />
+
 
                       {/* User-only Routes */}
                       <Route element={<ProtectedRoute allowedRoles={['user']} />}>

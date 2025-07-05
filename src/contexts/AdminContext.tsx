@@ -59,7 +59,7 @@ interface AdminContextType {
   loadingCategories: boolean;
   errorCategories: string | null;
   getCategories: () => Promise<void>;
-  createCategory: (formData: FormData) => Promise<Category>;
+  // createCategory: (formData: FormData) => Promise<Category>;
 
   // Offers
   offers: Offer[];
@@ -155,7 +155,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 };
 
 
-  // Category functions
+// Updated Category functions
   const getCategories = async () => {
     try {
       setLoadingCategories(true);
@@ -170,19 +170,108 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  const createCategory = async (formData: FormData) => {
+  const createCategory = async (formData: {
+    title: string;
+    subCategories: string[] | string;
+    config: object | string;
+    image: File;
+  }) => {
     try {
       setLoadingCategories(true);
-      const response = await api.post('/api/admin/categories', formData, {
+      
+      // Prepare FormData for file upload
+      const fd = new FormData();
+      fd.append('title', formData.title);
+      
+      // Handle subCategories - can be array or string
+      if (Array.isArray(formData.subCategories)) {
+        fd.append('subCategories', JSON.stringify(formData.subCategories));
+      } else {
+        fd.append('subCategories', formData.subCategories);
+      }
+      
+      // Handle config - can be object or JSON string
+      if (typeof formData.config === 'object') {
+        fd.append('config', JSON.stringify(formData.config));
+      } else {
+        fd.append('config', formData.config);
+      }
+      
+      fd.append('categoryImage', formData.image);
+
+      const response = await api.post('/api/admin/categories', fd, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
+      
       setCategories([...categories, response.data.data]);
       return response.data.data;
     } catch (error) {
       const err = error as AxiosError<{ message?: string }>;
       throw new Error(err.response?.data?.message || 'Failed to create category');
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
+  const updateCategory = async (id: string, formData: {
+    title?: string;
+    subCategories?: string[] | string;
+    config?: object | string;
+    image?: File;
+  }) => {
+    try {
+      setLoadingCategories(true);
+      
+      const fd = new FormData();
+      
+      if (formData.title) fd.append('title', formData.title);
+      
+      if (formData.subCategories) {
+        if (Array.isArray(formData.subCategories)) {
+          fd.append('subCategories', JSON.stringify(formData.subCategories));
+        } else {
+          fd.append('subCategories', formData.subCategories);
+        }
+      }
+      
+      if (formData.config) {
+        if (typeof formData.config === 'object') {
+          fd.append('config', JSON.stringify(formData.config));
+        } else {
+          fd.append('config', formData.config);
+        }
+      }
+      
+      if (formData.image) fd.append('categoryImage', formData.image);
+
+      const response = await api.put(`/api/admin/categories/${id}`, fd, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      setCategories(categories.map(cat => 
+        cat._id === id ? response.data.data : cat
+      ));
+      return response.data.data;
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
+      throw new Error(err.response?.data?.message || 'Failed to update category');
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
+  const deleteCategory = async (id: string) => {
+    try {
+      setLoadingCategories(true);
+      await api.delete(`/api/admin/categories/${id}`);
+      setCategories(categories.filter(cat => cat._id !== id));
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
+      throw new Error(err.response?.data?.message || 'Failed to delete category');
     } finally {
       setLoadingCategories(false);
     }
@@ -246,6 +335,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     errorCategories,
     getCategories,
     createCategory,
+    updateCategory,
+    deleteCategory,
 
     // Offers
     offers,

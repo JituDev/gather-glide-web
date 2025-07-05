@@ -112,10 +112,7 @@ const ServicesPage = () => {
     setHasAppliedInitialFilter(true);
   }
 }, [locationState]);
-
- // ✅ API call based on debounced search and filters
-useEffect(() => {
-  const fetchServices = async () => {
+const fetchServices = async () => {
     try {
       setLoading(true);
       setError('');
@@ -138,6 +135,8 @@ useEffect(() => {
     }
   };
 
+ // ✅ API call based on debounced search and filters
+useEffect(() => {
   // Always fetch services when filters change, not just when locationState exists
   fetchServices();
 }, [selectedCategory, debouncedSearchTerm, locationFilter]);

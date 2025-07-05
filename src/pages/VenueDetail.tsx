@@ -24,7 +24,9 @@ import {
   ChevronRight,
   Send,
   ThumbsUp,
-  User
+  User,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useService } from '../contexts/ServiceContext';
 import { formatPrice } from '../utils/formatPrice';
@@ -37,10 +39,16 @@ const ServiceDetail = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
-  const [activeTab, setActiveTab] = useState('overview');
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState('');
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({
+    // description: true,
+    features: false,
+    faqs: false,
+    policies: false,
+    moreInfo: false
+  });
 
   useEffect(() => {
     if (id) {
@@ -60,6 +68,13 @@ const ServiceDetail = () => {
     }
   };
 
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
   const submitReview = () => {
     if (rating > 0 && review.trim()) {
       console.log('Review submitted:', { rating, review });
@@ -67,6 +82,598 @@ const ServiceDetail = () => {
       setReview('');
       alert('Thank you for your review!');
     }
+  };
+
+  const renderCategorySpecificDetails = () => {
+    if (!currentService?.details) return null;
+
+    const details = currentService.details;
+    const category = currentService.category.title.toLowerCase();
+
+    // Common sections for all categories
+    // const commonSections = [
+    //   {
+    //     title: 'Description',
+    //     key: 'description',
+    //     content: (
+    //       <div className="text-gray-700 leading-relaxed">
+    //         {currentService?.description}
+    //       </div>
+    //     )
+    //   }
+    // ];
+
+    // Category-specific sections
+    let categorySections = [];
+
+    switch (category) {
+      case 'decoration':
+        categorySections = [
+          {
+            title: 'Decoration Details',
+            key: 'features',
+            content: (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500">Type of Decoration</h4>
+                    <p className="text-gray-900">{details.decorationType || 'Not specified'}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500">Materials Used</h4>
+                    <p className="text-gray-900">{details.materialUsed || 'Not specified'}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500">Applicable For</h4>
+                    <p className="text-gray-900">{details.indoorOutdoor || 'Not specified'}</p>
+                  </div>
+                </div>
+              </div>
+            )
+          },
+          {
+            title: 'Add-ons & Features',
+            key: 'moreInfo',
+            content: (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.includesLighting ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>Includes Decorative Lighting</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.includesSoundSetup ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>Includes Sound Setup</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.customizationAvailable ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>Customization Available</span>
+                  </div>
+                  {details.floralType && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Type of Flowers</h4>
+                      <p className="text-gray-900">{details.floralType}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          },
+          {
+            title: 'Booking & Pricing',
+            key: 'policies',
+            content: (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {details.startingPrice && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Starting Price</h4>
+                      <p className="text-gray-900">{formatPrice(details.startingPrice)}</p>
+                    </div>
+                  )}
+                  {details.advancePayment && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Advance Payment</h4>
+                      <p className="text-gray-900">{details.advancePayment}%</p>
+                    </div>
+                  )}
+                  {details.cancellationPolicy && (
+                    <div className="md:col-span-2">
+                      <h4 className="text-sm font-medium text-gray-500">Cancellation Policy</h4>
+                      <p className="text-gray-900">{details.cancellationPolicy}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          }
+        ];
+        break;
+
+      case 'tent':
+        categorySections = [
+          {
+            title: 'Tent Information',
+            key: 'features',
+            content: (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {details.tentSize && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Tent Size</h4>
+                      <p className="text-gray-900">{details.tentSize} sq ft</p>
+                    </div>
+                  )}
+                  {details.materialType && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Material Type</h4>
+                      <p className="text-gray-900">{details.materialType}</p>
+                    </div>
+                  )}
+                  {details.colorTheme && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Color Theme</h4>
+                      <p className="text-gray-900">{details.colorTheme}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          },
+          {
+            title: 'Facilities',
+            key: 'moreInfo',
+            content: (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.lightingIncluded ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>Lighting Included</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.fanCoolerIncluded ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>Fan/Cooler Included</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.waterproof ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>Waterproof Tent</span>
+                  </div>
+                </div>
+              </div>
+            )
+          },
+          {
+            title: 'Service Policies',
+            key: 'policies',
+            content: (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {details.installationTime && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Setup Time</h4>
+                      <p className="text-gray-900">{details.installationTime} hours</p>
+                    </div>
+                  )}
+                  {details.extraCharges && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Extra Charges</h4>
+                      <p className="text-gray-900">{details.extraCharges}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          }
+        ];
+        break;
+
+      case 'photography':
+        categorySections = [
+          {
+            title: 'Photography Details',
+            key: 'features',
+            content: (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {details.cameraBrands && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Camera Brands</h4>
+                      <p className="text-gray-900">{details.cameraBrands}</p>
+                    </div>
+                  )}
+                  {details.numberOfPhotographers && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Number of Photographers</h4>
+                      <p className="text-gray-900">{details.numberOfPhotographers}</p>
+                    </div>
+                  )}
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.includesDrone ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>Drone Coverage Included</span>
+                  </div>
+                </div>
+              </div>
+            )
+          },
+          {
+            title: 'Coverage Info',
+            key: 'moreInfo',
+            content: (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {details.eventTypesCovered && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Event Types Covered</h4>
+                      <p className="text-gray-900">{details.eventTypesCovered}</p>
+                    </div>
+                  )}
+                  {details.deliveryTime && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Photo Delivery Time</h4>
+                      <p className="text-gray-900">{details.deliveryTime} days</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          },
+          {
+            title: 'Deliverables',
+            key: 'policies',
+            content: (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.albumIncluded ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>Printed Album Included</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.onlineGallery ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>Online Gallery Access</span>
+                  </div>
+                </div>
+              </div>
+            )
+          }
+        ];
+        break;
+
+      case 'catering':
+        categorySections = [
+          {
+            title: 'Menu Details',
+            key: 'features',
+            content: (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {details.vegMenu && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Veg Menu</h4>
+                      <p className="text-gray-900">{details.vegMenu}</p>
+                    </div>
+                  )}
+                  {details.nonVegMenu && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Non-Veg Menu</h4>
+                      <p className="text-gray-900">{details.nonVegMenu}</p>
+                    </div>
+                  )}
+                  {details.cuisineTypes && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Cuisine Types</h4>
+                      <p className="text-gray-900">{details.cuisineTypes}</p>
+                    </div>
+                  )}
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.dessertsIncluded ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>Desserts Included</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.beveragesIncluded ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>Beverages Included</span>
+                  </div>
+                </div>
+              </div>
+            )
+          },
+          {
+            title: 'Service Type',
+            key: 'moreInfo',
+            content: (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.buffetAvailable ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>Buffet Available</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.liveCounter ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>Live Counter Available</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.tableServiceAvailable ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>Table Service Available</span>
+                  </div>
+                </div>
+              </div>
+            )
+          },
+          {
+            title: 'Guest Capacity',
+            key: 'policies',
+            content: (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {details.minGuests && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Minimum Guests</h4>
+                      <p className="text-gray-900">{details.minGuests}</p>
+                    </div>
+                  )}
+                  {details.maxGuests && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Maximum Guests</h4>
+                      <p className="text-gray-900">{details.maxGuests}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          }
+        ];
+        break;
+
+      case 'light and sound':
+        categorySections = [
+          {
+            title: 'Lighting Details',
+            key: 'features',
+            content: (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {details.lightTypes && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Types of Lights</h4>
+                      <p className="text-gray-900">{details.lightTypes}</p>
+                    </div>
+                  )}
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.laserShow ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>Laser Show Included</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.dmxLighting ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>DMX Lighting Available</span>
+                  </div>
+                </div>
+              </div>
+            )
+          },
+          {
+            title: 'Sound Setup',
+            key: 'moreInfo',
+            content: (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.djIncluded ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>DJ Included</span>
+                  </div>
+                  {details.micCount && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Number of Microphones</h4>
+                      <p className="text-gray-900">{details.micCount}</p>
+                    </div>
+                  )}
+                  {details.soundPower && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Total Sound Output</h4>
+                      <p className="text-gray-900">{details.soundPower} Watts</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          },
+          {
+            title: 'Policies',
+            key: 'policies',
+            content: (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.nightServiceAvailable ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>Available for Night Events</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.generatorIncluded ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>Generator Included</span>
+                  </div>
+                </div>
+              </div>
+            )
+          }
+        ];
+        break;
+
+      case 'party hall':
+        categorySections = [
+          {
+            title: 'Basic Information',
+            key: 'features',
+            content: (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {details.hotelName && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Hotel Name</h4>
+                      <p className="text-gray-900">{details.hotelName}</p>
+                    </div>
+                  )}
+                  {details.ratings && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Ratings</h4>
+                      <p className="text-gray-900">{details.ratings}/5</p>
+                    </div>
+                  )}
+                  {details.location && (
+                    <div className="md:col-span-2">
+                      <h4 className="text-sm font-medium text-gray-500">Location</h4>
+                      <p className="text-gray-900">{details.location}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          },
+          {
+            title: 'Pricing',
+            key: 'moreInfo',
+            content: (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {details.vegPrice && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Veg Price Starting</h4>
+                      <p className="text-gray-900">{details.vegPrice}</p>
+                    </div>
+                  )}
+                  {details.nonVegPrice && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Non-Veg Price Starting</h4>
+                      <p className="text-gray-900">{details.nonVegPrice}</p>
+                    </div>
+                  )}
+                  {details.halfDayRent && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Half Day Rent</h4>
+                      <p className="text-gray-900">{details.halfDayRent}</p>
+                    </div>
+                  )}
+                  {details.fullDayRent && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Full Day Rent</h4>
+                      <p className="text-gray-900">{details.fullDayRent}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          },
+          {
+            title: 'Room & Capacity Info',
+            key: 'policies',
+            content: (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {details.spaceCapacity && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Space Capacity</h4>
+                      <p className="text-gray-900">{details.spaceCapacity} people</p>
+                    </div>
+                  )}
+                  {details.numberOfRooms && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Number of Rooms</h4>
+                      <p className="text-gray-900">{details.numberOfRooms}</p>
+                    </div>
+                  )}
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.djAvailable ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>DJ Available</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.alcoholServed ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>Alcohol Served</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.acAvailable ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>AC Available</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className={`w-5 h-5 mr-2 ${details.nonAcAvailable ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>Non-AC Available</span>
+                  </div>
+                </div>
+              </div>
+            )
+          }
+        ];
+        break;
+
+      default:
+        categorySections = [];
+    }
+
+    const allFaqs = [];
+
+    // Add admin FAQs from details object
+    for (let i = 1; i <= 5; i++) {
+      const faqKey = `faq${i}`;
+      if (details[faqKey]) {
+        const [question, answer] = details[faqKey].split('?');
+        allFaqs.push({
+          question: question + '?',
+          answer: answer || 'Not specified'
+        });
+      }
+    }
+
+    // Add vendor FAQs from service.faqs array
+    if (currentService.faqs && currentService.faqs.length > 0) {
+      currentService.faqs.forEach(faq => {
+        allFaqs.push({
+          question: faq.question.endsWith('?') ? faq.question : faq.question + '?',
+          answer: faq.answer || 'Not specified'
+        });
+      });
+    }
+
+    // FAQ section for all categories
+    const faqSection = {
+      title: 'FAQs',
+      key: 'faqs',
+      content: (
+        <div className="space-y-4">
+          {allFaqs.length > 0 ? (
+            allFaqs.map((faq, index) => (
+              <div key={index}>
+                <h4 className="text-sm font-medium text-gray-500">{faq.question}</h4>
+                <p className="text-gray-900">{faq.answer}</p>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">No FAQs available</p>
+          )}
+        </div>
+      )
+    };
+
+    // Combine all sections
+    // const allSections = [...commonSections, ...categorySections, faqSection];
+    const allSections = [ ...categorySections, faqSection];
+
+    return allSections.map((section, index) => (
+      <div key={index} className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 mb-6">
+        <button
+          onClick={() => toggleSection(section.key)}
+          className="w-full flex justify-between items-center text-left"
+        >
+          <h2 className="text-xl font-bold text-gray-900">{section.title}</h2>
+          {expandedSections[section.key] ? (
+            <ChevronUp className="w-5 h-5 text-gray-500" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-gray-500" />
+          )}
+        </button>
+
+        {expandedSections[section.key] && (
+          <div className="mt-4">
+            {section.content}
+          </div>
+        )}
+      </div>
+    ));
   };
 
   if (loadingServices) {
@@ -130,21 +737,17 @@ const ServiceDetail = () => {
   ];
 
   // Features based on tags
-  const features = [
-    { icon: Utensils, name: 'Catering', color: 'text-orange-500' },
-    { icon: Music, name: 'Entertainment', color: 'text-purple-500' },
-    { icon: Home, name: 'Venue', color: 'text-indigo-500' },
-    { icon: Wifi, name: 'WiFi', color: 'text-blue-500' },
-    { icon: Car, name: 'Parking', color: 'text-green-500' },
-    { icon: Camera, name: 'Photography', color: 'text-pink-500' }
-  ]
-    .filter(feature =>
-      currentService?.tags?.some(tag =>
-        tag.toLowerCase().includes(feature.name.toLowerCase())
-      )
-    )
-    .slice(0, 6); // slice should be called on the filtered array
-
+  // const features = [
+  //   { icon: Utensils, name: 'Catering', color: 'text-orange-500' },
+  //   { icon: Music, name: 'Entertainment', color: 'text-purple-500' },
+  //   { icon: Home, name: 'Venue', color: 'text-indigo-500' },
+  //   { icon: Wifi, name: 'WiFi', color: 'text-blue-500' },
+  //   { icon: Car, name: 'Parking', color: 'text-green-500' },
+  //   { icon: Camera, name: 'Photography', color: 'text-pink-500' }
+  // ].filter(feature =>
+  //     currentService?.tags?.some(tag =>
+  //       tag.toLowerCase().includes(feature.name.toLowerCase())
+  //     ).slice(0, 6));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -227,7 +830,7 @@ const ServiceDetail = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6">
             {/* Service Info */}
             <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
               <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6">
@@ -253,6 +856,9 @@ const ServiceDetail = () => {
                       <span className="text-sm text-gray-600 ml-1">(156 reviews)</span>
                     </div>
                   </div>
+                  <div className="flex items-center mb-0">
+                    <p className='text-lg'>Desciption - <span className='text-md text-gray-600'>{currentService?.description}</span> </p>
+                  </div>
                 </div>
 
                 <div className="text-right">
@@ -267,7 +873,6 @@ const ServiceDetail = () => {
                             ? parseInt(currentService?.maxPrice) - (parseInt(currentService?.maxPrice) * currentService?.offer.discountPercentage / 100)
                             : currentService?.maxPrice - (currentService?.maxPrice * currentService?.offer.discountPercentage / 100)
                         )}
-
                       </div>
                       <div className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full inline-block">
                         {currentService?.offer.discountPercentage}% OFF
@@ -300,32 +905,10 @@ const ServiceDetail = () => {
                   </div>
                 </div>
               )}
-
-              <p className="text-gray-700 leading-relaxed">{currentService?.description}</p>
             </div>
 
-            {/* Features */}
-            <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Features & Amenities</h2>
-
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
-                {features.map((feature, index) => (
-                  <div key={index} className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                    <feature.icon className={`w-6 h-6 ${feature.color}`} />
-                    <span className="font-medium text-gray-700">{feature.name}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {currentService?.tags?.map((tag, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="text-gray-700">{tag}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Category Specific Details */}
+            {renderCategorySpecificDetails()}
 
             {/* Reviews Section */}
             <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
@@ -426,8 +1009,6 @@ const ServiceDetail = () => {
                           ? parseInt(currentService?.maxPrice) - (parseInt(currentService?.maxPrice) * currentService?.offer.discountPercentage / 100)
                           : currentService?.maxPrice - (currentService?.maxPrice * currentService?.offer.discountPercentage / 100)
                       )}
-
-
                     </div>
                     <div className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full inline-block">
                       {currentService?.offer.discountPercentage}% OFF
