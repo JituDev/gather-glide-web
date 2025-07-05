@@ -117,7 +117,7 @@ const Navbar = ({ cityName: propCityName = null  }) => {
   // Vendor-specific nav items
   const vendorNavItems = [
     { path: "/vendorOffer", icon: Gift, label: "OFFERS" }, // Vendor offers
-    { path: "/servicemanagement", icon: Briefcase, label: "SERVICE MGMT" },
+    { path: "/services", icon: Briefcase, label: "SERVICE MGMT" },
     { path: "/bookingmanagement", icon: Calendar, label: "BOOKING MGMT" }
   ];
 
