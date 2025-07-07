@@ -331,12 +331,12 @@ const ServiceDetail = () => {
               </button>
             </div>
             <div className="flex items-center space-x-3">
-              <button
+              {/* <button
                 onClick={() => setIsFavorite(!isFavorite)}
                 className={`p-2 rounded-full transition-all duration-300 ${isFavorite ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-500'}`}
               >
                 <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
-              </button>
+              </button> */}
               <button className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-500 transition-all duration-300">
                 <Share2 className="w-5 h-5" />
               </button>

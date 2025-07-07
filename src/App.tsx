@@ -29,6 +29,8 @@ import ProtectedRoute from "./components/ProtectedRoute.js";
 import AdminCategories from "./pages/AdminCategories.js";
 import ServiceListPage from "./pages/ServiceListPage.js";
 import ServiceFormPage from "./pages/ServiceFormPage.js";
+import NewCategoryPage from "./pages/NewCategoryPage.js";
+import EditCategoryPage from "./pages/EditCategoryPage.js";
 
 
 const App = () => (
@@ -64,6 +66,9 @@ const App = () => (
                     <Route path="/vendor/:id" element={<VendorPage />} />
                     <Route path="/admin/login" element={<AdminAuthForm />} />
                     <Route path="/admin/category_management" element={<AdminCategories />} />
+                    <Route path="admin/categories/new" element={<NewCategoryPage />} />
+                    <Route path="admin/categories/:id" element={<EditCategoryPage />} />
+
 
 
                     {/* User-only Routes */}

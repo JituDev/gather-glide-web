@@ -4,20 +4,21 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { MapPin as LocationIcon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { getSavedCity } from "@/utils/cityStorage";
+import { getSavedCity, saveCity } from "@/utils/cityStorage";
 
-const Navbar = ({ cityName: propCityName = null  }) => {
+const Navbar = ({ cityName: propCityName = null }) => {
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isVendorDropdownOpen, setIsVendorDropdownOpen] = useState(false);
   const { user } = useAuth();
   const [displayName, setDisplayName] = useState("");
-   const [localCityName, setLocalCityName] = useState(null);
+  const [localCityName, setLocalCityName] = useState(null);
 
   useEffect(() => {
     // Check for city name from props first
     if (propCityName) {
       setLocalCityName(propCityName);
+      saveCity(propCityName); // Save the city if it comes from props
     } else {
       // Fall back to localStorage
       const savedCity = getSavedCity();
@@ -240,17 +241,18 @@ const Navbar = ({ cityName: propCityName = null  }) => {
           </div>
 
           {/* Mobile menu toggle button */}
+          {localCityName && (
+            <button
+              onClick={() => navigate('/ServicesPage', { state: { location: localCityName } })}
+              className="hover:text-purple-200 transition-colors text-gray-50 flex items-center px-2"
+            >
+              <LocationIcon className="w-4 h-4 mr-1" /> {localCityName}
+            </button>
+          )}
           <button onClick={toggleMenu} className="md:hidden text-white">
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
-          {localCityName && (
-    <button
-      onClick={() => navigate('/ServicesPage', { state: { location: localCityName } })}
-      className="hover:text-purple-200 transition-colors flex items-center px-2"
-    >
-      <LocationIcon className="w-4 h-4 mr-1" /> {localCityName}
-    </button>
-  )}
+          
 
           {/* Profile/Login Button */}
           {user ? (
