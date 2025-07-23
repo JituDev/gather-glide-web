@@ -68,6 +68,15 @@ interface ServiceContextType {
   getAllServices: () => Promise<Service[]>;
 }
 
+export interface Variant {
+    name: string;
+    unit: string;
+    price: number;
+    minQty?: number;
+    maxQty?: number;
+}
+
+
 // Create context
 const ServiceContext = createContext<ServiceContextType | undefined>(undefined);
 
@@ -115,29 +124,35 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setAuthToken(token);
   }, []);
 
-  const createService = async (formData: FormData) => {
-  try {
-    setLoadingServices(true);
-    if (!token) throw new Error('User not authenticated');
-    setErrorServices(null);
+  const createService = async (formData: FormData, variants?: Variant[]) => {
+      try {
+          setLoadingServices(true);
+          if (!token) throw new Error("User not authenticated");
+          setErrorServices(null);
 
-    const response = await api.post('/', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`,
-      },
-    });
+          // 🆕 Append variants if provided
+          if (variants && Array.isArray(variants)) {
+              formData.append("variants", JSON.stringify(variants));
+          }
 
-    setServices([...services, response.data.data]);
-    return response.data.data;
-  } catch (error) {
-    const err = error as AxiosError<{ message?: string }>;
-    setErrorServices(err.response?.data?.message || 'Failed to create service');
-    throw err;
-  } finally {
-    setLoadingServices(false);
-  }
-};
+          const response = await api.post("/", formData, {
+              headers: {
+                  "Content-Type": "multipart/form-data",
+                  Authorization: `Bearer ${token}`,
+              },
+          });
+
+          setServices([...services, response.data.data]);
+          return response.data.data;
+      } catch (error) {
+          const err = error as AxiosError<{ message?: string }>;
+          setErrorServices(err.response?.data?.message || "Failed to create service");
+          throw err;
+      } finally {
+          setLoadingServices(false);
+      }
+  };
+
 
   const getVendorServices = async (vendorId: string) => {
     try {
@@ -156,108 +171,115 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const updateService = async (id: string, formData: {
-  title?: string;
-  description?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  category?: string;
-  subCategory?: string;
-  tags?: string[] | string;
-  location?: string;
-  phone?: string;
-  website?: string;
-  socialLinks?: string[];
-  details?: object | string;
-  faqs?: Array<{ question: string; answer: string }> | string;
-  images?: File[];
-  removeImages?: string[]; // URLs of images to remove
-}) => {
-  try {
-    setLoadingServices(true);
-    if (!token) throw new Error('User not authenticated');
-
-    // Prepare FormData for file upload
-    const fd = new FormData();
-
-    // Append all basic fields if they exist
-    if (formData.title) fd.append('title', formData.title);
-    if (formData.description) fd.append('description', formData.description);
-    if (formData.minPrice) fd.append('minPrice', formData.minPrice.toString());
-    if (formData.maxPrice) fd.append('maxPrice', formData.maxPrice.toString());
-    if (formData.category) fd.append('category', formData.category);
-    if (formData.subCategory) fd.append('subCategory', formData.subCategory);
-    if (formData.location) fd.append('location', formData.location);
-    if (formData.phone) fd.append('phone', formData.phone);
-    if (formData.website) fd.append('website', formData.website);
-
-    // Handle tags - can be array or string
-    if (formData.tags) {
-      if (Array.isArray(formData.tags)) {
-        fd.append('tags', JSON.stringify(formData.tags));
-      } else {
-        fd.append('tags', formData.tags);
+  const updateService = async (
+      id: string,
+      formData: {
+          title?: string;
+          description?: string;
+          minPrice?: number;
+          maxPrice?: number;
+          category?: string;
+          subCategory?: string;
+          tags?: string[] | string;
+          location?: string;
+          phone?: string;
+          website?: string;
+          socialLinks?: string[];
+          details?: object | string;
+          faqs?: Array<{ question: string; answer: string }> | string;
+          images?: File[];
+          variants?: Variant[];
+          removeImages?: string[]; // URLs of images to remove
       }
-    }
+  ) => {
+      try {
+          setLoadingServices(true);
+          if (!token) throw new Error("User not authenticated");
 
-    // Handle socialLinks
-    if (formData.socialLinks) {
-      fd.append('socialLinks', JSON.stringify(formData.socialLinks));
-    }
+          // Prepare FormData for file upload
+          const fd = new FormData();
 
-    // Handle details - can be object or JSON string
-    if (formData.details) {
-      if (typeof formData.details === 'object') {
-        fd.append('details', JSON.stringify(formData.details));
-      } else {
-        fd.append('details', formData.details);
+          // Append all basic fields if they exist
+          if (formData.title) fd.append("title", formData.title);
+          if (formData.description) fd.append("description", formData.description);
+          if (formData.minPrice) fd.append("minPrice", formData.minPrice.toString());
+          if (formData.maxPrice) fd.append("maxPrice", formData.maxPrice.toString());
+          if (formData.category) fd.append("category", formData.category);
+          if (formData.subCategory) fd.append("subCategory", formData.subCategory);
+          if (formData.location) fd.append("location", formData.location);
+          if (formData.phone) fd.append("phone", formData.phone);
+          if (formData.website) fd.append("website", formData.website);
+          if (formData.variants && Array.isArray(formData.variants)) {
+              fd.append("variants", JSON.stringify(formData.variants));
+          }
+
+          // Handle tags - can be array or string
+          if (formData.tags) {
+              if (Array.isArray(formData.tags)) {
+                  fd.append("tags", JSON.stringify(formData.tags));
+              } else {
+                  fd.append("tags", formData.tags);
+              }
+          }
+
+          // Handle socialLinks
+          if (formData.socialLinks) {
+              fd.append("socialLinks", JSON.stringify(formData.socialLinks));
+          }
+
+          // Handle details - can be object or JSON string
+          if (formData.details) {
+              if (typeof formData.details === "object") {
+                  fd.append("details", JSON.stringify(formData.details));
+              } else {
+                  fd.append("details", formData.details);
+              }
+          }
+
+          // Handle FAQs - can be array or JSON string
+          if (formData.faqs) {
+              if (Array.isArray(formData.faqs)) {
+                  fd.append("faqs", JSON.stringify(formData.faqs));
+              } else {
+                  fd.append("faqs", formData.faqs);
+              }
+          }
+
+          // Handle images to remove
+          if (formData.removeImages && formData.removeImages.length > 0) {
+              fd.append("removeImages", JSON.stringify(formData.removeImages));
+          }
+
+          // Handle new images
+          if (formData.images) {
+              formData.images.forEach((image) => {
+                  fd.append("images", image);
+              });
+          }
+
+          const response = await api.put(`/${id}`, fd, {
+              headers: {
+                  "Content-Type": "multipart/form-data",
+                  Authorization: `Bearer ${token}`,
+              },
+          });
+
+          setServices(
+              services.map((service) => (service._id === id ? response.data.data : service))
+          );
+
+          if (currentService?._id === id) {
+              setCurrentService(response.data.data);
+          }
+
+          return response.data.data;
+      } catch (error) {
+          const err = error as AxiosError<{ message?: string }>;
+          throw new Error(err.response?.data?.message || "Failed to update service");
+      } finally {
+          setLoadingServices(false);
       }
-    }
-
-    // Handle FAQs - can be array or JSON string
-    if (formData.faqs) {
-      if (Array.isArray(formData.faqs)) {
-        fd.append('faqs', JSON.stringify(formData.faqs));
-      } else {
-        fd.append('faqs', formData.faqs);
-      }
-    }
-
-    // Handle images to remove
-    if (formData.removeImages && formData.removeImages.length > 0) {
-      fd.append('removeImages', JSON.stringify(formData.removeImages));
-    }
-
-    // Handle new images
-    if (formData.images) {
-      formData.images.forEach((image) => {
-        fd.append('images', image);
-      });
-    }
-
-    const response = await api.put(`/${id}`, fd, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    setServices(services.map(service =>
-      service._id === id ? response.data.data : service
-    ));
-
-    if (currentService?._id === id) {
-      setCurrentService(response.data.data);
-    }
-
-    return response.data.data;
-  } catch (error) {
-    const err = error as AxiosError<{ message?: string }>;
-    throw new Error(err.response?.data?.message || 'Failed to update service');
-  } finally {
-    setLoadingServices(false);
-  }
-};
+  };
 
 
   const deleteService = async (id: string) => {

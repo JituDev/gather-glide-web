@@ -5,6 +5,7 @@ import { useAdmin } from '@/contexts/AdminContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Navbar from '@/components/Navbar';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ServiceFormData {
     title: string;
@@ -26,6 +27,15 @@ interface ServiceFormData {
     faqs: Array<{ question: string; answer: string }>;
     images: FileList | null;
     existingImages?: string[];
+    variants: Variant[];
+}
+
+interface Variant {
+    name: string;
+    unit: string;
+    price: number;
+    minQty?: number;
+    maxQty?: number;
 }
 
 interface DynamicField {
@@ -45,6 +55,8 @@ const ServiceFormPage = () => {
         createService,
         updateService,
     } = useService();
+    const {user} = useAuth();
+    console.log("user email", user?.email);
     
     const { vendorId } = useVendor();
     const { getCategories, categories } = useAdmin();
@@ -57,20 +69,21 @@ const ServiceFormPage = () => {
     const [validationErrors, setValidationErrors] = useState<Partial<ServiceFormData>>({});
 
     const [formData, setFormData] = useState<ServiceFormData>({
-        title: '',
-        description: '',
+        title: "",
+        description: "",
         minPrice: 0,
         maxPrice: 0,
-        category: '',
-        subCategory: '',
-        tags: '',
-        location: '',
-        phone: '',
-        website: '',
+        category: "",
+        subCategory: "",
+        tags: "",
+        location: "",
+        phone: "",
+        website: "",
         details: {},
         faqs: [],
         images: null,
-        existingImages: []
+        existingImages: [],
+        variants: [],
     });
 
     useEffect(() => {
@@ -257,6 +270,26 @@ const ServiceFormPage = () => {
             faqs: updatedFaqs
         }));
     };
+    const addVariant = () => {
+        setFormData((prev) => ({
+            ...prev,
+            variants: [...prev.variants, { name: "", unit: "", price: 0 }],
+        }));
+    };
+
+    const removeVariant = (index: number) => {
+        setFormData((prev) => ({
+            ...prev,
+            variants: prev.variants.filter((_, i) => i !== index),
+        }));
+    };
+
+    const updateVariant = (index: number, key: keyof Variant, value: any) => {
+        const updated = [...formData.variants];
+        updated[index][key] = value;
+        setFormData((prev) => ({ ...prev, variants: updated }));
+    };
+
 
     const validateForm = () => {
         const errors: Partial<ServiceFormData> = {};
@@ -268,6 +301,17 @@ const ServiceFormPage = () => {
         if (!formData.category) errors.category = 'Category is required';
         if (!formData.subCategory) errors.subCategory = 'Sub-category is required';
         if (!formData.location) errors.location = 'Location is required';
+        if (!formData.variants || formData.variants.length === 0) {
+            errors.variants = "At least one variant is required";
+        } else {
+            const invalidVariant = formData.variants.find(
+                (v) => !v.name || !v.unit || !v.price || v.price <= 0
+            );
+            if (invalidVariant) {
+                errors.variants = "Each variant must have a name, unit, and a valid price";
+            }
+        }
+
 
         // Validate dynamic required fields
         dynamicFields.forEach(field => {
@@ -330,6 +374,9 @@ const ServiceFormPage = () => {
 
             // Append FAQs
             fd.append('faqs', JSON.stringify(formData.faqs));
+
+            fd.append("variants", JSON.stringify(formData.variants));
+
 
             // Add images to be removed (for edit mode)
             if (isEditMode && filesToRemove.length > 0) {
@@ -479,16 +526,26 @@ const ServiceFormPage = () => {
                 <div className="max-w-4xl mx-auto">
                     <div className="mb-6">
                         <button
-                            onClick={() => navigate('/services')}
+                            onClick={() => navigate("/services")}
                             className="flex items-center text-blue-600 hover:text-blue-800"
                         >
-                            <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            <svg
+                                className="w-5 h-5 mr-1"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                                />
                             </svg>
                             Back to Services
                         </button>
                         <h1 className="text-2xl font-bold text-purple-800 mt-4">
-                            {isEditMode ? 'Edit Service' : 'Create New Service'}
+                            {isEditMode ? "Edit Service" : "Create New Service"}
                         </h1>
                     </div>
 
@@ -501,10 +558,16 @@ const ServiceFormPage = () => {
                                     name="title"
                                     value={formData.title}
                                     onChange={handleInputChange}
-                                    className={`w-full px-3 py-2 border rounded-lg ${validationErrors.title ? 'border-red-500' : 'border-gray-300'}`}
+                                    className={`w-full px-3 py-2 border rounded-lg ${
+                                        validationErrors.title
+                                            ? "border-red-500"
+                                            : "border-gray-300"
+                                    }`}
                                 />
                                 {validationErrors.title && (
-                                    <p className="text-red-500 text-sm mt-1">{validationErrors.title}</p>
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {validationErrors.title}
+                                    </p>
                                 )}
                             </div>
 
@@ -514,7 +577,11 @@ const ServiceFormPage = () => {
                                     name="category"
                                     value={formData.category}
                                     onChange={handleInputChange}
-                                    className={`w-full px-3 py-2 border rounded-lg ${validationErrors.category ? 'border-red-500' : 'border-gray-300'}`}
+                                    className={`w-full px-3 py-2 border rounded-lg ${
+                                        validationErrors.category
+                                            ? "border-red-500"
+                                            : "border-gray-300"
+                                    }`}
                                 >
                                     <option value="">Select a category</option>
                                     {categories.map((cat) => (
@@ -524,7 +591,9 @@ const ServiceFormPage = () => {
                                     ))}
                                 </select>
                                 {validationErrors.category && (
-                                    <p className="text-red-500 text-sm mt-1">{validationErrors.category}</p>
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {validationErrors.category}
+                                    </p>
                                 )}
                             </div>
 
@@ -534,7 +603,11 @@ const ServiceFormPage = () => {
                                     name="subCategory"
                                     value={formData.subCategory}
                                     onChange={handleInputChange}
-                                    className={`w-full px-3 py-2 border rounded-lg ${validationErrors.subCategory ? 'border-red-500' : 'border-gray-300'}`}
+                                    className={`w-full px-3 py-2 border rounded-lg ${
+                                        validationErrors.subCategory
+                                            ? "border-red-500"
+                                            : "border-gray-300"
+                                    }`}
                                 >
                                     <option value="">Select a sub-category</option>
                                     {subCategories.map((sub, index) => (
@@ -544,7 +617,9 @@ const ServiceFormPage = () => {
                                     ))}
                                 </select>
                                 {validationErrors.subCategory && (
-                                    <p className="text-red-500 text-sm mt-1">{validationErrors.subCategory}</p>
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {validationErrors.subCategory}
+                                    </p>
                                 )}
                             </div>
 
@@ -555,41 +630,150 @@ const ServiceFormPage = () => {
                                     name="location"
                                     value={formData.location}
                                     onChange={handleInputChange}
-                                    className={`w-full px-3 py-2 border rounded-lg ${validationErrors.location ? 'border-red-500' : 'border-gray-300'}`}
+                                    className={`w-full px-3 py-2 border rounded-lg ${
+                                        validationErrors.location
+                                            ? "border-red-500"
+                                            : "border-gray-300"
+                                    }`}
                                 />
                                 {validationErrors.location && (
-                                    <p className="text-red-500 text-sm mt-1">{validationErrors.location}</p>
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {validationErrors.location}
+                                    </p>
+                                )}
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-gray-700 font-semibold mb-2">
+                                    Service Variants*
+                                </label>
+
+                                {formData?.variants?.map((variant, index) => (
+                                    <div key={index} className="grid grid-cols-6 gap-2 mb-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Name"
+                                            value={variant.name}
+                                            onChange={(e) =>
+                                                updateVariant(index, "name", e.target.value)
+                                            }
+                                            className="col-span-2 px-2 py-1 border rounded"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Unit"
+                                            value={variant.unit}
+                                            onChange={(e) =>
+                                                updateVariant(index, "unit", e.target.value)
+                                            }
+                                            className="col-span-1 px-2 py-1 border rounded"
+                                        />
+                                        <input
+                                            type="number"
+                                            placeholder="Price"
+                                            value={variant.price}
+                                            onChange={(e) =>
+                                                updateVariant(
+                                                    index,
+                                                    "price",
+                                                    Number(e.target.value)
+                                                )
+                                            }
+                                            className="col-span-1 px-2 py-1 border rounded"
+                                        />
+                                        <input
+                                            type="number"
+                                            placeholder="Min Qty"
+                                            value={variant.minQty ?? ""}
+                                            onChange={(e) =>
+                                                updateVariant(
+                                                    index,
+                                                    "minQty",
+                                                    Number(e.target.value)
+                                                )
+                                            }
+                                            className="col-span-1 px-2 py-1 border rounded"
+                                        />
+                                        <input
+                                            type="number"
+                                            placeholder="Max Qty"
+                                            value={variant.maxQty ?? ""}
+                                            onChange={(e) =>
+                                                updateVariant(
+                                                    index,
+                                                    "maxQty",
+                                                    Number(e.target.value)
+                                                )
+                                            }
+                                            className="col-span-1 px-2 py-1 border rounded"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeVariant(index)}
+                                            className="text-red-500 text-sm ml-2"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                ))}
+
+                                <button
+                                    type="button"
+                                    onClick={addVariant}
+                                    className="mt-2 px-3 py-1 bg-blue-500 text-white rounded"
+                                >
+                                    + Add Variant
+                                </button>
+
+                                {validationErrors.variants && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {validationErrors.variants}
+                                    </p>
                                 )}
                             </div>
 
                             <div>
-                                <label className="block text-gray-700 mb-1">Minimum Price ($)*</label>
+                                <label className="block text-gray-700 mb-1">
+                                    Minimum Price ($)*
+                                </label>
                                 <input
                                     type="number"
                                     name="minPrice"
                                     value={formData.minPrice}
                                     onChange={handleInputChange}
                                     min="0"
-                                    className={`w-full px-3 py-2 border rounded-lg ${validationErrors.minPrice ? 'border-red-500' : 'border-gray-300'}`}
+                                    className={`w-full px-3 py-2 border rounded-lg ${
+                                        validationErrors.minPrice
+                                            ? "border-red-500"
+                                            : "border-gray-300"
+                                    }`}
                                 />
                                 {validationErrors.minPrice && (
-                                    <p className="text-red-500 text-sm mt-1">{validationErrors.minPrice}</p>
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {validationErrors.minPrice}
+                                    </p>
                                 )}
                             </div>
 
-
                             <div>
-                                <label className="block text-gray-700 mb-1">Maximum Price ($)*</label>
+                                <label className="block text-gray-700 mb-1">
+                                    Maximum Price ($)*
+                                </label>
                                 <input
                                     type="number"
                                     name="maxPrice"
                                     value={formData.maxPrice}
                                     onChange={handleInputChange}
                                     min={formData.minPrice}
-                                    className={`w-full px-3 py-2 border rounded-lg ${validationErrors.maxPrice ? 'border-red-500' : 'border-gray-300'}`}
+                                    className={`w-full px-3 py-2 border rounded-lg ${
+                                        validationErrors.maxPrice
+                                            ? "border-red-500"
+                                            : "border-gray-300"
+                                    }`}
                                 />
                                 {validationErrors.maxPrice && (
-                                    <p className="text-red-500 text-sm mt-1">{validationErrors.maxPrice}</p>
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {validationErrors.maxPrice}
+                                    </p>
                                 )}
                             </div>
                         </div>
@@ -600,10 +784,16 @@ const ServiceFormPage = () => {
                                 value={formData.description}
                                 onChange={handleInputChange}
                                 rows={4}
-                                className={`w-full px-3 py-2 border rounded-lg ${validationErrors.description ? 'border-red-500' : 'border-gray-300'}`}
+                                className={`w-full px-3 py-2 border rounded-lg ${
+                                    validationErrors.description
+                                        ? "border-red-500"
+                                        : "border-gray-300"
+                                }`}
                             ></textarea>
                             {validationErrors.description && (
-                                <p className="text-red-500 text-sm mt-1">{validationErrors.description}</p>
+                                <p className="text-red-500 text-sm mt-1">
+                                    {validationErrors.description}
+                                </p>
                             )}
                         </div>
 
@@ -619,7 +809,9 @@ const ServiceFormPage = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
-                                <label className="block text-gray-700 mb-1">Tags (comma separated)</label>
+                                <label className="block text-gray-700 mb-1">
+                                    Tags (comma separated)
+                                </label>
                                 <input
                                     type="text"
                                     name="tags"
@@ -659,14 +851,16 @@ const ServiceFormPage = () => {
                                 <input
                                     type="url"
                                     name="facebook"
-                                    value={formData.socialLinks?.facebook || ''}
-                                    onChange={(e) => setFormData(prev => ({
-                                        ...prev,
-                                        socialLinks: {
-                                            ...prev.socialLinks,
-                                            facebook: e.target.value
-                                        }
-                                    }))}
+                                    value={formData.socialLinks?.facebook || ""}
+                                    onChange={(e) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            socialLinks: {
+                                                ...prev.socialLinks,
+                                                facebook: e.target.value,
+                                            },
+                                        }))
+                                    }
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                                 />
                             </div>
@@ -676,14 +870,16 @@ const ServiceFormPage = () => {
                                 <input
                                     type="url"
                                     name="instagram"
-                                    value={formData.socialLinks?.instagram || ''}
-                                    onChange={(e) => setFormData(prev => ({
-                                        ...prev,
-                                        socialLinks: {
-                                            ...prev.socialLinks,
-                                            instagram: e.target.value
-                                        }
-                                    }))}
+                                    value={formData.socialLinks?.instagram || ""}
+                                    onChange={(e) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            socialLinks: {
+                                                ...prev.socialLinks,
+                                                instagram: e.target.value,
+                                             },
+                                        }))
+                                    }
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                                 />
                             </div>
@@ -693,14 +889,16 @@ const ServiceFormPage = () => {
                                 <input
                                     type="url"
                                     name="twitter"
-                                    value={formData.socialLinks?.twitter || ''}
-                                    onChange={(e) => setFormData(prev => ({
-                                        ...prev,
-                                        socialLinks: {
-                                            ...prev.socialLinks,
-                                            twitter: e.target.value
-                                        }
-                                    }))}
+                                    value={formData.socialLinks?.twitter || ""}
+                                    onChange={(e) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            socialLinks: {
+                                                ...prev.socialLinks,
+                                                twitter: e.target.value,
+                                            },
+                                        }))
+                                    }
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                                 />
                             </div>
@@ -708,7 +906,7 @@ const ServiceFormPage = () => {
 
                         <div className="mb-6">
                             <label className="block text-gray-700 mb-1">
-                                {isEditMode ? 'Add More Images' : 'Images*'}
+                                {isEditMode ? "Add More Images" : "Images*"}
                             </label>
 
                             {/* Image upload input */}
@@ -724,22 +922,23 @@ const ServiceFormPage = () => {
                             {/* Image previews */}
                             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 mt-2">
                                 {/* Existing images (edit mode) */}
-                                {isEditMode && formData.existingImages?.map((img, index) => (
-                                    <div key={`existing-${index}`} className="relative group">
-                                        <img
-                                            src={img}
-                                            alt={`Existing ${index}`}
-                                            className="w-full h-24 object-cover rounded border border-gray-200"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => handleRemoveImage(index, true)}
-                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                        >
-                                            ×
-                                        </button>
-                                    </div>
-                                ))}
+                                {isEditMode &&
+                                    formData.existingImages?.map((img, index) => (
+                                        <div key={`existing-${index}`} className="relative group">
+                                            <img
+                                                src={img}
+                                                alt={`Existing ${index}`}
+                                                className="w-full h-24 object-cover rounded border border-gray-200"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveImage(index, true)}
+                                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    ))}
 
                                 {/* New image previews */}
                                 {imagePreviews.map((preview, index) => (
@@ -762,19 +961,26 @@ const ServiceFormPage = () => {
 
                             {/* Validation and help text */}
                             {validationErrors.images && (
-                                <p className="text-red-500 text-sm mt-1">{validationErrors.images}</p>
+                                <p className="text-red-500 text-sm mt-1">
+                                    {validationErrors.images}
+                                </p>
                             )}
                             <p className="text-gray-500 text-sm mt-1">
-                                Upload high-quality images of your service (first image will be featured)
+                                Upload high-quality images of your service (first image will be
+                                featured)
                                 <br />
-                                Maximum 10 images allowed ({(formData.existingImages?.length || 0) + (formData.images?.length || 0) - filesToRemove.length}/10)
+                                Maximum 10 images allowed (
+                                {(formData.existingImages?.length || 0) +
+                                    (formData.images?.length || 0) -
+                                    filesToRemove.length}
+                                /10)
                             </p>
                         </div>
 
                         <div className="flex justify-end space-x-3">
                             <button
                                 type="button"
-                                onClick={() => navigate('/services')}
+                                onClick={() => navigate("/services")}
                                 className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition duration-200"
                             >
                                 Cancel
@@ -783,7 +989,7 @@ const ServiceFormPage = () => {
                                 type="submit"
                                 className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition duration-200"
                             >
-                                {isEditMode ? 'Update Service' : 'Create Service'}
+                                {isEditMode ? "Update Service" : "Create Service"}
                             </button>
                         </div>
                     </form>

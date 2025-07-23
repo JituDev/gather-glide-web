@@ -97,7 +97,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [cityName, setCityName] = useState(null);
+  // const [cityName, setCityName] = useState(null);
   const [error, setError] = useState<ReactNode | null>(null);
   const navigate = useNavigate();
   const token = localStorage.getItem('token') || null;
