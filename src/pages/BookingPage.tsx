@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useService } from "../contexts/ServiceContext";
 import Navbar from "@/components/Navbar";
-import { Footer } from "react-day-picker";
 
 const BookingPage = () => {
     const { id } = useParams();
@@ -33,6 +32,16 @@ const BookingPage = () => {
             variants: {
                 ...formData.variants,
                 [variantId]: Number(value),
+            },
+        });
+    };
+
+    const handleCheckboxChange = (variantId, isChecked) => {
+        setFormData({
+            ...formData,
+            variants: {
+                ...formData.variants,
+                [variantId]: isChecked ? 1 : 0,
             },
         });
     };
@@ -70,7 +79,7 @@ const BookingPage = () => {
 
     return (
         <>
-        <Navbar />
+            <Navbar />
             <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 px-4">
                 <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6">
                     <h1 className="text-3xl font-bold text-gray-800 mb-2">
@@ -80,26 +89,62 @@ const BookingPage = () => {
 
                     <div className="grid md:grid-cols-2 gap-8">
                         <div>
-                            <h2 className="text-xl font-semibold mb-4">Service Details</h2>
+                            <h2 className="text-xl font-semibold mb-4">Service Options</h2>
                             <div className="space-y-4">
                                 {currentService?.variants?.map((variant) => (
                                     <div key={variant._id} className="border-b pb-4">
                                         <div className="flex justify-between items-center mb-2">
                                             <span className="font-medium">{variant.name}</span>
                                             <span>
-                                                ₹{variant.price}/{variant.unit}
+                                                ₹{variant.price}
+                                                {variant.isCheckbox ? "" : `/${variant.unit}`}
                                             </span>
                                         </div>
-                                        <input
-                                            type="number"
-                                            min={variant.minQty}
-                                            max={variant.maxQty || ""}
-                                            placeholder={`Quantity (min ${variant.minQty})`}
-                                            className="w-full px-3 py-2 border rounded-md"
-                                            onChange={(e) =>
-                                                handleVariantChange(variant._id, e.target.value)
-                                            }
-                                        />
+
+                                        {variant.isCheckbox ? (
+                                            <div className="flex items-center">
+                                                <input
+                                                    type="checkbox"
+                                                    id={`variant-${variant._id}`}
+                                                    className="h-4 w-4 text-blue-600 rounded"
+                                                    onChange={(e) =>
+                                                        handleCheckboxChange(
+                                                            variant._id,
+                                                            e.target.checked
+                                                        )
+                                                    }
+                                                    checked={formData.variants[variant._id] === 1}
+                                                />
+                                                <label
+                                                    htmlFor={`variant-${variant._id}`}
+                                                    className="ml-2 text-gray-700"
+                                                >
+                                                    Include this option
+                                                </label>
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <input
+                                                    type="number"
+                                                    min={variant.minQty}
+                                                    max={variant.maxQty || ""}
+                                                    placeholder={`Quantity (min ${variant.minQty})`}
+                                                    className="w-full px-3 py-2 border rounded-md"
+                                                    onChange={(e) =>
+                                                        handleVariantChange(
+                                                            variant._id,
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    value={formData.variants[variant._id] || ""}
+                                                />
+                                                {variant.maxQty && (
+                                                    <p className="text-sm text-gray-500 mt-1">
+                                                        Maximum: {variant.maxQty}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -156,6 +201,7 @@ const BookingPage = () => {
                                         required
                                         className="w-full px-3 py-2 border rounded-md"
                                         onChange={handleChange}
+                                        min={new Date().toISOString().split("T")[0]}
                                     />
                                 </div>
 
@@ -165,7 +211,7 @@ const BookingPage = () => {
                                     </label>
                                     <textarea
                                         name="message"
-                                        rows="3"
+                                        rows={3}
                                         className="w-full px-3 py-2 border rounded-md"
                                         onChange={handleChange}
                                     ></textarea>

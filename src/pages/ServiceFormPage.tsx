@@ -273,7 +273,18 @@ const ServiceFormPage = () => {
     const addVariant = () => {
         setFormData((prev) => ({
             ...prev,
-            variants: [...prev.variants, { name: "", unit: "", price: 0 }],
+            variants: [
+                ...prev.variants,
+                {
+                    name: "",
+                    unit: "item", // Default unit that works for both types
+                    price: 0,
+                    minQty: 1, // Default min quantity
+                    maxQty: undefined, // Only set to 1 when isCheckbox is true
+                    isCheckbox: false,
+                    defaultChecked: false,
+                },
+            ],
         }));
     };
 
@@ -284,11 +295,39 @@ const ServiceFormPage = () => {
         }));
     };
 
-    const updateVariant = (index: number, key: keyof Variant, value: any) => {
-        const updated = [...formData.variants];
-        updated[index][key] = value;
-        setFormData((prev) => ({ ...prev, variants: updated }));
-    };
+  const updateVariant = (index: number, key: keyof Variant | object, value?: any) => {
+      setFormData((prev) => {
+          const updatedVariants = [...prev.variants];
+
+          // Handle bulk updates
+          if (typeof key === "object") {
+              updatedVariants[index] = { ...updatedVariants[index], ...key };
+          }
+          // Handle single field update
+          else {
+              updatedVariants[index] = { ...updatedVariants[index], [key]: value };
+
+              // Special handling when changing to checkbox type
+              if (key === "isCheckbox" && value === true) {
+                  updatedVariants[index] = {
+                      ...updatedVariants[index],
+                      unit: "item",
+                      minQty: 1,
+                      maxQty: 1,
+                  };
+              }
+              // Reset maxQty when changing from checkbox to quantity-based
+              else if (key === "isCheckbox" && value === false) {
+                  updatedVariants[index] = {
+                      ...updatedVariants[index],
+                      maxQty: undefined,
+                  };
+              }
+          }
+
+          return { ...prev, variants: updatedVariants };
+      });
+  };
 
 
     const validateForm = () => {
@@ -304,11 +343,38 @@ const ServiceFormPage = () => {
         if (!formData.variants || formData.variants.length === 0) {
             errors.variants = "At least one variant is required";
         } else {
-            const invalidVariant = formData.variants.find(
-                (v) => !v.name || !v.unit || !v.price || v.price <= 0
-            );
-            if (invalidVariant) {
-                errors.variants = "Each variant must have a name, unit, and a valid price";
+            for (const variant of formData.variants) {
+                if (!variant.name) {
+                    errors.variants = "All variants must have a name";
+                    break;
+                }
+
+                if (variant.price === undefined || isNaN(variant.price) || variant.price < 0) {
+                    errors.variants = "All variants must have a valid price";
+                    break;
+                }
+
+                // Different validation for checkbox vs quantity variants
+                if (variant.isCheckbox) {
+                    if (variant.maxQty !== 1) {
+                        errors.variants = "Checkbox variants must have max quantity of 1";
+                        break;
+                    }
+                } else {
+                    if (!variant.unit) {
+                        errors.variants = "Quantity-based variants must have a unit";
+                        break;
+                    }
+                    if (variant.minQty === undefined || variant.minQty < 1) {
+                        errors.variants =
+                            "Quantity-based variants must have minimum quantity of at least 1";
+                        break;
+                    }
+                    if (variant.maxQty !== undefined && variant.maxQty < variant.minQty) {
+                        errors.variants = "Maximum quantity cannot be less than minimum quantity";
+                        break;
+                    }
+                }
             }
         }
 
@@ -648,71 +714,128 @@ const ServiceFormPage = () => {
                                 </label>
 
                                 {formData?.variants?.map((variant, index) => (
-                                    <div key={index} className="grid grid-cols-6 gap-2 mb-2">
-                                        <input
-                                            type="text"
-                                            placeholder="Name"
-                                            value={variant.name}
-                                            onChange={(e) =>
-                                                updateVariant(index, "name", e.target.value)
-                                            }
-                                            className="col-span-2 px-2 py-1 border rounded"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Unit"
-                                            value={variant.unit}
-                                            onChange={(e) =>
-                                                updateVariant(index, "unit", e.target.value)
-                                            }
-                                            className="col-span-1 px-2 py-1 border rounded"
-                                        />
-                                        <input
-                                            type="number"
-                                            placeholder="Price"
-                                            value={variant.price}
-                                            onChange={(e) =>
-                                                updateVariant(
-                                                    index,
-                                                    "price",
-                                                    Number(e.target.value)
-                                                )
-                                            }
-                                            className="col-span-1 px-2 py-1 border rounded"
-                                        />
-                                        <input
-                                            type="number"
-                                            placeholder="Min Qty"
-                                            value={variant.minQty ?? ""}
-                                            onChange={(e) =>
-                                                updateVariant(
-                                                    index,
-                                                    "minQty",
-                                                    Number(e.target.value)
-                                                )
-                                            }
-                                            className="col-span-1 px-2 py-1 border rounded"
-                                        />
-                                        <input
-                                            type="number"
-                                            placeholder="Max Qty"
-                                            value={variant.maxQty ?? ""}
-                                            onChange={(e) =>
-                                                updateVariant(
-                                                    index,
-                                                    "maxQty",
-                                                    Number(e.target.value)
-                                                )
-                                            }
-                                            className="col-span-1 px-2 py-1 border rounded"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => removeVariant(index)}
-                                            className="text-red-500 text-sm ml-2"
-                                        >
-                                            ✕
-                                        </button>
+                                    <div
+                                        key={index}
+                                        className="mb-4 p-3 border rounded-lg bg-gray-50"
+                                    >
+                                        <div className="grid grid-cols-6 gap-2 mb-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Name (e.g., Drone Shoot)"
+                                                value={variant.name}
+                                                onChange={(e) =>
+                                                    updateVariant(index, "name", e.target.value)
+                                                }
+                                                className="col-span-2 px-2 py-1 border rounded"
+                                            />
+
+                                            {/* Checkbox toggle */}
+                                            <div className="col-span-1 flex items-center">
+                                                <label className="flex items-center">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={variant.isCheckbox}
+                                                        onChange={(e) => {
+                                                            const updates = {
+                                                                isCheckbox: e.target.checked,
+                                                                // Reset to defaults when changing type
+                                                                unit: e.target.checked
+                                                                    ? "item"
+                                                                    : "",
+                                                                minQty: e.target.checked
+                                                                    ? 1
+                                                                    : undefined,
+                                                                maxQty: e.target.checked
+                                                                    ? 1
+                                                                    : undefined,
+                                                            };
+                                                            updateVariant(index, updates);
+                                                        }}
+                                                        className="mr-1"
+                                                    />
+                                                    <span className="text-sm">Checkbox</span>
+                                                </label>
+                                            </div>
+
+                                            <input
+                                                type="number"
+                                                placeholder="Price"
+                                                value={variant.price}
+                                                onChange={(e) =>
+                                                    updateVariant(
+                                                        index,
+                                                        "price",
+                                                        Number(e.target.value)
+                                                    )
+                                                }
+                                                className="col-span-1 px-2 py-1 border rounded"
+                                                min="0"
+                                                step="0.01"
+                                            />
+
+                                            {!variant.isCheckbox && (
+                                                <>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Unit (e.g., hour)"
+                                                        value={variant.unit}
+                                                        onChange={(e) =>
+                                                            updateVariant(
+                                                                index,
+                                                                "unit",
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        className="col-span-1 px-2 py-1 border rounded"
+                                                    />
+                                                    <input
+                                                        type="number"
+                                                        placeholder="Min Qty"
+                                                        value={variant.minQty ?? ""}
+                                                        onChange={(e) =>
+                                                            updateVariant(
+                                                                index,
+                                                                "minQty",
+                                                                Number(e.target.value)
+                                                            )
+                                                        }
+                                                        className="col-span-1 px-2 py-1 border rounded"
+                                                        min="1"
+                                                    />
+                                                </>
+                                            )}
+
+                                            <button
+                                                type="button"
+                                                onClick={() => removeVariant(index)}
+                                                className="text-red-500 text-sm ml-2"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+
+                                        {/* Additional options for checkbox variants */}
+                                        {variant.isCheckbox && (
+                                            <div className="mt-2 flex items-center">
+                                                <label className="flex items-center mr-4">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={variant.defaultChecked}
+                                                        onChange={(e) =>
+                                                            updateVariant(
+                                                                index,
+                                                                "defaultChecked",
+                                                                e.target.checked
+                                                            )
+                                                        }
+                                                        className="mr-1"
+                                                    />
+                                                    <span className="text-sm">
+                                                        Checked by default
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
 
@@ -877,7 +1000,7 @@ const ServiceFormPage = () => {
                                             socialLinks: {
                                                 ...prev.socialLinks,
                                                 instagram: e.target.value,
-                                             },
+                                            },
                                         }))
                                     }
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"

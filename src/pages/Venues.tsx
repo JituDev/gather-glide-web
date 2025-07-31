@@ -227,12 +227,11 @@ useEffect(() => {
   }
 
   return (
-    <>
-      <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-
-        {/* Enhanced Filter Bar */}
-        {/* <div className="sticky top-0 z-40 bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <>
+          <Navbar />
+          <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+              {/* Enhanced Filter Bar */}
+              {/* <div className="sticky top-0 z-40 bg-gradient-to-br from-blue-50 via-white to-purple-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center space-x-3 flex-wrap">
@@ -308,430 +307,441 @@ useEffect(() => {
           </div>
         </div> */}
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex gap-8">
-            {/* Enhanced Sidebar */}
-            <div className="hidden lg:block w-80 space-y-8">
-              {/* Category Filters */}
-              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-                <h3 className="text-lg font-bold text-gray-900 mb-6">Categories</h3>
-                <div className="space-y-4">
-                  {categories?.map(category => (
-                    <div
-                      key={category?._id}
-                      className={`flex items-center space-x-4 p-3 rounded-xl cursor-pointer transition-all duration-300 hover:shadow-md ${selectedCategory === category._id
-                        ? 'bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200'
-                        : 'hover:bg-gray-50'
-                        }`}
-                      onClick={() => setSelectedCategory(selectedCategory === category?._id ? '' : category?._id)}
-                    >
-                      <div className="w-14 h-14 rounded-xl overflow-hidden shadow-md bg-gray-100 flex items-center justify-center">
-                        {category.image ? (
-                          <img
-                            src={category.image}
-                            alt={category.title}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <Home className="w-6 h-6 text-gray-400" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className={`font-semibold ${selectedCategory === category._id ? 'text-blue-600' : 'text-gray-700'}`}>
-                          {category.title}
-                        </h4>
-                        {/* <p className="text-sm text-gray-500">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                  <div className="flex gap-8">
+                      {/* Enhanced Sidebar */}
+                      <div className="hidden lg:block w-80 space-y-8">
+                          {/* Category Filters */}
+                          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                              <h3 className="text-lg font-bold text-gray-900 mb-6">Categories</h3>
+                              <div className="space-y-4">
+                                  {categories?.map((category) => (
+                                      <div
+                                          key={category?._id}
+                                          className={`flex items-center space-x-4 p-3 rounded-xl cursor-pointer transition-all duration-300 hover:shadow-md ${
+                                              selectedCategory === category._id
+                                                  ? "bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200"
+                                                  : "hover:bg-gray-50"
+                                          }`}
+                                          onClick={() =>
+                                              setSelectedCategory(
+                                                  selectedCategory === category?._id
+                                                      ? ""
+                                                      : category?._id
+                                              )
+                                          }
+                                      >
+                                          <div className="w-14 h-14 rounded-xl overflow-hidden shadow-md bg-gray-100 flex items-center justify-center">
+                                              {category.image ? (
+                                                  <img
+                                                      src={category.image}
+                                                      alt={category.title}
+                                                      className="w-full h-full object-cover"
+                                                  />
+                                              ) : (
+                                                  <Home className="w-6 h-6 text-gray-400" />
+                                              )}
+                                          </div>
+                                          <div className="flex-1">
+                                              <h4
+                                                  className={`font-semibold ${
+                                                      selectedCategory === category._id
+                                                          ? "text-blue-600"
+                                                          : "text-gray-700"
+                                                  }`}
+                                              >
+                                                  {category.title}
+                                              </h4>
+                                              {/* <p className="text-sm text-gray-500">
                           {category.count || services?.filter(s => s.category._id === category._id).length} services
                         </p> */}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Services by Budget */}
-              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-                <h3 className="text-lg font-bold text-gray-900 mb-6">Budget Range</h3>
-                <div className="grid grid-cols-1 gap-4">
-                  {budgetRanges?.map(range => (
-                    <div key={range.name} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition-all duration-300 group">
-                      <div className={`w-12 h-12 rounded-full ${range.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                        <DollarSign className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">{range.name}</p>
-                        <p className="text-sm text-gray-500">{range.range}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="flex-1">
-              {/* Search and Header */}
-              <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                    {selectedCategory
-                      ? categories.find(c => c._id === selectedCategory)?.title || 'Selected Services'
-                      : 'All Services'}
-                  </h2>
-                  <p className="text-gray-600">Showing {services?.length} results matching your criteria</p>
-                </div>
-
-
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type="text"
-                      placeholder="Search services..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-3 w-full md:w-64 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
-                    />
-                  </div>
-
-                  {/* Add this new button */}
-                  <button
-                    onClick={clearFilters}
-                    className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-sm hover:shadow-md"
-                  >
-                    <Eye className="w-4 h-4" />
-                    <span>Clear All Filters</span>
-                  </button>
-
-                  <button
-                    onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-                    className="flex items-center space-x-2 bg-white border border-gray-200 px-4 py-3 rounded-xl hover:bg-gray-50 transition-all shadow-sm"
-                  >
-                    <List className="w-4 h-4" />
-                    <span>{viewMode === 'grid' ? 'List' : 'Grid'}</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Service Cards - Grid View */}
-              {viewMode === 'grid' ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                  {services?.map((service) => (
-                    <div
-                      key={service?._id}
-                      className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 group h-full flex flex-col"
-                    >
-                      {/* Image Section */}
-                      <div className="relative h-48 overflow-hidden">
-                        {/* <div className="absolute top-4 left-4 z-10">
-                          <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
-                            Featured
-                          </span>
-                        </div> */}
-                        <div className="absolute top-4 right-4 z-10">
-                          <button
-                            onClick={() => handleWishlistToggle(service?._id)}
-                            disabled={wishlistLoading}
-                            className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${isInWishlist(service?._id)  // Changed from isInWishlist.has() to isInWishlist()
-                              ? 'bg-red-500 text-white'
-                              : 'bg-white/80 text-gray-600 hover:bg-white hover:text-red-500'
-                              }`}
-                          >
-                            <Heart className={`w-5 h-5 ${isInWishlist(service?._id) ? 'fill-current' : ''}`} />
-                          </button>
-                        </div>
-                        <img
-                          src={service?.images[0] || "https://images.pexels.com/photos/1042152/pexels-photo-1042152.jpeg"}
-                          alt={service?.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      </div>
-
-                      {/* Content Section */}
-                      <div className="p-6 flex flex-col flex-grow">
-                        <div className="flex-grow">
-                          <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                            {service?.title}
-                          </h3>
-                          <div className="flex items-center text-gray-600 mb-2">
-                            <MapPin className="w-4 h-4 mr-2 text-blue-500" />
-                            <span className="text-sm">{service?.location}</span>
-                          </div>
-
-                          {service?.capacity && (
-                            <div className="flex items-center space-x-3 mb-3">
-                              <div className="flex items-center">
-                                <Users className="w-4 h-4 mr-1 text-purple-500" />
-                                <span className="text-xs text-gray-600">{service?.capacity}</span>
-                              </div>
-                              {service?.space && (
-                                <div className="flex items-center">
-                                  <Home className="w-4 h-4 mr-1 text-green-500" />
-                                  <span className="text-xs text-gray-600">{service?.space}</span>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {service?.rating && (
-                            <div className="flex items-center mb-3">
-                              <div className="flex items-center mr-3">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className={`w-4 h-4 ${i < Math.floor(service?.rating || 0)
-                                      ? 'text-yellow-400 fill-current'
-                                      : 'text-gray-300'
-                                      }`}
-                                  />
-                                ))}
-                                <span className="text-xs text-gray-600 ml-1">
-                                  {service?.rating} ({service?.reviews || 0} reviews)
-                                </span>
-                              </div>
-                            </div>
-                          )}
-
-                          {service?.tags && service?.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mb-4">
-                              {service?.tags?.map((feature, index) => (
-                                <span
-                                  key={index}
-                                  className="bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium border border-blue-100"
-                                >
-                                  {feature}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="mt-auto">
-                          <div className="flex items-center justify-between">
-                            <div className="text-right">
-                              {service?.offer ? (
-                                <div className="space-y-1">
-                                  <div className="text-sm line-through text-gray-400">
-                                    {formatPrice(service?.minPrice)} - {formatPrice(service?.maxPrice)}
-                                  </div>
-                                  <div className="text-xl font-bold text-gray-900">
-                                    {formatPrice(service?.offer.discountedPrice)} - {formatPrice(service?.maxPrice - (service?.maxPrice * service?.offer.discountPercentage / 100))}
-                                  </div>
-                                  <div className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full inline-block">
-                                    {service?.offer.discountPercentage}% OFF
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="text-xl font-bold text-gray-900">
-                                  {formatPrice(service?.minPrice)} - {formatPrice(service?.maxPrice)}
-                                </div>
-                              )}
-                              {service?.pricePerPlate && (
-                                <div className="text-xs text-gray-600">
-                                  per plate: {formatPrice(service?.pricePerPlate)}
-                                </div>
-                              )}
-                            </div>
-                            <button
-                              onClick={() => navigate(`/services/${service?._id}`)}
-                              className="flex items-center space-x-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-sm hover:shadow-md text-sm"
-                            >
-                              <Eye className="w-3 h-3" />
-                              <span>View</span>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                /* Service Cards - List View */
-                <div className="space-y-6">
-                  {services?.map((service) => (
-                    <div
-                      key={service?._id}
-                      className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 group  h-[470px] lg:h-[230px]"
-                    >
-                      <div className="flex flex-col lg:flex-row h-full">
-                        {/* Image Section */}
-                        <div className="lg:w-64 relative overflow-hidden h-full">
-                          {/* <div className="absolute top-4 left-4 z-10">
-                            <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
-                              Featured
-                            </span>
-                          </div> */}
-                          <div className="absolute top-4 right-4 z-10">
-                            <button
-                              onClick={() => handleWishlistToggle(service?._id)}
-                              disabled={wishlistLoading}
-                              className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${isInWishlist(service?._id)  // Changed from isInWishlist.has() to isInWishlist()
-                                ? 'bg-red-500 text-white'
-                                : 'bg-white/80 text-gray-600 hover:bg-white hover:text-red-500'
-                                }`}
-                            >
-                              <Heart className={`w-5 h-5 ${isInWishlist(service?._id) ? 'fill-current' : ''}`} />
-                            </button>
-                          </div>
-                          <img
-                            src={service?.images[0] || "https://images.pexels.com/photos/1042152/pexels-photo-1042152.jpeg"}
-                            alt={service?.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        </div>
-
-                        {/* Content Section */}
-                        <div className="flex-1 p-6 flex flex-col">
-                          <div className="flex justify-between items-start mb-4">
-                            <div className="flex-1">
-                              <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                                {service?.title}
-                              </h3>
-                              <div className="flex items-center text-gray-600 mb-2">
-                                <MapPin className="w-4 h-4 mr-2 text-blue-500" />
-                                <span className="text-sm">{service?.location}</span>
-                              </div>
-
-                              {service?.capacity && (
-                                <div className="flex items-center space-x-3 mb-3">
-                                  <div className="flex items-center">
-                                    <Users className="w-4 h-4 mr-1 text-purple-500" />
-                                    <span className="text-xs text-gray-600">{service?.capacity}</span>
-                                  </div>
-                                  {service?.space && (
-                                    <div className="flex items-center">
-                                      <Home className="w-4 h-4 mr-1 text-green-500" />
-                                      <span className="text-xs text-gray-600">{service?.space}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-
-                              {service?.rating && (
-                                <div className="flex items-center mb-3">
-                                  <div className="flex items-center mr-3">
-                                    {[...Array(5)].map((_, i) => (
-                                      <Star
-                                        key={i}
-                                        className={`w-4 h-4 ${i < Math.floor(service?.rating || 0)
-                                          ? 'text-yellow-400 fill-current'
-                                          : 'text-gray-300'
-                                          }`}
-                                      />
-                                    ))}
-                                    <span className="text-xs text-gray-600 ml-1">
-                                      {service?.rating} ({service?.reviews || 0} reviews)
-                                    </span>
-                                  </div>
-                                </div>
-                              )}
-
-                              {service?.tags && service?.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mb-4">
-                                  {service?.tags?.map((feature, index) => (
-                                    <span
-                                      key={index}
-                                      className="bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium border border-blue-100"
-                                    >
-                                      {feature}
-                                    </span>
+                                          </div>
+                                      </div>
                                   ))}
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="text-right ml-4">
-                              {service?.offer ? (
-                                <div className="space-y-1">
-                                  <div className="text-sm line-through text-gray-400">
-                                    {formatPrice(service?.minPrice)} - {formatPrice(service?.maxPrice)}
-                                  </div>
-                                  <div className="text-xl font-bold text-gray-900">
-                                    {formatPrice(service?.offer.discountedPrice)} - {formatPrice(service?.maxPrice - (service?.maxPrice * service?.offer.discountPercentage / 100))}
-                                  </div>
-                                  <div className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full inline-block">
-                                    {service?.offer.discountPercentage}% OFF
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="text-xl font-bold text-gray-900">
-                                  {formatPrice(service?.minPrice)} - {formatPrice(service?.maxPrice)}
-                                </div>
-                              )}
-                              {service?.pricePerPlate && (
-                                <div className="text-xs text-gray-600">
-                                  per plate: {formatPrice(service?.pricePerPlate)}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <div className="flex space-x-2">
-                                {service?.images.slice(0, 3).map((image, imgIndex) => (
-                                  <div key={imgIndex} className="relative group/thumb cursor-pointer">
-                                    <img
-                                      src={image || "https://images.pexels.com/photos/1042152/pexels-photo-1042152.jpeg"}
-                                      alt={`${service?.title} ${imgIndex + 1}`}
-                                      className="w-16 h-12 object-cover rounded-lg shadow-sm group-hover/thumb:shadow-md transition-all duration-300 transform group-hover/thumb:scale-105"
-                                    />
-                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/thumb:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-                                  </div>
-                                ))}
-                                {service?.images.length > 3 && (
-                                  <div className="w-16 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:from-blue-50 hover:to-purple-50 transition-all duration-300">
-                                    <span className="text-gray-500 text-xs">
-                                      +{service?.images.length - 3}
-                                    </span>
-                                  </div>
-                                )}
                               </div>
-                            </div>
-
-                            <div className="flex space-x-2">
-                              <button
-                                onClick={() => navigate(`/services/${service?._id}`)}
-                                className="flex items-center space-x-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-sm hover:shadow-md text-sm"
-                              >
-                                <Eye className="w-3 h-3" />
-                                <span>View Details</span>
-                              </button>
-                              <button className="flex items-center space-x-1 bg-white border border-blue-600 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-300 text-sm">
-                                <Calendar className="w-3 h-3" />
-                                <span>Book Now</span>
-                              </button>
-                            </div>
                           </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
 
-              {services?.length === 0 && (
-                <div className="text-center py-16">
-                  <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
-                    <Search className="w-12 h-12 text-blue-500" />
+                          {/* Services by Budget */}
+                          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                              <h3 className="text-lg font-bold text-gray-900 mb-6">Budget Range</h3>
+                              <div className="grid grid-cols-1 gap-4">
+                                  {budgetRanges?.map((range) => (
+                                      <div
+                                          key={range.name}
+                                          className="flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition-all duration-300 group"
+                                      >
+                                          <div
+                                              className={`w-12 h-12 rounded-full ${range.color} flex items-center justify-center group-hover:scale-110 transition-transform`}
+                                          >
+                                              <DollarSign className="w-5 h-5" />
+                                          </div>
+                                          <div>
+                                              <p className="font-medium text-gray-900">
+                                                  {range.name}
+                                              </p>
+                                              <p className="text-sm text-gray-500">{range.range}</p>
+                                          </div>
+                                      </div>
+                                  ))}
+                              </div>
+                          </div>
+                      </div>
+
+                      {/* Main Content */}
+                      <div className="flex-1">
+                          {/* Search and Header */}
+                          <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
+                              <div>
+                                  <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                                      {selectedCategory
+                                          ? categories.find((c) => c._id === selectedCategory)
+                                                ?.title || "Selected Services"
+                                          : "All Services"}
+                                  </h2>
+                                  <p className="text-gray-600">
+                                      Showing {services?.length} results matching your criteria
+                                  </p>
+                              </div>
+
+                              <div className="flex items-center space-x-4">
+                                  <div className="relative">
+                                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                      <input
+                                          type="text"
+                                          placeholder="Search services..."
+                                          value={searchTerm}
+                                          onChange={(e) => setSearchTerm(e.target.value)}
+                                          className="pl-10 pr-4 py-3 w-full md:w-64 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
+                                      />
+                                  </div>
+
+                                  {/* Add this new button */}
+                                  <button
+                                      onClick={clearFilters}
+                                      className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-sm hover:shadow-md"
+                                  >
+                                      <Eye className="w-4 h-4" />
+                                      <span>Clear All Filters</span>
+                                  </button>
+
+                                  <button
+                                      onClick={() =>
+                                          setViewMode(viewMode === "grid" ? "list" : "grid")
+                                      }
+                                      className="flex items-center space-x-2 bg-white border border-gray-200 px-4 py-3 rounded-xl hover:bg-gray-50 transition-all shadow-sm"
+                                  >
+                                      <List className="w-4 h-4" />
+                                      <span>{viewMode === "grid" ? "List" : "Grid"}</span>
+                                  </button>
+                              </div>
+                          </div>
+
+                          {/* Service Cards - Grid View */}
+                          {viewMode === "grid" ? (
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                                  {services?.map((service) => (
+                                      <div
+                                          key={service?._id}
+                                          className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 group h-full flex flex-col"
+                                      >
+                                          {/* Image Section */}
+                                          <div className="relative h-48 overflow-hidden">
+                                              <div className="absolute top-4 right-4 z-10">
+                                                  <button
+                                                      onClick={() =>
+                                                          handleWishlistToggle(service?._id)
+                                                      }
+                                                      disabled={wishlistLoading}
+                                                      className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${
+                                                          isInWishlist(service?._id)
+                                                              ? "bg-red-500 text-white"
+                                                              : "bg-white/80 text-gray-600 hover:bg-white hover:text-red-500"
+                                                      }`}
+                                                  >
+                                                      <Heart
+                                                          className={`w-5 h-5 ${
+                                                              isInWishlist(service?._id)
+                                                                  ? "fill-current"
+                                                                  : ""
+                                                          }`}
+                                                      />
+                                                  </button>
+                                              </div>
+                                              <img
+                                                  src={
+                                                      service?.images[0] ||
+                                                      "https://images.pexels.com/photos/1042152/pexels-photo-1042152.jpeg"
+                                                  }
+                                                  alt={service?.title}
+                                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                              />
+                                              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                          </div>
+
+                                          {/* Content Section */}
+                                          <div className="p-6 flex flex-col flex-grow">
+                                              <div className="flex-grow">
+                                                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                                                      {service?.title}
+                                                  </h3>
+                                                  <div className="flex items-center text-gray-600 mb-2">
+                                                      <MapPin className="w-4 h-4 mr-2 text-blue-500" />
+                                                      <span className="text-sm">
+                                                          {service?.location}
+                                                      </span>
+                                                  </div>
+
+                                                  {/* Variants Section */}
+                                                  <div className="mb-4 space-y-2">
+                                                      {service?.variants
+                                                          ?.slice(0, 3)
+                                                          .map((variant) => (
+                                                              <div
+                                                                  key={variant._id}
+                                                                  className="flex justify-between text-sm"
+                                                              >
+                                                                  <span className="text-gray-600">
+                                                                      {variant.name}:
+                                                                  </span>
+                                                                  <span className="font-medium">
+                                                                      ₹{variant.price}
+                                                                      {variant.unit &&
+                                                                          `/${variant.unit}`}
+                                                                      {variant.minQty > 1 &&
+                                                                          ` (min ${variant.minQty})`}
+                                                                  </span>
+                                                              </div>
+                                                          ))}
+                                                      {service?.variants?.length > 3 && (
+                                                          <div className="text-sm text-blue-600">
+                                                              +{service.variants.length - 3} more
+                                                              options
+                                                          </div>
+                                                      )}
+                                                  </div>
+
+                                                  {service?.tags && service?.tags.length > 0 && (
+                                                      <div className="flex flex-wrap gap-1 mb-4">
+                                                          {service?.tags?.map((feature, index) => (
+                                                              <span
+                                                                  key={index}
+                                                                  className="bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium border border-blue-100"
+                                                              >
+                                                                  {feature}
+                                                              </span>
+                                                          ))}
+                                                      </div>
+                                                  )}
+                                              </div>
+
+                                              <div className="mt-auto">
+                                                  <div className="flex items-center justify-between">
+                                                      <button
+                                                          onClick={() =>
+                                                              navigate(`/services/${service?._id}`)
+                                                          }
+                                                          className="flex items-center space-x-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-sm hover:shadow-md text-sm"
+                                                      >
+                                                          <Eye className="w-3 h-3" />
+                                                          <span>View Details</span>
+                                                      </button>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  ))}
+                              </div>
+                          ) : (
+                              /* Service Cards - List View */
+                              <div className="space-y-6">
+                                  {services?.map((service) => (
+                                      <div
+                                          key={service?._id}
+                                          className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 group h-[470px] lg:h-[230px]"
+                                      >
+                                          <div className="flex flex-col lg:flex-row h-full">
+                                              {/* Image Section */}
+                                              <div className="lg:w-64 relative overflow-hidden h-full">
+                                                  <div className="absolute top-4 right-4 z-10">
+                                                      <button
+                                                          onClick={() =>
+                                                              handleWishlistToggle(service?._id)
+                                                          }
+                                                          disabled={wishlistLoading}
+                                                          className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${
+                                                              isInWishlist(service?._id)
+                                                                  ? "bg-red-500 text-white"
+                                                                  : "bg-white/80 text-gray-600 hover:bg-white hover:text-red-500"
+                                                          }`}
+                                                      >
+                                                          <Heart
+                                                              className={`w-5 h-5 ${
+                                                                  isInWishlist(service?._id)
+                                                                      ? "fill-current"
+                                                                      : ""
+                                                              }`}
+                                                          />
+                                                      </button>
+                                                  </div>
+                                                  <img
+                                                      src={
+                                                          service?.images[0] ||
+                                                          "https://images.pexels.com/photos/1042152/pexels-photo-1042152.jpeg"
+                                                      }
+                                                      alt={service?.title}
+                                                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                  />
+                                                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                              </div>
+
+                                              {/* Content Section */}
+                                              <div className="flex-1 p-6 flex flex-col">
+                                                  <div className="flex justify-between items-start mb-4">
+                                                      <div className="flex-1">
+                                                          <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                                                              {service?.title}
+                                                          </h3>
+                                                          <div className="flex items-center text-gray-600 mb-2">
+                                                              <MapPin className="w-4 h-4 mr-2 text-blue-500" />
+                                                              <span className="text-sm">
+                                                                  {service?.location}
+                                                              </span>
+                                                          </div>
+
+                                                          {/* Variants Section */}
+                                                          <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                              {service?.variants
+                                                                  ?.slice(0, 4)
+                                                                  .map((variant) => (
+                                                                      <div
+                                                                          key={variant._id}
+                                                                          className="flex justify-between text-sm"
+                                                                      >
+                                                                          <span className="text-gray-600">
+                                                                              {variant.name}:
+                                                                          </span>
+                                                                          <span className="font-medium">
+                                                                              ₹{variant.price}
+                                                                              {variant.unit &&
+                                                                                  `/${variant.unit}`}
+                                                                              {variant.minQty > 1 &&
+                                                                                  ` (min ${variant.minQty})`}
+                                                                          </span>
+                                                                      </div>
+                                                                  ))}
+                                                              {service?.variants?.length > 4 && (
+                                                                  <div className="text-sm text-blue-600">
+                                                                      +{service.variants.length - 4}{" "}
+                                                                      more options
+                                                                  </div>
+                                                              )}
+                                                          </div>
+
+                                                          {service?.tags &&
+                                                              service?.tags.length > 0 && (
+                                                                  <div className="flex flex-wrap gap-1 mb-4">
+                                                                      {service?.tags?.map(
+                                                                          (feature, index) => (
+                                                                              <span
+                                                                                  key={index}
+                                                                                  className="bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium border border-blue-100"
+                                                                              >
+                                                                                  {feature}
+                                                                              </span>
+                                                                          )
+                                                                      )}
+                                                                  </div>
+                                                              )}
+                                                      </div>
+                                                  </div>
+
+                                                  <div className="flex items-center justify-between mt-auto">
+                                                      <div className="flex space-x-2">
+                                                          {service?.images
+                                                              .slice(0, 3)
+                                                              .map((image, imgIndex) => (
+                                                                  <div
+                                                                      key={imgIndex}
+                                                                      className="relative group/thumb cursor-pointer"
+                                                                  >
+                                                                      <img
+                                                                          src={
+                                                                              image ||
+                                                                              "https://images.pexels.com/photos/1042152/pexels-photo-1042152.jpeg"
+                                                                          }
+                                                                          alt={`${service?.title} ${
+                                                                              imgIndex + 1
+                                                                          }`}
+                                                                          className="w-16 h-12 object-cover rounded-lg shadow-sm group-hover/thumb:shadow-md transition-all duration-300 transform group-hover/thumb:scale-105"
+                                                                      />
+                                                                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/thumb:opacity-100 transition-opacity duration-300 rounded-lg"></div>
+                                                                  </div>
+                                                              ))}
+                                                          {service?.images.length > 3 && (
+                                                              <div className="w-16 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:from-blue-50 hover:to-purple-50 transition-all duration-300">
+                                                                  <span className="text-gray-500 text-xs">
+                                                                      +{service?.images.length - 3}
+                                                                  </span>
+                                                              </div>
+                                                          )}
+                                                      </div>
+
+                                                      <div className="flex space-x-2">
+                                                          <button
+                                                              onClick={() =>
+                                                                  navigate(
+                                                                      `/services/${service?._id}`
+                                                                  )
+                                                              }
+                                                              className="flex items-center space-x-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-sm hover:shadow-md text-sm"
+                                                          >
+                                                              <Eye className="w-3 h-3" />
+                                                              <span>View Details</span>
+                                                          </button>
+                                                          {/* <button
+                                                              onClick={() =>
+                                                                  navigate(
+                                                                      `/services/${service?._id}/book`
+                                                                  )
+                                                              }
+                                                              className="flex items-center space-x-1 bg-white border border-blue-600 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-300 text-sm"
+                                                          >
+                                                              <Calendar className="w-3 h-3" />
+                                                              <span>Book Now</span>
+                                                          </button> */}
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  ))}
+                              </div>
+                          )}
+
+                          {services?.length === 0 && (
+                              <div className="text-center py-16">
+                                  <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+                                      <Search className="w-12 h-12 text-blue-500" />
+                                  </div>
+                                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                      No services found
+                                  </h3>
+                                  <p className="text-gray-600 mb-6">
+                                      Try adjusting your search criteria or filters
+                                  </p>
+                                  <button
+                                      onClick={clearFilters}
+                                      className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
+                                  >
+                                      Clear Filters
+                                  </button>
+                              </div>
+                          )}
+                      </div>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No services found</h3>
-                  <p className="text-gray-600 mb-6">Try adjusting your search criteria or filters</p>
-                  <button
-                    onClick={clearFilters}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
-                  >
-                    Clear Filters
-                  </button>
-                </div>
-              )}
-            </div>
+              </div>
           </div>
-        </div>
-      </div>
-    </>
+      </>
   );
 };
 
