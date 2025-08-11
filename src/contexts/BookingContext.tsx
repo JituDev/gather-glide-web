@@ -1,210 +1,236 @@
-// contexts/BookingContext.tsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
-import { useAuth } from './AuthContext';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import axios from "axios";
+import { useAuth } from "./AuthContext";
+import { toast } from "react-toastify";
+
+interface LineItem {
+    variant: string;
+    quantity: number;
+}
 
 interface Booking {
-  _id: string;
-  user: string;
-  userName: string;
-  userEmail: string;
-  vendor: string;
-  service: string;
-  message?: string;
-  date: string;
-  amount: number;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  createdAt: string;
-  updatedAt: string;
+    _id: string;
+    user: string;
+    userName: string;
+    userEmail: string;
+    vendor: string;
+    service: string;
+    message?: string;
+    date: string;
+    items: {
+        name: string;
+        unit: string;
+        quantity: number;
+        unitPrice: number;
+    }[];
+    subTotal: number;
+    tax: number;
+    grandTotal: number;
+    status: "pending" | "confirmed" | "cancelled" | "completed";
+    paymentStatus: "pending" | "paid" | "refunded";
+    createdAt: string;
+    updatedAt: string;
 }
 
 interface PaymentDetails {
-  orderId: string;
-  amount: number;
-  currency: string;
-  key: string;
+    orderId: string;
+    amount: number;
+    currency: string;
+    key: string;
+}
+
+interface CreateBookingData {
+    service: string;
+    name: string;
+    email: string;
+    phone: string;
+    date: string;
+    message?: string;
+    totalPrice: number;
+    variants: LineItem[];
 }
 
 interface BookingContextType {
-  bookings: Booking[];
-  vendorBookings: Booking[];
-  loading: boolean;
-  error: string | null;
-  createBooking: (
-    vendorId: string, 
-    serviceId: string, 
-    date: string, 
-    message?: string
-  ) => Promise<{ booking: Booking; payment: PaymentDetails }>;
-  getVendorBookings: (vendorId: string) => Promise<Booking[]>;
-  getUserBookings: (userId: string) => Promise<Booking[]>;
-  updateBookingStatus: (bookingId: string, status: string) => Promise<Booking>;
+    bookings: Booking[];
+    vendorBookings: Booking[];
+    loading: boolean;
+    error: string | null;
+    createBooking: (
+        data: CreateBookingData
+    ) => Promise<{ booking: Booking; payment: PaymentDetails }>;
+    getVendorBookings: (vendorId: string) => Promise<Booking[]>;
+    getUserBookings: (userId: string) => Promise<Booking[]>;
+    updateBookingStatus: (bookingId: string, status: string) => Promise<Booking>;
 }
 
 const BookingContext = createContext<BookingContextType | undefined>(undefined);
 
 export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [vendorBookings, setVendorBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+    const [bookings, setBookings] = useState<Booking[]>([]);
+    const [vendorBookings, setVendorBookings] = useState<Booking[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const { user } = useAuth();
+    const token = localStorage.getItem("token");
 
-  const api = axios.create({
-    baseURL: `${import.meta.env.VITE_API_BASE_URL}/api/bookings`,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+    const api = axios.create({
+        baseURL: `${import.meta.env.VITE_API_BASE_URL}/api/bookings`,
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
 
-  // Set auth token if user is logged in
-  // api.interceptors.request.use((config) => {
-  //   if (user?.token) {
-  //     config.headers.Authorization = `Bearer ${user.token}`;
-  //   }
-  //   return config;
-  // });
-  const setAuthToken = (token: string | null) => {
-    if (token) {
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    } else {
-      delete api.defaults.headers.common['Authorization'];
-    }
-  };
+    // Set auth token
+    const setAuthToken = (token: string | null) => {
+        if (token) {
+            api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        } else {
+            delete api.defaults.headers.common["Authorization"];
+        }
+    };
 
-  useEffect(() => {
-    const token = localStorage.getItem('token'); // Adjust based on your auth setup
-    setAuthToken(token);
-  }, []);
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        setAuthToken(token);
+    }, []);
 
-  const createBooking = async (
-    vendorId: string,
-    serviceId: string,
-    date: string,
-    message?: string
-  ): Promise<{ booking: Booking; payment: PaymentDetails }> => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await api.post('/', {
-        vendorId,
-        serviceId,
-        date,
-        message
-      });
+    const createBooking = async (bookingData: CreateBookingData) => {
+        
 
-      // Add to user's bookings
-      setBookings(prev => [...prev, response.data.data.booking]);
+        try {
+            setLoading(true);
+            setError(null);
 
-      return {
-        booking: response.data.data.booking,
-        payment: response.data.data.payment
-      };
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create booking');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
+            const response = await api.post("/", bookingData, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
 
-  const getVendorBookings = async (vendorId: string): Promise<Booking[]> => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await api.get(`/vendor/${vendorId}`);
-      setVendorBookings(response.data.data);
-      return response.data.data;
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch vendor bookings');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
+            // Add to user's bookings
+            setBookings((prev) => [...prev, response.data.data.booking]);
 
-  const getUserBookings = async (userId: string): Promise<Booking[]> => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await api.get(`/user/${userId}`);
-      setBookings(response.data.data);
-      return response.data.data;
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch user bookings');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
+            toast.success("Booking created successfully!");
+            return response.data.data;
+        } catch (err: any) {
+            const errorMessage =
+                err.response?.data?.message ||
+                err.response?.data?.error ||
+                "Failed to create booking";
+            setError(errorMessage);
+            toast.error(errorMessage);
+            console.log("err",err)
+            throw new Error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  const updateBookingStatus = async (
-    bookingId: string,
-    status: string
-  ): Promise<Booking> => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await api.put(`/${bookingId}/status`, { status });
+    const getVendorBookings = async (vendorId: string) => {
+        try {
+            setLoading(true);
+            setError(null);
 
-      // Update in vendor bookings
-      setVendorBookings(prev =>
-        prev.map(booking =>
-          booking._id === bookingId ? response.data.data : booking
-        )
-      );
+            const response = await api.get(`/vendor/${vendorId}`);
+            setVendorBookings(response.data.data);
+            return response.data.data;
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || "Failed to fetch vendor bookings";
+            setError(errorMessage);
+            throw new Error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-      // Update in user bookings if exists
-      setBookings(prev =>
-        prev.map(booking =>
-          booking._id === bookingId ? response.data.data : booking
-        )
-      );
+    const getUserBookings = async (userId: string) => {
+        try {
+            setLoading(true);
+            setError(null);
 
-      return response.data.data;
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to update booking status');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
+            const response = await api.get(`/user/${userId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            setBookings(response.data.data);
+            return response.data.data;
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || "Failed to fetch user bookings";
+            setError(errorMessage);
+            throw new Error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  // Load user bookings on mount if user is logged in
-  useEffect(() => {
-    if (user?._id && user?.role === 'user') {
-      getUserBookings(user._id);
-    } else if (user?._id && user?.role === 'vendor') {
-      getVendorBookings(user._id);
-    }
-  }, [user?._id, user?.role]);
+    const updateBookingStatus = async (bookingId: string, status: string) => {
+        try {
+            setLoading(true);
+            setError(null);
 
-  return (
-    <BookingContext.Provider
-      value={{
-        bookings,
-        vendorBookings,
-        loading,
-        error,
-        createBooking,
-        getVendorBookings,
-        getUserBookings,
-        updateBookingStatus,
-      }}
-    >
-      {children}
-    </BookingContext.Provider>
-  );
+            const response = await api.put(`/${bookingId}/status`, { status });
+
+            // Update in both bookings arrays
+            setVendorBookings((prev) =>
+                prev.map((b) => (b._id === bookingId ? response.data.data : b))
+            );
+            setBookings((prev) => prev.map((b) => (b._id === bookingId ? response.data.data : b)));
+
+            toast.success("Booking status updated!");
+            return response.data.data;
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || "Failed to update booking status";
+            setError(errorMessage);
+            toast.error(errorMessage);
+            throw new Error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Load initial bookings
+    useEffect(() => {
+        if (!user?._id) return;
+
+        const loadBookings = async () => {
+            try {
+                if (user.role === "user") {
+                    await getUserBookings(user._id);
+                } else if (user.role === "vendor") {
+                    await getVendorBookings(user._id);
+                }
+            } catch (error) {
+                console.error("Failed to load bookings:", error);
+            }
+        };
+
+        loadBookings();
+    }, [user?._id, user?.role]);
+
+    return (
+        <BookingContext.Provider
+            value={{
+                bookings,
+                vendorBookings,
+                loading,
+                error,
+                createBooking,
+                getVendorBookings,
+                getUserBookings,
+                updateBookingStatus,
+            }}
+        >
+            {children}
+        </BookingContext.Provider>
+    );
 };
 
 export const useBooking = (): BookingContextType => {
-  const context = useContext(BookingContext);
-  if (context === undefined) {
-    throw new Error('useBooking must be used within a BookingProvider');
-  }
-  return context;
+    const context = useContext(BookingContext);
+    if (context === undefined) {
+        throw new Error("useBooking must be used within a BookingProvider");
+    }
+    return context;
 };

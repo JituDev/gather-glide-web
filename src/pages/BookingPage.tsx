@@ -1,19 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useService } from "../contexts/ServiceContext";
+import { useBooking } from "../contexts/BookingContext";
 import Navbar from "@/components/Navbar";
+import { toast } from "react-toastify";
 
 const BookingPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { getService, currentService, loading, error } = useService();
+    const {
+        getService,
+        currentService,
+        loading: serviceLoading,
+        error: serviceError,
+    } = useService();
+    const { createBooking, loading: bookingLoading } = useBooking();
+
     const [formData, setFormData] = useState({
         name: "",
         email: "",
         phone: "",
         date: "",
         message: "",
-        variants: {},
+        variants: {} as Record<string, number>,
     });
 
     useEffect(() => {
@@ -22,21 +31,22 @@ const BookingPage = () => {
         }
     }, [id]);
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleVariantChange = (variantId, value) => {
+    const handleVariantChange = (variantId: string, value: string) => {
+        const quantity = value === "" ? 0 : Math.max(0, parseInt(value));
         setFormData({
             ...formData,
             variants: {
                 ...formData.variants,
-                [variantId]: Number(value),
+                [variantId]: quantity,
             },
         });
     };
 
-    const handleCheckboxChange = (variantId, isChecked) => {
+    const handleCheckboxChange = (variantId: string, isChecked: boolean) => {
         setFormData({
             ...formData,
             variants: {
@@ -46,7 +56,7 @@ const BookingPage = () => {
         });
     };
 
-    const calculateTotal = () => {
+    const calculateTotal = (): number => {
         if (!currentService?.variants) return 0;
 
         return currentService.variants.reduce((total, variant) => {
@@ -55,27 +65,57 @@ const BookingPage = () => {
         }, 0);
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const bookingData = {
-            service: id,
-            ...formData,
-            totalPrice: calculateTotal(),
-            variants: Object.entries(formData.variants)
-                .filter(([_, quantity]) => quantity > 0)
-                .map(([variantId, quantity]) => ({
-                    variant: variantId,
-                    quantity,
-                })),
-        };
+   const handleSubmit = async (e: React.FormEvent) => {
+       e.preventDefault();
+       const totalPrice = calculateTotal();
 
-        // Here you would call your API to create the booking
-        console.log("Booking data:", bookingData);
-        // navigate('/confirmation');
-    };
+       if (totalPrice <= 0) {
+           toast.error("Please select at least one service option");
+           return;
+       }
 
-    if (loading) return <div className="text-center py-8">Loading...</div>;
-    if (error) return <div className="text-center py-8 text-red-500">Error: {error}</div>;
+       // Prepare the variants array in the correct format
+       const variantsArray = Object.entries(formData.variants)
+           .filter(([_, quantity]) => quantity > 0)
+           .map(([variantId, quantity]) => ({
+               variant: variantId,
+               quantity: Number(quantity),
+           }));
+
+       const bookingData = {
+           service: id as string,
+           name: formData.name,
+           email: formData.email,
+           phone: formData.phone,
+           date: formData.date,
+           message: formData.message,
+           totalPrice: totalPrice,
+           variants: variantsArray,
+       };
+
+       try {
+           // Ensure you're sending JSON content type
+           const { booking, payment } = await createBooking(bookingData);
+           toast.success("Booking created successfully!");
+
+           navigate(`/booking/${booking._id}/payment`, {
+               state: {
+                   bookingId: booking._id,
+                   amount: payment.amount,
+                   orderId: payment.orderId,
+                   currency: payment.currency,
+                   key: payment.key,
+               },
+           });
+       } catch (error) {
+           console.error("Booking failed:", error);
+           toast.error("Failed to create booking. Please try again.");
+       }
+   };
+
+    if (serviceLoading) return <div className="text-center py-8">Loading service details...</div>;
+    if (serviceError)
+        return <div className="text-center py-8 text-red-500">Error: {serviceError}</div>;
 
     return (
         <>
@@ -127,7 +167,7 @@ const BookingPage = () => {
                                                 <input
                                                     type="number"
                                                     min={variant.minQty}
-                                                    max={variant.maxQty || ""}
+                                                    max={variant.maxQty || undefined}
                                                     placeholder={`Quantity (min ${variant.minQty})`}
                                                     className="w-full px-3 py-2 border rounded-md"
                                                     onChange={(e) =>
@@ -168,6 +208,7 @@ const BookingPage = () => {
                                         required
                                         className="w-full px-3 py-2 border rounded-md"
                                         onChange={handleChange}
+                                        value={formData.name}
                                     />
                                 </div>
 
@@ -179,6 +220,7 @@ const BookingPage = () => {
                                         required
                                         className="w-full px-3 py-2 border rounded-md"
                                         onChange={handleChange}
+                                        value={formData.email}
                                     />
                                 </div>
 
@@ -190,6 +232,7 @@ const BookingPage = () => {
                                         required
                                         className="w-full px-3 py-2 border rounded-md"
                                         onChange={handleChange}
+                                        value={formData.phone}
                                     />
                                 </div>
 
@@ -202,6 +245,7 @@ const BookingPage = () => {
                                         className="w-full px-3 py-2 border rounded-md"
                                         onChange={handleChange}
                                         min={new Date().toISOString().split("T")[0]}
+                                        value={formData.date}
                                     />
                                 </div>
 
@@ -214,14 +258,18 @@ const BookingPage = () => {
                                         rows={3}
                                         className="w-full px-3 py-2 border rounded-md"
                                         onChange={handleChange}
+                                        value={formData.message}
                                     ></textarea>
                                 </div>
 
                                 <button
                                     type="submit"
-                                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-md hover:opacity-90 transition"
+                                    disabled={bookingLoading}
+                                    className={`w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-md hover:opacity-90 transition ${
+                                        bookingLoading ? "opacity-70 cursor-not-allowed" : ""
+                                    }`}
                                 >
-                                    Confirm Booking
+                                    {bookingLoading ? "Processing..." : "Confirm Booking"}
                                 </button>
                             </form>
                         </div>

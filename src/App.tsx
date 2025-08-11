@@ -32,6 +32,8 @@ import ServiceFormPage from "./pages/ServiceFormPage.js";
 import NewCategoryPage from "./pages/NewCategoryPage.js";
 import EditCategoryPage from "./pages/EditCategoryPage.js";
 import BookingPage from "./pages/BookingPage.js";
+import { BookingProvider } from "./contexts/BookingContext.js";
+import UserBookingsPage from "./pages/UserBookingsPage.js";
 
 const App = () => (
     // <QueryClientProvider client={queryClient}>
@@ -42,101 +44,133 @@ const App = () => (
                 <AdminProvider>
                     <VendorProvider>
                         <ServiceProvider>
-                            <WishlistProvider>
-                                <SupportProvider>
-                                    <ToastContainer
-                                        position="top-right"
-                                        autoClose={3000}
-                                        hideProgressBar={false}
-                                        newestOnTop={false}
-                                        closeOnClick
-                                        pauseOnFocusLoss
-                                        draggable
-                                        pauseOnHover
-                                        theme="colored"
-                                    />
-                                    <Routes>
-                                        {/* Public Routes */}
-                                        <Route path="/" element={<Homepage />} />
-                                        <Route path="/login" element={<Login />} />
-                                        <Route path="/ServicesPage" element={<ServicesPage />} />
-                                        <Route path="/services/:id" element={<ServiceDetail />} />
-                                        <Route path="/help" element={<HelpSupportPage />} />
-                                        <Route path="/userOffer" element={<UserOffersPage />} />
-                                        <Route path="/vendor/:id" element={<VendorPage />} />
-                                        <Route path="/admin/login" element={<AdminAuthForm />} />
-                                        <Route
-                                            path="/admin/category_management"
-                                            element={<AdminCategories />}
+                            <BookingProvider>
+                                <WishlistProvider>
+                                    <SupportProvider>
+                                        <ToastContainer
+                                            position="top-right"
+                                            autoClose={3000}
+                                            hideProgressBar={false}
+                                            newestOnTop={false}
+                                            closeOnClick
+                                            pauseOnFocusLoss
+                                            draggable
+                                            pauseOnHover
+                                            theme="colored"
                                         />
-                                        <Route
-                                            path="admin/categories/new"
-                                            element={<NewCategoryPage />}
-                                        />
-                                        <Route
-                                            path="admin/categories/:id"
-                                            element={<EditCategoryPage />}
-                                        />
-                                        <Route path="/booking/:id" element={<BookingPage />} />
-                            
+                                        <Routes>
+                                            {/* Public Routes */}
+                                            <Route path="/" element={<Homepage />} />
+                                            <Route path="/login" element={<Login />} />
+                                            <Route
+                                                path="/ServicesPage"
+                                                element={<ServicesPage />}
+                                            />
+                                            <Route
+                                                path="/services/:id"
+                                                element={<ServiceDetail />}
+                                            />
+                                            <Route path="/help" element={<HelpSupportPage />} />
+                                            <Route path="/userOffer" element={<UserOffersPage />} />
+                                            <Route path="/vendor/:id" element={<VendorPage />} />
+                                            <Route
+                                                path="/admin/login"
+                                                element={<AdminAuthForm />}
+                                            />
+                                            <Route
+                                                path="/admin/category_management"
+                                                element={<AdminCategories />}
+                                            />
+                                            <Route
+                                                path="admin/categories/new"
+                                                element={<NewCategoryPage />}
+                                            />
+                                            <Route
+                                                path="admin/categories/:id"
+                                                element={<EditCategoryPage />}
+                                            />
+                                            <Route path="/booking/:id" element={<BookingPage />} />
+                                            <Route
+                                                path="/bookings"
+                                                element={<UserBookingsPage />}
+                                            />
 
-                                        {/* User-only Routes */}
-                                        <Route element={<ProtectedRoute allowedRoles={["user"]} />}>
-                                            <Route path="/userprofile" element={<UserProfile />} />
-                                            <Route path="/wishlist" element={<WishlistPage />} />
-                                        </Route>
+                                            {/* User-only Routes */}
+                                            <Route
+                                                element={<ProtectedRoute allowedRoles={["user"]} />}
+                                            >
+                                                <Route
+                                                    path="/userprofile"
+                                                    element={<UserProfile />}
+                                                />
+                                                <Route
+                                                    path="/wishlist"
+                                                    element={<WishlistPage />}
+                                                />
+                                            </Route>
 
-                                        {/* Vendor-only Routes */}
-                                        <Route
-                                            element={<ProtectedRoute allowedRoles={["vendor"]} />}
-                                        >
+                                            {/* Vendor-only Routes */}
                                             <Route
-                                                path="/vendorprofile"
-                                                element={<VendorProfile />}
-                                            />
-                                            <Route
-                                                path="/vendorOffer"
-                                                element={<VendorCreateOfferPage />}
-                                            />
-                                            <Route
-                                                path="/servicemanagement"
-                                                element={<ServiceManagement />}
-                                            />
-                                            <Route path="/services" element={<ServiceListPage />} />
-                                            <Route
-                                                path="/services/new"
-                                                element={<ServiceFormPage />}
-                                            />
-                                            <Route
-                                                path="/services/edit/:id"
-                                                element={<ServiceFormPage />}
-                                            />
-                                            <Route path="/wishlist" element={<WishlistPage />} />
-                                        </Route>
+                                                element={
+                                                    <ProtectedRoute allowedRoles={["vendor"]} />
+                                                }
+                                            >
+                                                <Route
+                                                    path="/vendorprofile"
+                                                    element={<VendorProfile />}
+                                                />
+                                                <Route
+                                                    path="/vendorOffer"
+                                                    element={<VendorCreateOfferPage />}
+                                                />
+                                                <Route
+                                                    path="/servicemanagement"
+                                                    element={<ServiceManagement />}
+                                                />
+                                                <Route
+                                                    path="/services"
+                                                    element={<ServiceListPage />}
+                                                />
+                                                <Route
+                                                    path="/services/new"
+                                                    element={<ServiceFormPage />}
+                                                />
+                                                <Route
+                                                    path="/services/edit/:id"
+                                                    element={<ServiceFormPage />}
+                                                />
+                                                <Route
+                                                    path="/wishlist"
+                                                    element={<WishlistPage />}
+                                                />
+                                            </Route>
 
-                                        {/* Admin-only Routes */}
-                                        <Route
-                                            element={<ProtectedRoute allowedRoles={["admin"]} />}
-                                        >
+                                            {/* Admin-only Routes */}
                                             <Route
-                                                path="/admin/support"
-                                                element={<AdminSupportPage />}
-                                            />
-                                            <Route
-                                                path="/admin/usermanagement"
-                                                element={<AdminUserManagement />}
-                                            />
-                                            <Route
-                                                path="/adminprofile"
-                                                element={<AdminProfile />}
-                                            />
-                                        </Route>
+                                                element={
+                                                    <ProtectedRoute allowedRoles={["admin"]} />
+                                                }
+                                            >
+                                                <Route
+                                                    path="/admin/support"
+                                                    element={<AdminSupportPage />}
+                                                />
+                                                <Route
+                                                    path="/admin/usermanagement"
+                                                    element={<AdminUserManagement />}
+                                                />
+                                                <Route
+                                                    path="/adminprofile"
+                                                    element={<AdminProfile />}
+                                                />
+                                            </Route>
 
-                                        {/* Catch-all route */}
-                                        <Route path="*" element={<NotFound />} />
-                                    </Routes>
-                                </SupportProvider>
-                            </WishlistProvider>
+                                            {/* Catch-all route */}
+                                            <Route path="*" element={<NotFound />} />
+                                        </Routes>
+                                    </SupportProvider>
+                                </WishlistProvider>
+                            </BookingProvider>
                         </ServiceProvider>
                     </VendorProvider>
                 </AdminProvider>
