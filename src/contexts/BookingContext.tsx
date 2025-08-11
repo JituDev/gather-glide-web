@@ -132,7 +132,11 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
             setLoading(true);
             setError(null);
 
-            const response = await api.get(`/vendor/${vendorId}`);
+            const response = await api.get(`/vendor/${vendorId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             setVendorBookings(response.data.data);
             return response.data.data;
         } catch (err: any) {
@@ -168,27 +172,23 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const updateBookingStatus = async (bookingId: string, status: string) => {
         try {
             setLoading(true);
-            setError(null);
-
             const response = await api.put(`/${bookingId}/status`, { status });
 
-            // Update in both bookings arrays
+            // Update both bookings and vendorBookings state
+            setBookings((prev) => prev.map((b) => (b._id === bookingId ? response.data.data : b)));
             setVendorBookings((prev) =>
                 prev.map((b) => (b._id === bookingId ? response.data.data : b))
             );
-            setBookings((prev) => prev.map((b) => (b._id === bookingId ? response.data.data : b)));
 
-            toast.success("Booking status updated!");
             return response.data.data;
-        } catch (err: any) {
+        } catch (err) {
             const errorMessage = err.response?.data?.message || "Failed to update booking status";
-            setError(errorMessage);
-            toast.error(errorMessage);
             throw new Error(errorMessage);
         } finally {
             setLoading(false);
         }
     };
+
 
     // Load initial bookings
     useEffect(() => {

@@ -34,6 +34,7 @@ import EditCategoryPage from "./pages/EditCategoryPage.js";
 import BookingPage from "./pages/BookingPage.js";
 import { BookingProvider } from "./contexts/BookingContext.js";
 import UserBookingsPage from "./pages/UserBookingsPage.js";
+import VendorBookingsPage from "./pages/VendorBookingsPage.js";
 
 const App = () => (
     // <QueryClientProvider client={queryClient}>
@@ -95,6 +96,10 @@ const App = () => (
                                                 element={<UserBookingsPage />}
                                             />
 
+                                            <Route
+                                                path="/bookingmanagement"
+                                                element={<VendorBookingsPage />}
+                                            />
                                             {/* User-only Routes */}
                                             <Route
                                                 element={<ProtectedRoute allowedRoles={["user"]} />}
@@ -108,7 +113,6 @@ const App = () => (
                                                     element={<WishlistPage />}
                                                 />
                                             </Route>
-
                                             {/* Vendor-only Routes */}
                                             <Route
                                                 element={
@@ -144,7 +148,6 @@ const App = () => (
                                                     element={<WishlistPage />}
                                                 />
                                             </Route>
-
                                             {/* Admin-only Routes */}
                                             <Route
                                                 element={
@@ -164,7 +167,6 @@ const App = () => (
                                                     element={<AdminProfile />}
                                                 />
                                             </Route>
-
                                             {/* Catch-all route */}
                                             <Route path="*" element={<NotFound />} />
                                         </Routes>
