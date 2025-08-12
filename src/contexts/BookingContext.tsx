@@ -95,8 +95,6 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }, []);
 
     const createBooking = async (bookingData: CreateBookingData) => {
-        
-
         try {
             setLoading(true);
             setError(null);
@@ -120,7 +118,7 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 "Failed to create booking";
             setError(errorMessage);
             toast.error(errorMessage);
-            console.log("err",err)
+            console.log("err", err);
             throw new Error(errorMessage);
         } finally {
             setLoading(false);
@@ -188,7 +186,6 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
             setLoading(false);
         }
     };
-
 
     // Load initial bookings
     useEffect(() => {

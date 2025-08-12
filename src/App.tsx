@@ -35,6 +35,8 @@ import BookingPage from "./pages/BookingPage.js";
 import { BookingProvider } from "./contexts/BookingContext.js";
 import UserBookingsPage from "./pages/UserBookingsPage.js";
 import VendorBookingsPage from "./pages/VendorBookingsPage.js";
+import AdminBookingsPage from "./pages/AdminBookingsPage.js";
+import AdminBookingDetailsPage from "./pages/AdminBookingDetailsPage.js";
 
 const App = () => (
     // <QueryClientProvider client={queryClient}>
@@ -94,6 +96,14 @@ const App = () => (
                                             <Route
                                                 path="/bookings"
                                                 element={<UserBookingsPage />}
+                                            />
+                                            <Route
+                                                path="/admin/bookings"
+                                                element={<AdminBookingsPage />}
+                                            />
+                                            <Route
+                                                path="/admin/bookings/:id"
+                                                element={<AdminBookingDetailsPage />}
                                             />
 
                                             <Route

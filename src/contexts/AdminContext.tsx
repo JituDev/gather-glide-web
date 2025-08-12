@@ -87,6 +87,11 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [currentOffer, setCurrentOffer] = useState<Offer | null>(null);
   const [loadingOffers, setLoadingOffers] = useState(false);
   const [errorOffers, setErrorOffers] = useState<string | null>(null);
+    const [allBookings, setAllBookings] = useState<any[]>([]);
+    // const [allVendors, setAllVendors] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
 
   // Axios instance with auth header
 //   const api = axios.create({
@@ -125,6 +130,31 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setLoadingVendors(false);
     }
   };
+
+   const getAllBookings = async (queryParams = "") => {
+       try {
+           setLoading(true);
+           setError(null);
+
+           // Convert URLSearchParams to object if needed
+           const params = new URLSearchParams(queryParams);
+           const queryObject = {};
+           params.forEach((value, key) => {
+               queryObject[key] = value;
+           });
+
+           const response = await api.get("/api/admin/bookings", {
+               params: queryObject, // Axios will properly serialize this
+           });
+
+           setAllBookings(response.data.data);
+       } catch (err: any) {
+           setError(err.response?.data?.message || "Failed to fetch bookings");
+           throw err;
+       } finally {
+           setLoading(false);
+       }
+   };
 
   const approveVendor = async (id: string, isApproved: boolean) => {
   try {
@@ -322,29 +352,35 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const value: AdminContextType = {
-    // Vendors
-    vendors,
-    loadingVendors,
-    errorVendors,
-    getVendors,
-    approveVendor,
+      // Vendors
+      vendors,
+      loadingVendors,
+      errorVendors,
+      getVendors,
+      approveVendor,
 
-    // Categories
-    categories,
-    loadingCategories,
-    errorCategories,
-    getCategories,
-    createCategory,
-    updateCategory,
-    deleteCategory,
+      // Categories
+      categories,
+      loadingCategories,
+      errorCategories,
+      getCategories,
+      createCategory,
+      updateCategory,
+      deleteCategory,
 
-    // Offers
-    offers,
-    loadingOffers,
-    errorOffers,
-    currentOffer,
-    getOffers,
-    getOffer,
+      // Offers
+      offers,
+      loadingOffers,
+      errorOffers,
+      currentOffer,
+      getOffers,
+      getOffer,
+
+
+      allBookings,
+      getAllBookings,
+      loading,
+      error,
   };
 
   return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;
