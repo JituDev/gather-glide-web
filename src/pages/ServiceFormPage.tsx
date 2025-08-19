@@ -335,8 +335,8 @@ const ServiceFormPage = () => {
 
         if (!formData.title.trim()) errors.title = 'Title is required';
         if (!formData.description.trim()) errors.description = 'Description is required';
-        if (formData.minPrice <= 0) errors.minPrice = 'Minimum price must be greater than 0';
-        if (formData.maxPrice <= formData.minPrice) errors.maxPrice = 'Maximum price must be greater than minimum price';
+        // if (formData.minPrice <= 0) errors.minPrice = 'Minimum price must be greater than 0';
+        // if (formData.maxPrice <= formData.minPrice) errors.maxPrice = 'Maximum price must be greater than minimum price';
         if (!formData.category) errors.category = 'Category is required';
         if (!formData.subCategory) errors.subCategory = 'Sub-category is required';
         if (!formData.location) errors.location = 'Location is required';
@@ -404,6 +404,7 @@ const ServiceFormPage = () => {
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
+        console.log('handleSubmit')
         e.preventDefault();
 
         if (!validateForm()) return;
@@ -414,8 +415,8 @@ const ServiceFormPage = () => {
             // Append all basic fields
             fd.append('title', formData.title);
             fd.append('description', formData.description);
-            fd.append('minPrice', formData.minPrice.toString());
-            fd.append('maxPrice', formData.maxPrice.toString());
+            // fd.append('minPrice', formData.minPrice.toString());
+            // fd.append('maxPrice', formData.maxPrice.toString());
             fd.append('category', formData.category);
             fd.append('subCategory', formData.subCategory);
             fd.append('tags', formData.tags);
@@ -589,7 +590,7 @@ const ServiceFormPage = () => {
         <>
             <Navbar />
             <div className="min-h-screen bg-white p-6">
-                <div className="max-w-4xl mx-auto">
+                <div className="max-w-6xl mx-auto">
                     <div className="mb-6">
                         <button
                             onClick={() => navigate("/services")}
@@ -854,7 +855,7 @@ const ServiceFormPage = () => {
                                 )}
                             </div>
 
-                            <div>
+                            {/* <div>
                                 <label className="block text-gray-700 mb-1">
                                     Minimum Price ($)*
                                 </label>
@@ -875,9 +876,9 @@ const ServiceFormPage = () => {
                                         {validationErrors.minPrice}
                                     </p>
                                 )}
-                            </div>
+                            </div> */}
 
-                            <div>
+                            {/* <div>
                                 <label className="block text-gray-700 mb-1">
                                     Maximum Price ($)*
                                 </label>
@@ -898,7 +899,7 @@ const ServiceFormPage = () => {
                                         {validationErrors.maxPrice}
                                     </p>
                                 )}
-                            </div>
+                            </div> */}
                         </div>
                         <div className="mb-4">
                             <label className="block text-gray-700 mb-1">Description*</label>
