@@ -94,6 +94,30 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setAuthToken(token);
     }, []);
 
+    const checkAvailability = async (serviceId: string, date: string) => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const response = await api.get(`/checkAvailability`, {
+                params: { serviceId, date },
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            return response.data; // { available, slots }
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || "Failed to check availability";
+            setError(errorMessage);
+            toast.error(errorMessage);
+            throw new Error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
     const createBooking = async (bookingData: CreateBookingData) => {
         try {
             setLoading(true);
@@ -217,6 +241,7 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 getVendorBookings,
                 getUserBookings,
                 updateBookingStatus,
+                checkAvailability,
             }}
         >
             {children}
