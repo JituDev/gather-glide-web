@@ -84,6 +84,12 @@ const ServiceFormPage = () => {
         images: null,
         existingImages: [],
         variants: [],
+        // 🆕 Slot-related fields
+        isSlotBased: false,
+        slotDuration: 60, // in minutes
+        slotCapacity: 1, // how many people per slot
+        slotStartTime: "09:00", // default start time
+        slotEndTime: "18:00", // default end time
     });
 
     useEffect(() => {
@@ -411,62 +417,71 @@ const ServiceFormPage = () => {
 
         try {
             const fd = new FormData();
-            
+
             // Append all basic fields
-            fd.append('title', formData.title);
-            fd.append('description', formData.description);
+            fd.append("title", formData.title);
+            fd.append("description", formData.description);
             // fd.append('minPrice', formData.minPrice.toString());
             // fd.append('maxPrice', formData.maxPrice.toString());
-            fd.append('category', formData.category);
-            fd.append('subCategory', formData.subCategory);
-            fd.append('tags', formData.tags);
-            fd.append('location', formData.location);
+            fd.append("category", formData.category);
+            fd.append("subCategory", formData.subCategory);
+            fd.append("tags", formData.tags);
+            fd.append("location", formData.location);
 
             // Handle optional fields
-            if (formData.phone) fd.append('phone', formData.phone);
-            if (formData.website) fd.append('website', formData.website);
+            if (formData.phone) fd.append("phone", formData.phone);
+            if (formData.website) fd.append("website", formData.website);
 
             // Append social links if any exist
             const socialLinks = {
                 ...(formData.socialLinks?.facebook && { facebook: formData.socialLinks.facebook }),
-                ...(formData.socialLinks?.instagram && { instagram: formData.socialLinks.instagram }),
-                ...(formData.socialLinks?.twitter && { twitter: formData.socialLinks.twitter })
+                ...(formData.socialLinks?.instagram && {
+                    instagram: formData.socialLinks.instagram,
+                }),
+                ...(formData.socialLinks?.twitter && { twitter: formData.socialLinks.twitter }),
             };
             if (Object.keys(socialLinks).length > 0) {
-                fd.append('socialLinks', JSON.stringify(socialLinks));
+                fd.append("socialLinks", JSON.stringify(socialLinks));
             }
 
             // Append dynamic fields details
-            fd.append('details', JSON.stringify(formData.details));
+            fd.append("details", JSON.stringify(formData.details));
 
             // Append FAQs
-            fd.append('faqs', JSON.stringify(formData.faqs));
+            fd.append("faqs", JSON.stringify(formData.faqs));
 
             fd.append("variants", JSON.stringify(formData.variants));
-
+            // 🆕 Add slot fields
+            fd.append("isSlotBased", String(formData.isSlotBased));
+            if (formData.isSlotBased) {
+                fd.append("slotDuration", String(formData.slotDuration));
+                fd.append("slotCapacity", String(formData.slotCapacity));
+                fd.append("slotStartTime", formData.slotStartTime);
+                fd.append("slotEndTime", formData.slotEndTime);
+            }
 
             // Add images to be removed (for edit mode)
             if (isEditMode && filesToRemove.length > 0) {
-                fd.append('removeImages', JSON.stringify(filesToRemove));
+                fd.append("removeImages", JSON.stringify(filesToRemove));
             }
 
             // Add new images
             if (formData.images) {
                 const filesArray = Array.from(formData.images);
                 filesArray.forEach((file, index) => {
-                    fd.append('galleryImages', file);
+                    fd.append("galleryImages", file);
                 });
             }
 
             if (isEditMode && id) {
                 await updateService(id, fd);
-                toast.success('Service updated successfully');
+                toast.success("Service updated successfully");
             } else {
                 await createService(fd);
-                toast.success('Service created successfully');
+                toast.success("Service created successfully");
             }
 
-            navigate('/services');
+            navigate("/services");
         } catch (error) {
             console.error('Error submitting service:', error);
             toast.error(`Failed to ${isEditMode ? 'update' : 'create'} service`);
@@ -709,6 +724,106 @@ const ServiceFormPage = () => {
                                     </p>
                                 )}
                             </div>
+                            <div className="mb-4">
+                                <label className="block text-gray-700 font-semibold mb-2">
+                                    Slot Based Booking?
+                                </label>
+                                <label className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.isSlotBased}
+                                        onChange={(e) =>
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                isSlotBased: e.target.checked,
+                                            }))
+                                        }
+                                        className="mr-2"
+                                    />
+                                    Enable slot system
+                                </label>
+                            </div>
+                            {formData.isSlotBased && (
+                                <div className="mb-4 p-4 border rounded-lg bg-gray-50">
+                                    <h3 className="font-semibold text-gray-800 mb-3">
+                                        Slot Settings
+                                    </h3>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-gray-600 text-sm mb-1">
+                                                Slot Duration (minutes)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={formData.slotDuration}
+                                                min="15"
+                                                step="15"
+                                                onChange={(e) =>
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        slotDuration: Number(e.target.value),
+                                                    }))
+                                                }
+                                                className="w-full px-2 py-1 border rounded"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-gray-600 text-sm mb-1">
+                                                Capacity per Slot
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={formData.slotCapacity}
+                                                min="1"
+                                                onChange={(e) =>
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        slotCapacity: Number(e.target.value),
+                                                    }))
+                                                }
+                                                className="w-full px-2 py-1 border rounded"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-gray-600 text-sm mb-1">
+                                                Start Time
+                                            </label>
+                                            <input
+                                                type="time"
+                                                value={formData.slotStartTime}
+                                                onChange={(e) =>
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        slotStartTime: e.target.value,
+                                                    }))
+                                                }
+                                                className="w-full px-2 py-1 border rounded"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-gray-600 text-sm mb-1">
+                                                End Time
+                                            </label>
+                                            <input
+                                                type="time"
+                                                value={formData.slotEndTime}
+                                                onChange={(e) =>
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        slotEndTime: e.target.value,
+                                                    }))
+                                                }
+                                                className="w-full px-2 py-1 border rounded"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="mb-4">
                                 <label className="block text-gray-700 font-semibold mb-2">
                                     Service Variants*
