@@ -47,7 +47,7 @@ interface CreateBookingData {
     date: string;
     message?: string;
     totalPrice: number;
-    variants: LineItem[];
+    variants: { variant: string; quantity: number }[];
 }
 
 interface BookingContextType {

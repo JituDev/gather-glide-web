@@ -303,21 +303,37 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const getService = async (id: string) => {
-    try {
-      setLoadingServices(true);
-      setErrorServices(null);
-      const response = await api.get(`/${id}`);
-      setCurrentService(response.data.data);
-      return response.data.data;
-    } catch (error) {
-      const err = error as AxiosError<{ message?: string }>;
-      setErrorServices(err.response?.data?.message || 'Failed to fetch service');
-      throw err;
-    } finally {
-      setLoadingServices(false);
-    }
+  const checkAvailability = async (serviceId: string, date: string) => {
+      try {
+          const response = await api.get(`/check-availability?serviceId=${serviceId}&date=${date}`);
+          return response.data; // { success, available, remaining }
+      } catch (err: any) {
+          const errorMessage =
+              err.response?.data?.message ||
+              err.response?.data?.error ||
+              "Failed to check availability";
+          toast.error(errorMessage);
+          throw new Error(errorMessage);
+      }
   };
+
+
+  const getService = async (id: string) => {
+      try {
+          setLoadingServices(true);
+          setErrorServices(null);
+          const response = await api.get(`/getServices?id=${id}`); // ✅ fixed
+          setCurrentService(response.data.data);
+          return response.data.data;
+      } catch (error) {
+          const err = error as AxiosError<{ message?: string }>;
+          setErrorServices(err.response?.data?.message || "Failed to fetch service");
+          throw err;
+      } finally {
+          setLoadingServices(false);
+      }
+  };
+
 
   // Public Service Queries
   const getServicesByCategory = async (category: string, location?: string, search?: string) => {
