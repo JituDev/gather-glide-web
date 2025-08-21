@@ -74,7 +74,7 @@ const App = () => (
                                                 element={<ServiceDetail />}
                                             />
                                             <Route path="/help" element={<HelpSupportPage />} />
-                                            <Route path="/userOffer" element={<UserOffersPage />} />
+                                            {/* <Route path="/userOffer" element={<UserOffersPage />} /> */}
                                             <Route path="/vendor/:id" element={<VendorPage />} />
                                             <Route
                                                 path="/admin/login"
@@ -93,23 +93,7 @@ const App = () => (
                                                 element={<EditCategoryPage />}
                                             />
                                             <Route path="/booking/:id" element={<BookingPage />} />
-                                            <Route
-                                                path="/bookings"
-                                                element={<UserBookingsPage />}
-                                            />
-                                            <Route
-                                                path="/admin/bookings"
-                                                element={<AdminBookingsPage />}
-                                            />
-                                            <Route
-                                                path="/admin/bookings/:id"
-                                                element={<AdminBookingDetailsPage />}
-                                            />
 
-                                            <Route
-                                                path="/bookingmanagement"
-                                                element={<VendorBookingsPage />}
-                                            />
                                             {/* User-only Routes */}
                                             <Route
                                                 element={<ProtectedRoute allowedRoles={["user"]} />}
@@ -121,6 +105,10 @@ const App = () => (
                                                 <Route
                                                     path="/wishlist"
                                                     element={<WishlistPage />}
+                                                />
+                                                <Route
+                                                    path="/bookings"
+                                                    element={<UserBookingsPage />}
                                                 />
                                             </Route>
                                             {/* Vendor-only Routes */}
@@ -157,6 +145,10 @@ const App = () => (
                                                     path="/wishlist"
                                                     element={<WishlistPage />}
                                                 />
+                                                <Route
+                                                    path="/bookingmanagement"
+                                                    element={<VendorBookingsPage />}
+                                                />
                                             </Route>
                                             {/* Admin-only Routes */}
                                             <Route
@@ -175,6 +167,14 @@ const App = () => (
                                                 <Route
                                                     path="/adminprofile"
                                                     element={<AdminProfile />}
+                                                />
+                                                <Route
+                                                    path="/admin/bookings"
+                                                    element={<AdminBookingsPage />}
+                                                />
+                                                <Route
+                                                    path="/admin/bookings/:id"
+                                                    element={<AdminBookingDetailsPage />}
                                                 />
                                             </Route>
                                             {/* Catch-all route */}

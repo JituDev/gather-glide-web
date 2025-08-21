@@ -1,32 +1,29 @@
-// components/ProtectedRoute.tsx
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 interface ProtectedRouteProps {
-  allowedRoles?: ("user" | "vendor" | "admin")[];
+    allowedRoles?: ("user" | "vendor" | "admin")[];
 }
 
 const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
-  const { user, isAuthenticated } = useAuth();
+    const { user } = useAuth();
 
-  console.log('ProtectedRoute check:', { 
-    isAuthenticated: isAuthenticated(), 
-    user, 
-    allowedRoles 
-  });
+    // ✅ Check login by token presence
+    const token = localStorage.getItem("token");
+    const loggedIn = !!token;
 
-  if (!isAuthenticated()) {
-    console.log('Not authenticated, redirecting to login');
-    return <Navigate to="/login" replace />;
-  }
+    // Case 1: Not logged in → go to login
+    if (!loggedIn) {
+        return <Navigate to="/login" replace />;
+    }
 
-  if (!allowedRoles || (user && allowedRoles.includes(user.role))) {
-    console.log('Access granted');
-    return <Outlet />;
-  }
+    // Case 2: Logged in + role matches → render route
+    if (allowedRoles && user && allowedRoles.includes(user.role)) {
+        return <Outlet />;
+    }
 
-  console.log('Wrong role, redirecting to home');
-  return <Navigate to="/" replace />;
+    // Case 3: Logged in but no role match → go home
+    return <Navigate to="/" replace />;
 };
 
 export default ProtectedRoute;
