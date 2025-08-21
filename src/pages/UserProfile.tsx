@@ -95,7 +95,7 @@ const UserProfile = () => {
 
     const sidebarItems = [
         { id: 'personal', label: 'Personal Information', icon: User },
-        { id: 'bookings', label: 'My Bookings', icon: Calendar },
+        // { id: 'bookings', label: 'My Bookings', icon: Calendar },
         { id: 'reviews', label: 'My Reviews', icon: Star },
         // { id: 'wishlist', label: 'Wishlisted Vendors', icon: Star },
         { id: 'logout', label: 'Logout', icon: Settings }
@@ -175,78 +175,78 @@ const UserProfile = () => {
         </div>
     );
 
-    const renderBookings = () => (
-        <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">My Bookings</h2>
-            <div className="space-y-4">
-                {[
-                    {
-                        id: 1,
-                        vendor: "Royal Caterers",
-                        service: "Wedding Catering",
-                        date: "Dec 25, 2024",
-                        status: "Confirmed",
-                        amount: "₹25,000",
-                        statusColor: "green"
-                    },
-                    {
-                        id: 2,
-                        vendor: "Dream Photography",
-                        service: "Wedding Photography",
-                        date: "Dec 25, 2024",
-                        status: "Confirmed",
-                        amount: "₹15,000",
-                        statusColor: "green"
-                    },
-                    {
-                        id: 3,
-                        vendor: "Elite Decorators",
-                        service: "Birthday Decoration",
-                        date: "Jan 10, 2025",
-                        status: "Pending",
-                        amount: "₹8,000",
-                        statusColor: "yellow"
-                    },
-                    {
-                        id: 4,
-                        vendor: "Sound Pro",
-                        service: "Sound System",
-                        date: "Nov 20, 2024",
-                        status: "Completed",
-                        amount: "₹5,000",
-                        statusColor: "blue"
-                    }
-                ].map((booking) => (
-                    <div key={booking.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                            <div className="flex-1">
-                                <h3 className="font-semibold text-gray-800 text-lg">{booking.vendor}</h3>
-                                <p className="text-gray-600">{booking.service}</p>
-                                <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                                    <span className="flex items-center">
-                                        <Calendar className="w-4 h-4 mr-1" />
-                                        {booking.date}
-                                    </span>
-                                    <span className="font-medium text-gray-800">{booking.amount}</span>
-                                </div>
-                            </div>
-                            <div className="mt-4 md:mt-0 flex items-center space-x-3">
-                                <span className={`px-3 py-1 rounded-full text-sm font-medium ${booking.statusColor === 'green' ? 'bg-green-100 text-green-800' :
-                                    booking.statusColor === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
-                                        'bg-blue-100 text-blue-800'
-                                    }`}>
-                                    {booking.status}
-                                </span>
-                                <button className="text-purple-600 hover:text-purple-800 font-medium">
-                                    View Details
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
+    // const renderBookings = () => (
+    //     <div className="bg-white rounded-xl shadow-lg p-6">
+    //         <h2 className="text-2xl font-bold text-gray-800 mb-6">My Bookings</h2>
+    //         <div className="space-y-4">
+    //             {[
+    //                 {
+    //                     id: 1,
+    //                     vendor: "Royal Caterers",
+    //                     service: "Wedding Catering",
+    //                     date: "Dec 25, 2024",
+    //                     status: "Confirmed",
+    //                     amount: "₹25,000",
+    //                     statusColor: "green"
+    //                 },
+    //                 {
+    //                     id: 2,
+    //                     vendor: "Dream Photography",
+    //                     service: "Wedding Photography",
+    //                     date: "Dec 25, 2024",
+    //                     status: "Confirmed",
+    //                     amount: "₹15,000",
+    //                     statusColor: "green"
+    //                 },
+    //                 {
+    //                     id: 3,
+    //                     vendor: "Elite Decorators",
+    //                     service: "Birthday Decoration",
+    //                     date: "Jan 10, 2025",
+    //                     status: "Pending",
+    //                     amount: "₹8,000",
+    //                     statusColor: "yellow"
+    //                 },
+    //                 {
+    //                     id: 4,
+    //                     vendor: "Sound Pro",
+    //                     service: "Sound System",
+    //                     date: "Nov 20, 2024",
+    //                     status: "Completed",
+    //                     amount: "₹5,000",
+    //                     statusColor: "blue"
+    //                 }
+    //             ].map((booking) => (
+    //                 <div key={booking.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+    //                     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+    //                         <div className="flex-1">
+    //                             <h3 className="font-semibold text-gray-800 text-lg">{booking.vendor}</h3>
+    //                             <p className="text-gray-600">{booking.service}</p>
+    //                             <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+    //                                 <span className="flex items-center">
+    //                                     <Calendar className="w-4 h-4 mr-1" />
+    //                                     {booking.date}
+    //                                 </span>
+    //                                 <span className="font-medium text-gray-800">{booking.amount}</span>
+    //                             </div>
+    //                         </div>
+    //                         <div className="mt-4 md:mt-0 flex items-center space-x-3">
+    //                             <span className={`px-3 py-1 rounded-full text-sm font-medium ${booking.statusColor === 'green' ? 'bg-green-100 text-green-800' :
+    //                                 booking.statusColor === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
+    //                                     'bg-blue-100 text-blue-800'
+    //                                 }`}>
+    //                                 {booking.status}
+    //                             </span>
+    //                             <button className="text-purple-600 hover:text-purple-800 font-medium">
+    //                                 View Details
+    //                             </button>
+    //                         </div>
+    //                     </div>
+    //                 </div>
+    //             ))}
+    //         </div>
+    //     </div>
+    // );
 
     const renderReviews = () => (
         <div className="bg-white rounded-xl shadow-lg p-6">
@@ -374,8 +374,8 @@ const UserProfile = () => {
         switch (activeSection) {
             case 'personal':
                 return renderPersonalInfo();
-            case 'bookings':
-                return renderBookings();
+            // case 'bookings':
+            //     return renderBookings();
             case 'reviews':
                 return renderReviews();
             // case 'wishlist':

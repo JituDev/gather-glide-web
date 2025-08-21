@@ -111,13 +111,13 @@ const Navbar = ({ cityName: propCityName = null }) => {
   const userNavItems = [
     { path: "/wishlist", icon: Heart, label: "WISHLIST" },
     { path: "/bookings", icon: Calendar, label: "BOOKINGS" },
-    { path: "/userOffer", icon: Gift, label: "OFFERS" }, // User offers
+    // { path: "/userOffer", icon: Gift, label: "OFFERS" }, // User offers
     { path: "/help", icon: HelpCircle, label: "HELP" },
   ];
 
   // Vendor-specific nav items
   const vendorNavItems = [
-    { path: "/vendorOffer", icon: Gift, label: "OFFERS" }, // Vendor offers
+    // { path: "/vendorOffer", icon: Gift, label: "OFFERS" }, // Vendor offers
     { path: "/services", icon: Briefcase, label: "SERVICE MGMT" },
     { path: "/bookingmanagement", icon: Calendar, label: "BOOKING MGMT" }
   ];

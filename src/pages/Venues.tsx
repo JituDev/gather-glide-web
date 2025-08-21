@@ -362,7 +362,7 @@ useEffect(() => {
                           </div>
 
                           {/* Services by Budget */}
-                          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                          {/* <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                               <h3 className="text-lg font-bold text-gray-900 mb-6">Budget Range</h3>
                               <div className="grid grid-cols-1 gap-4">
                                   {budgetRanges?.map((range) => (
@@ -384,7 +384,7 @@ useEffect(() => {
                                       </div>
                                   ))}
                               </div>
-                          </div>
+                          </div> */}
                       </div>
 
                       {/* Main Content */}
