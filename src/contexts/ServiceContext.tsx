@@ -130,7 +130,7 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
           if (!token) throw new Error("User not authenticated");
           setErrorServices(null);
 
-          // 🆕 Append variants if provided
+          // Append variants if provided
           if (variants && Array.isArray(variants)) {
               formData.append("variants", JSON.stringify(variants));
           }
@@ -152,6 +152,7 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
           setLoadingServices(false);
       }
   };
+
 
 
   const getVendorServices = async (vendorId: string) => {
@@ -301,20 +302,6 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setLoadingServices(false);
     }
-  };
-
-  const checkAvailability = async (serviceId: string, date: string) => {
-      try {
-          const response = await api.get(`/check-availability?serviceId=${serviceId}&date=${date}`);
-          return response.data; // { success, available, remaining }
-      } catch (err: any) {
-          const errorMessage =
-              err.response?.data?.message ||
-              err.response?.data?.error ||
-              "Failed to check availability";
-          toast.error(errorMessage);
-          throw new Error(errorMessage);
-      }
   };
 
 

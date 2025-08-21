@@ -40,6 +40,7 @@ interface PaymentDetails {
 }
 
 interface CreateBookingData {
+    serviceId: string;
     service: string;
     name: string;
     email: string;
@@ -48,6 +49,8 @@ interface CreateBookingData {
     message?: string;
     totalPrice: number;
     variants: { variant: string; quantity: number }[];
+    slotId?: string; // optional if slot-based
+    notes?: string;
 }
 
 interface BookingContextType {
@@ -106,7 +109,12 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 },
             });
 
-            return response.data; // { available, slots }
+            const data = response.data;
+
+            return {
+                available: data.availableSlots && data.availableSlots.length > 0,
+                slots: data.availableSlots || [],
+            };
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Failed to check availability";
             setError(errorMessage);
@@ -118,36 +126,37 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
 
 
-    const createBooking = async (bookingData: CreateBookingData) => {
-        try {
-            setLoading(true);
-            setError(null);
+const createBooking = async (bookingData: CreateBookingData) => {
+    try {
+        setLoading(true);
+        setError(null);
 
-            const response = await api.post("/", bookingData, {
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+        const response = await api.post("/", bookingData, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
 
-            // Add to user's bookings
-            setBookings((prev) => [...prev, response.data.data.booking]);
+        const booking = response.data.data.booking;
 
-            toast.success("Booking created successfully!");
-            return response.data.data;
-        } catch (err: any) {
-            const errorMessage =
-                err.response?.data?.message ||
-                err.response?.data?.error ||
-                "Failed to create booking";
-            setError(errorMessage);
-            toast.error(errorMessage);
-            console.log("err", err);
-            throw new Error(errorMessage);
-        } finally {
-            setLoading(false);
-        }
-    };
+        // Add to user's bookings
+        setBookings((prev) => [...prev, booking]);
+
+        toast.success("Booking created successfully!");
+        return booking;
+    } catch (err: any) {
+        const errorMessage =
+            err.response?.data?.message || err.response?.data?.error || "Failed to create booking";
+        setError(errorMessage);
+        toast.error(errorMessage);
+        console.error("Booking error:", err);
+        throw new Error(errorMessage);
+    } finally {
+        setLoading(false);
+    }
+};
+
 
     const getVendorBookings = async (vendorId: string) => {
         try {

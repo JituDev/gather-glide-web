@@ -7,8 +7,8 @@ import { toast } from "react-toastify";
 
 const BookingPage = () => {
     const { id } = useParams();
-    const [slots, setSlots] = useState<string[]>([]);
-    const [selectedSlot, setSelectedSlot] = useState("");
+    const [slots, setSlots] = useState<any[]>([]);
+    const [selectedSlot, setSelectedSlot] = useState<any>(null);
 
     const navigate = useNavigate();
     const {
@@ -26,58 +26,25 @@ const BookingPage = () => {
         phone: "",
         date: "",
         message: "",
-        slotTime: "", // 🆕 selected slot time (ISO string)
         variants: {} as Record<string, number>,
     });
 
     const [availability, setAvailability] = useState<any>(null);
 
-    // Utility: generate slots from availability
-    const generateSlots = (start: string, end: string, duration: number) => {
-        const result: string[] = [];
-        let [sh, sm] = start.split(":").map(Number);
-        let [eh, em] = end.split(":").map(Number);
-
-        let startTime = new Date(0, 0, 0, sh, sm);
-        let endTime = new Date(0, 0, 0, eh, em);
-
-        while (startTime < endTime) {
-            let next = new Date(startTime.getTime() + duration * 60000);
-            if (next > endTime) break;
-            result.push(
-                `${startTime.getHours().toString().padStart(2, "0")}:${startTime
-                    .getMinutes()
-                    .toString()
-                    .padStart(2, "0")} - ${next.getHours().toString().padStart(2, "0")}:${next
-                    .getMinutes()
-                    .toString()
-                    .padStart(2, "0")}`
-            );
-            startTime = next;
-        }
-        return result;
-    };
-
-    // When date changes, generate slots
-    useEffect(() => {
-        if (formData.date && currentService?.availability?.isSlotBased) {
-            const { slotStartTime, slotEndTime, slotDuration } = currentService.availability;
-            setSlots(generateSlots(slotStartTime, slotEndTime, slotDuration));
-            setSelectedSlot(""); // reset selection
-        }
-    }, [formData.date, currentService]);
-
     useEffect(() => {
         if (id) getService(id);
     }, [id]);
 
-    // when user picks a date → check availability
+    // when user picks a date → fetch slots
     useEffect(() => {
         const fetchAvailability = async () => {
             if (id && formData.date) {
                 try {
                     const res = await checkAvailability(id, formData.date);
                     setAvailability(res);
+                    console.log("res for availability", res);
+                    setSlots(res.slots); // ✅ use `res.slots`, not res.availableSlots
+                    setSelectedSlot(null);
                 } catch (err) {
                     console.error("Failed to check availability:", err);
                     toast.error("Could not fetch availability for this date");
@@ -86,6 +53,7 @@ const BookingPage = () => {
         };
         fetchAvailability();
     }, [formData.date]);
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -130,10 +98,7 @@ const BookingPage = () => {
             return;
         }
 
-        if (
-            availability?.type === "slot" &&
-            !formData.slotTime // require slot selection
-        ) {
+        if (currentService?.availability?.isSlotBased && !selectedSlot) {
             toast.error("Please select a time slot");
             return;
         }
@@ -151,15 +116,11 @@ const BookingPage = () => {
             email: formData.email,
             phone: formData.phone,
             date: formData.date,
-            slot: selectedSlot || null,
+            slot: selectedSlot || null, // 🆕 send selected slot
             message: formData.message,
             totalPrice,
             variants: variantsArray,
         };
-
-        if (availability?.type === "slot") {
-            bookingData.slotTime = formData.slotTime; // 🆕 include slot time
-        }
 
         try {
             const { booking, payment } = await createBooking(bookingData);
@@ -327,9 +288,9 @@ const BookingPage = () => {
                                             {slots.length === 0 ? (
                                                 <p className="text-gray-500">No slots available</p>
                                             ) : (
-                                                slots.map((slot) => (
+                                                slots.map((slot, index) => (
                                                     <button
-                                                        key={slot}
+                                                        key={index}
                                                         type="button"
                                                         onClick={() => setSelectedSlot(slot)}
                                                         className={`px-3 py-2 border rounded-md text-center ${
@@ -338,7 +299,7 @@ const BookingPage = () => {
                                                                 : "bg-white text-gray-700"
                                                         }`}
                                                     >
-                                                        {slot}
+                                                        {slot.startTime} - {slot.endTime}
                                                     </button>
                                                 ))
                                             )}

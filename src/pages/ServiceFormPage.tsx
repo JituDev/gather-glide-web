@@ -71,8 +71,6 @@ const ServiceFormPage = () => {
     const [formData, setFormData] = useState<ServiceFormData>({
         title: "",
         description: "",
-        minPrice: 0,
-        maxPrice: 0,
         category: "",
         subCategory: "",
         tags: "",
@@ -84,13 +82,11 @@ const ServiceFormPage = () => {
         images: null,
         existingImages: [],
         variants: [],
-        // 🆕 Slot-related fields
+        // 🆕
         isSlotBased: false,
-        slotDuration: 60, // in minutes
-        slotCapacity: 1, // how many people per slot
-        slotStartTime: "09:00", // default start time
-        slotEndTime: "18:00", // default end time
+        slots: [{ startTime: "09:00", endTime: "18:00" }], // at least one slot
     });
+
 
     useEffect(() => {
         getCategories();
@@ -454,11 +450,9 @@ const ServiceFormPage = () => {
             // 🆕 Add slot fields
             fd.append("isSlotBased", String(formData.isSlotBased));
             if (formData.isSlotBased) {
-                fd.append("slotDuration", String(formData.slotDuration));
-                fd.append("slotCapacity", String(formData.slotCapacity));
-                fd.append("slotStartTime", formData.slotStartTime);
-                fd.append("slotEndTime", formData.slotEndTime);
+                fd.append("slots", JSON.stringify(formData.slots));
             }
+
 
             // Add images to be removed (for edit mode)
             if (isEditMode && filesToRemove.length > 0) {
@@ -736,6 +730,9 @@ const ServiceFormPage = () => {
                                             setFormData((prev) => ({
                                                 ...prev,
                                                 isSlotBased: e.target.checked,
+                                                slots: e.target.checked
+                                                    ? [{ startTime: "09:00", endTime: "18:00" }]
+                                                    : [],
                                             }))
                                         }
                                         className="mr-2"
@@ -743,84 +740,84 @@ const ServiceFormPage = () => {
                                     Enable slot system
                                 </label>
                             </div>
+
                             {formData.isSlotBased && (
                                 <div className="mb-4 p-4 border rounded-lg bg-gray-50">
-                                    <h3 className="font-semibold text-gray-800 mb-3">
-                                        Slot Settings
-                                    </h3>
+                                    <h3 className="font-semibold text-gray-800 mb-3">Slots</h3>
 
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-gray-600 text-sm mb-1">
-                                                Slot Duration (minutes)
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={formData.slotDuration}
-                                                min="15"
-                                                step="15"
-                                                onChange={(e) =>
+                                    {formData.slots.map((slot, index) => (
+                                        <div key={index} className="grid grid-cols-2 gap-4 mb-3">
+                                            <div>
+                                                <label className="block text-gray-600 text-sm mb-1">
+                                                    Start Time
+                                                </label>
+                                                <input
+                                                    type="time"
+                                                    value={slot.startTime}
+                                                    onChange={(e) => {
+                                                        const newSlots = [...formData.slots];
+                                                        newSlots[index].startTime = e.target.value;
+                                                        setFormData((prev) => ({
+                                                            ...prev,
+                                                            slots: newSlots,
+                                                        }));
+                                                    }}
+                                                    className="w-full px-2 py-1 border rounded"
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-gray-600 text-sm mb-1">
+                                                    End Time
+                                                </label>
+                                                <input
+                                                    type="time"
+                                                    value={slot.endTime}
+                                                    onChange={(e) => {
+                                                        const newSlots = [...formData.slots];
+                                                        newSlots[index].endTime = e.target.value;
+                                                        setFormData((prev) => ({
+                                                            ...prev,
+                                                            slots: newSlots,
+                                                        }));
+                                                    }}
+                                                    className="w-full px-2 py-1 border rounded"
+                                                />
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const newSlots = formData.slots.filter(
+                                                        (_, i) => i !== index
+                                                    );
                                                     setFormData((prev) => ({
                                                         ...prev,
-                                                        slotDuration: Number(e.target.value),
-                                                    }))
-                                                }
-                                                className="w-full px-2 py-1 border rounded"
-                                            />
+                                                        slots: newSlots,
+                                                    }));
+                                                }}
+                                                className="text-red-500 text-sm col-span-2 text-left"
+                                            >
+                                                Remove Slot
+                                            </button>
                                         </div>
+                                    ))}
 
-                                        <div>
-                                            <label className="block text-gray-600 text-sm mb-1">
-                                                Capacity per Slot
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={formData.slotCapacity}
-                                                min="1"
-                                                onChange={(e) =>
-                                                    setFormData((prev) => ({
-                                                        ...prev,
-                                                        slotCapacity: Number(e.target.value),
-                                                    }))
-                                                }
-                                                className="w-full px-2 py-1 border rounded"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-gray-600 text-sm mb-1">
-                                                Start Time
-                                            </label>
-                                            <input
-                                                type="time"
-                                                value={formData.slotStartTime}
-                                                onChange={(e) =>
-                                                    setFormData((prev) => ({
-                                                        ...prev,
-                                                        slotStartTime: e.target.value,
-                                                    }))
-                                                }
-                                                className="w-full px-2 py-1 border rounded"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-gray-600 text-sm mb-1">
-                                                End Time
-                                            </label>
-                                            <input
-                                                type="time"
-                                                value={formData.slotEndTime}
-                                                onChange={(e) =>
-                                                    setFormData((prev) => ({
-                                                        ...prev,
-                                                        slotEndTime: e.target.value,
-                                                    }))
-                                                }
-                                                className="w-full px-2 py-1 border rounded"
-                                            />
-                                        </div>
-                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                slots: [
+                                                    ...prev.slots,
+                                                    { startTime: "09:00", endTime: "18:00" },
+                                                ],
+                                            }));
+                                        }}
+                                        className="px-3 py-1 bg-blue-500 text-white rounded"
+                                    >
+                                        + Add Slot
+                                    </button>
                                 </div>
                             )}
 
