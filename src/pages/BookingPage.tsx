@@ -130,7 +130,6 @@ const BookingPage = () => {
         try {
             console.log('bookingData',bookingData)
             const { booking, payment } = await createBooking(bookingData);
-            toast.success("Booking created successfully!");
 
             if (payment) {
                 navigate(`/booking/${booking._id}/payment`, {
@@ -147,7 +146,6 @@ const BookingPage = () => {
             }
         } catch (error) {
             console.error("Booking failed:", error);
-            toast.error("Failed to create booking. Please try again.");
         }
     };
 

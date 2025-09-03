@@ -85,6 +85,7 @@ const ServiceFormPage = () => {
         // 🆕
         isSlotBased: false,
         slots: [{ startTime: "09:00", endTime: "18:00" }], // at least one slot
+        maxBookingsPerDay: 1,
     });
 
 
@@ -449,6 +450,8 @@ const ServiceFormPage = () => {
             fd.append("isSlotBased", String(formData.isSlotBased));
             if (formData.isSlotBased) {
                 fd.append("slots", JSON.stringify(formData.slots));
+            } else {
+                fd.append("maxBookingsPerDay", String(formData.maxBookingsPerDay));
             }
 
 
@@ -816,6 +819,27 @@ const ServiceFormPage = () => {
                                     >
                                         + Add Slot
                                     </button>
+                                </div>
+                            )}
+
+                            {/* --- If not slot-based, show maxBookingsPerDay --- */}
+                            {!formData.isSlotBased && (
+                                <div className="mb-4 p-4 border rounded-lg bg-gray-50">
+                                    <label className="block text-gray-700 font-semibold mb-2">
+                                        Max Bookings Per Day
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min={1}
+                                        value={formData.maxBookingsPerDay}
+                                        onChange={(e) =>
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                maxBookingsPerDay: Number(e.target.value),
+                                            }))
+                                        }
+                                        className="w-full px-2 py-1 border rounded"
+                                    />
                                 </div>
                             )}
 
