@@ -64,8 +64,14 @@ const BookingPage = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleVariantChange = (variantId: string, value: string) => {
-        const quantity = value === "" ? 0 : Math.max(0, parseInt(value));
+    const handleVariantChange = (variantId: string, value: string, minQty: number) => {
+        let quantity = value === "" ? 0 : parseInt(value);
+
+        // Enforce minimum
+        if (!isNaN(quantity) && quantity < minQty) {
+            quantity = minQty;
+        }
+
         setFormData({
             ...formData,
             variants: {
@@ -74,6 +80,7 @@ const BookingPage = () => {
             },
         });
     };
+
 
     const handleCheckboxChange = (variantId: string, isChecked: boolean) => {
         setFormData({
@@ -204,17 +211,18 @@ const BookingPage = () => {
                                                 <input
                                                     type="number"
                                                     min={variant.minQty}
-                                                    max={variant.maxQty || undefined}
                                                     placeholder={`Quantity (min ${variant.minQty})`}
                                                     className="w-full px-3 py-2 border rounded-md"
                                                     onChange={(e) =>
                                                         handleVariantChange(
                                                             variant._id,
-                                                            e.target.value
+                                                            e.target.value,
+                                                            variant.minQty
                                                         )
                                                     }
                                                     value={formData.variants[variant._id] || ""}
                                                 />
+
                                                 {variant.maxQty && (
                                                     <p className="text-sm text-gray-500 mt-1">
                                                         Maximum: {variant.maxQty}
@@ -302,6 +310,11 @@ const BookingPage = () => {
                                                         type="button"
                                                         disabled={slot.isBooked}
                                                         onClick={() => setSelectedSlot(slot)}
+                                                        title={
+                                                            slot.isBooked
+                                                                ? "This slot is already booked"
+                                                                : "Click to select this slot"
+                                                        }
                                                         className={`px-3 py-2 border rounded-md text-center ${
                                                             slot.isBooked
                                                                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"

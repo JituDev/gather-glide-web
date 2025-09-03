@@ -74,7 +74,7 @@ const App = () => (
                                                 element={<ServiceDetail />}
                                             />
                                             <Route path="/help" element={<HelpSupportPage />} />
-                                            <Route path="/userOffer" element={<UserOffersPage />} />
+                                            {/* <Route path="/userOffer" element={<UserOffersPage />} /> */}
                                             <Route path="/vendor/:id" element={<VendorPage />} />
                                             <Route
                                                 path="/admin/login"
