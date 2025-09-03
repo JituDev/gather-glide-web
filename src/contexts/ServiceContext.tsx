@@ -83,6 +83,8 @@ const ServiceContext = createContext<ServiceContextType | undefined>(undefined);
 // Provider component
 export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { vendorId } = useVendor();
+  const [loading, setLoading] = useState(false);
+      const [error, setError] = useState<string | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [currentService, setCurrentService] = useState<Service | null>(null);
   const [loadingServices, setLoadingServices] = useState(false);
@@ -124,6 +126,34 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setAuthToken(token);
   }, []);
 
+  const checkAvailability = async (serviceId: string, date: string) => {
+          try {
+              setLoading(true);
+              setError(null);
+  
+              // Changed from /checkAvailability to /available-slots
+              const response = await api.get(`/${serviceId}/available-slots`, {
+                  params: { date },
+                  headers: {
+                      Authorization: `Bearer ${token}`,
+                  },
+              });
+  
+              const data = response.data;
+  
+              return {
+                  available: data.data && data.data.length > 0,
+                  slots: data.data || [], // data.data contains the array of available slots
+              };
+          } catch (err: any) {
+              const errorMessage = err.response?.data?.message || "Failed to check availability";
+              setError(errorMessage);
+              throw new Error(errorMessage);
+          } finally {
+              setLoading(false);
+          }
+      };
+
   const createService = async (formData: FormData, variants?: Variant[]) => {
       try {
           setLoadingServices(true);
@@ -145,8 +175,11 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
           setServices([...services, response.data.data]);
           return response.data.data;
       } catch (error) {
+        console.log('error',error);
           const err = error as AxiosError<{ message?: string }>;
-          setErrorServices(err.response?.data?.message || "Failed to create service");
+          setErrorServices(
+              err.response?.data?.error || err.response?.error || "Failed to create service"
+          );
           throw err;
       } finally {
           setLoadingServices(false);
@@ -385,39 +418,40 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const value: ServiceContextType = {
-    // Service Management
-    setServices,
-    services,
-    currentService,
-    loadingServices,
-    errorServices,
+      // Service Management
+      setServices,
+      services,
+      currentService,
+      loadingServices,
+      errorServices,
 
-    // Vendor Services
-    vendorServices,
-    loadingVendorServices,
-    errorVendorServices,
+      // Vendor Services
+      vendorServices,
+      loadingVendorServices,
+      errorVendorServices,
 
-    // Category Services
-    categoryServices,
-    loadingCategoryServices,
-    errorCategoryServices,
+      // Category Services
+      categoryServices,
+      loadingCategoryServices,
+      errorCategoryServices,
 
-    // Search Results
-    searchResults,
-    loadingSearch,
-    errorSearch,
+      // Search Results
+      searchResults,
+      loadingSearch,
+      errorSearch,
 
-    // CRUD Operations
-    createService,
-    getVendorServices,
-    updateService,
-    deleteService,
-    getService,
+      // CRUD Operations
+      createService,
+      getVendorServices,
+      updateService,
+      deleteService,
+      getService,
 
-    // Public Queries
-    getServicesByCategory,
-    searchServices,
-    getAllServices
+      // Public Queries
+      getServicesByCategory,
+      searchServices,
+      getAllServices,
+      checkAvailability,
   };
 
   return <ServiceContext.Provider value={value}>{children}</ServiceContext.Provider>;

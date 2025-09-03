@@ -97,65 +97,38 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setAuthToken(token);
     }, []);
 
-    const checkAvailability = async (serviceId: string, date: string) => {
+    const createBooking = async (bookingData: CreateBookingData) => {
         try {
             setLoading(true);
             setError(null);
 
-            const response = await api.get(`/checkAvailability`, {
-                params: { serviceId, date },
+            const response = await api.post("/", bookingData, {
                 headers: {
+                    "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
             });
 
-            const data = response.data;
+            const booking = response.data.data.booking;
 
-            return {
-                available: data.availableSlots && data.availableSlots.length > 0,
-                slots: data.availableSlots || [],
-            };
+            // Add to user's bookings
+            setBookings((prev) => [...prev, booking]);
+
+            toast.success("Booking created successfully!");
+            return booking;
         } catch (err: any) {
-            const errorMessage = err.response?.data?.message || "Failed to check availability";
+            const errorMessage =
+                err.response?.data?.message ||
+                err.response?.data?.error ||
+                "Failed to create booking";
             setError(errorMessage);
             toast.error(errorMessage);
+            console.error("Booking error:", err);
             throw new Error(errorMessage);
         } finally {
             setLoading(false);
         }
     };
-
-
-const createBooking = async (bookingData: CreateBookingData) => {
-    try {
-        setLoading(true);
-        setError(null);
-
-        const response = await api.post("/", bookingData, {
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-        });
-
-        const booking = response.data.data.booking;
-
-        // Add to user's bookings
-        setBookings((prev) => [...prev, booking]);
-
-        toast.success("Booking created successfully!");
-        return booking;
-    } catch (err: any) {
-        const errorMessage =
-            err.response?.data?.message || err.response?.data?.error || "Failed to create booking";
-        setError(errorMessage);
-        toast.error(errorMessage);
-        console.error("Booking error:", err);
-        throw new Error(errorMessage);
-    } finally {
-        setLoading(false);
-    }
-};
 
 
     const getVendorBookings = async (vendorId: string) => {
@@ -250,7 +223,6 @@ const createBooking = async (bookingData: CreateBookingData) => {
                 getVendorBookings,
                 getUserBookings,
                 updateBookingStatus,
-                checkAvailability,
             }}
         >
             {children}

@@ -417,8 +417,6 @@ const ServiceFormPage = () => {
             // Append all basic fields
             fd.append("title", formData.title);
             fd.append("description", formData.description);
-            // fd.append('minPrice', formData.minPrice.toString());
-            // fd.append('maxPrice', formData.maxPrice.toString());
             fd.append("category", formData.category);
             fd.append("subCategory", formData.subCategory);
             fd.append("tags", formData.tags);
@@ -966,52 +964,6 @@ const ServiceFormPage = () => {
                                     </p>
                                 )}
                             </div>
-
-                            {/* <div>
-                                <label className="block text-gray-700 mb-1">
-                                    Minimum Price ($)*
-                                </label>
-                                <input
-                                    type="number"
-                                    name="minPrice"
-                                    value={formData.minPrice}
-                                    onChange={handleInputChange}
-                                    min="0"
-                                    className={`w-full px-3 py-2 border rounded-lg ${
-                                        validationErrors.minPrice
-                                            ? "border-red-500"
-                                            : "border-gray-300"
-                                    }`}
-                                />
-                                {validationErrors.minPrice && (
-                                    <p className="text-red-500 text-sm mt-1">
-                                        {validationErrors.minPrice}
-                                    </p>
-                                )}
-                            </div> */}
-
-                            {/* <div>
-                                <label className="block text-gray-700 mb-1">
-                                    Maximum Price ($)*
-                                </label>
-                                <input
-                                    type="number"
-                                    name="maxPrice"
-                                    value={formData.maxPrice}
-                                    onChange={handleInputChange}
-                                    min={formData.minPrice}
-                                    className={`w-full px-3 py-2 border rounded-lg ${
-                                        validationErrors.maxPrice
-                                            ? "border-red-500"
-                                            : "border-gray-300"
-                                    }`}
-                                />
-                                {validationErrors.maxPrice && (
-                                    <p className="text-red-500 text-sm mt-1">
-                                        {validationErrors.maxPrice}
-                                    </p>
-                                )}
-                            </div> */}
                         </div>
                         <div className="mb-4">
                             <label className="block text-gray-700 mb-1">Description*</label>

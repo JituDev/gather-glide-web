@@ -7,18 +7,18 @@ import { toast } from "react-toastify";
 
 const BookingPage = () => {
     const { id } = useParams();
-    const [slots, setSlots] = useState<any[]>([]);
-    const [selectedSlot, setSelectedSlot] = useState<any>(null);
-
     const navigate = useNavigate();
+
     const {
         getService,
         currentService,
         loading: serviceLoading,
         error: serviceError,
     } = useService();
+    const { createBooking, loading: bookingLoading } = useBooking();
 
-    const { createBooking, checkAvailability, loading: bookingLoading } = useBooking();
+    const [slots, setSlots] = useState<any[]>([]);
+    const [selectedSlot, setSelectedSlot] = useState<any>(null);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -29,31 +29,36 @@ const BookingPage = () => {
         variants: {} as Record<string, number>,
     });
 
-    const [availability, setAvailability] = useState<any>(null);
-
+    // Fetch service details
     useEffect(() => {
         if (id) getService(id);
     }, [id]);
 
-    // when user picks a date → fetch slots
+    // Fetch availability directly from backend when date changes
     useEffect(() => {
         const fetchAvailability = async () => {
             if (id && formData.date) {
                 try {
-                    const res = await checkAvailability(id, formData.date);
-                    setAvailability(res);
-                    console.log("res for availability", res);
-                    setSlots(res.slots); // ✅ use `res.slots`, not res.availableSlots
-                    setSelectedSlot(null);
+                    const res = await fetch(
+                        `http://localhost:5000/api/services/${id}/available-slots?date=${formData.date}`
+                    );
+                    if (!res.ok) throw new Error("Failed to fetch slots");
+                    const data = await res.json();
+
+                    setSlots(data.slots || []);
+
+                    // reset slot if not in new list
+                    if (selectedSlot && !data.slots?.find((s: any) => s._id === selectedSlot._id)) {
+                        setSelectedSlot(null);
+                    }
                 } catch (err) {
-                    console.error("Failed to check availability:", err);
+                    console.error("Failed to fetch availability:", err);
                     toast.error("Could not fetch availability for this date");
                 }
             }
         };
         fetchAvailability();
-    }, [formData.date]);
-
+    }, [formData.date, id]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -116,25 +121,30 @@ const BookingPage = () => {
             email: formData.email,
             phone: formData.phone,
             date: formData.date,
-            slot: selectedSlot || null, // 🆕 send selected slot
+            slotId: selectedSlot?._id || null, // ✅ send slotId not slot string
             message: formData.message,
             totalPrice,
             variants: variantsArray,
         };
 
         try {
+            console.log('bookingData',bookingData)
             const { booking, payment } = await createBooking(bookingData);
             toast.success("Booking created successfully!");
 
-            navigate(`/booking/${booking._id}/payment`, {
-                state: {
-                    bookingId: booking._id,
-                    amount: payment.amount,
-                    orderId: payment.orderId,
-                    currency: payment.currency,
-                    key: payment.key,
-                },
-            });
+            if (payment) {
+                navigate(`/booking/${booking._id}/payment`, {
+                    state: {
+                        bookingId: booking._id,
+                        amount: payment.amount,
+                        orderId: payment.orderId,
+                        currency: payment.currency,
+                        key: payment.key,
+                    },
+                });
+            } else {
+                navigate(`/booking/${booking._id}`);
+            }
         } catch (error) {
             console.error("Booking failed:", error);
             toast.error("Failed to create booking. Please try again.");
@@ -288,13 +298,16 @@ const BookingPage = () => {
                                             {slots.length === 0 ? (
                                                 <p className="text-gray-500">No slots available</p>
                                             ) : (
-                                                slots.map((slot, index) => (
+                                                slots.map((slot) => (
                                                     <button
-                                                        key={index}
+                                                        key={slot._id}
                                                         type="button"
+                                                        disabled={slot.isBooked}
                                                         onClick={() => setSelectedSlot(slot)}
                                                         className={`px-3 py-2 border rounded-md text-center ${
-                                                            selectedSlot === slot
+                                                            slot.isBooked
+                                                                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                                                : selectedSlot?._id === slot._id
                                                                 ? "bg-blue-600 text-white"
                                                                 : "bg-white text-gray-700"
                                                         }`}
