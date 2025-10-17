@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 
 const VendorBookingsPage = () => {
-    const { vendorBookings, getVendorBookings, loading, error } = useBooking();
+    const { vendorBookings, getVendorBookings, loading, error , updateBookingStatus } = useBooking();
     const { user } = useAuth();
     const [filter, setFilter] = useState("all"); // 'all', 'upcoming', 'past', 'pending'
     const [selectedService, setSelectedService] = useState("all");
@@ -197,7 +197,7 @@ const VendorBookingsPage = () => {
                                                         {booking.status.charAt(0).toUpperCase() +
                                                             booking.status.slice(1)}
                                                     </span>
-                                                    <span
+                                                    {/* <span
                                                         className={`px-3 py-1 rounded-full text-sm font-medium ${
                                                             booking.paymentStatus === "paid"
                                                                 ? "bg-green-100 text-green-800"
@@ -209,7 +209,7 @@ const VendorBookingsPage = () => {
                                                             .charAt(0)
                                                             .toUpperCase() +
                                                             booking.paymentStatus.slice(1)}
-                                                    </span>
+                                                    </span> */}
                                                 </div>
                                             </div>
 
@@ -261,12 +261,12 @@ const VendorBookingsPage = () => {
                                             </div>
 
                                             <div className="mt-6 flex flex-wrap justify-end gap-3">
-                                                <Link
+                                                {/* <Link
                                                     to={`/vendor/booking/${booking._id}`}
                                                     className="px-4 py-2 border border-purple-600 text-purple-600 rounded-md hover:bg-purple-50 transition"
                                                 >
                                                     View Details
-                                                </Link>
+                                                </Link> */}
                                                 {booking.status === "pending" && (
                                                     <>
                                                         <button

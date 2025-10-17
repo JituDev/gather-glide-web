@@ -106,21 +106,7 @@ const ServiceListPage = () => {
                                     <div className="p-4">
                                         <h3 className="text-xl font-semibold text-purple-800 mb-2">{service.title}</h3>
                                         <p className="text-gray-600 mb-2 line-clamp-2">{service.description}</p>
-                                        <div className="flex justify-between items-center mb-3">
-                                            <span className="text-blue-600 font-medium">
-                                                ${service.minPrice} - ${service.maxPrice}
-                                            </span>
-                                            <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">
-                                                {typeof service.category === 'object' ? service.category.title : service.category}
-                                            </span>
-                                        </div>
                                         <div className="flex space-x-2">
-                                            <button
-                                                onClick={() => navigate(`/services/edit/${service._id}`)}
-                                                className="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-800 py-1 px-3 rounded text-sm transition duration-200"
-                                            >
-                                                Edit
-                                            </button>
                                             <button
                                                 onClick={() => handleDelete(service._id)}
                                                 disabled={isDeleting}

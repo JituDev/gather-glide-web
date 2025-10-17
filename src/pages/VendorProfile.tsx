@@ -336,7 +336,7 @@ const VendorProfile = () => {
                 </>
               )}
 
-              <div className="flex flex-wrap justify-center lg:justify-start gap-6">
+              {/* <div className="flex flex-wrap justify-center lg:justify-start gap-6">
                 <div className="flex items-center text-blue-600">
                   <TrendingUp className="w-5 h-5 mr-2" />
                   <span>156 Total Bookings</span>
@@ -349,7 +349,7 @@ const VendorProfile = () => {
                   <Award className="w-5 h-5 mr-2" />
                   <span>Premium Vendor</span>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
 
@@ -419,7 +419,7 @@ const VendorProfile = () => {
 
         {/* Rest of the component remains the same */}
         {/* Stats Dashboard */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -433,33 +433,13 @@ const VendorProfile = () => {
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Rating</p>
-                <p className="text-2xl font-bold text-yellow-600">4.8</p>
-              </div>
-              <Star className="w-8 h-8 text-yellow-400" />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center justify-between">
-              <div>
                 <p className="text-gray-600 text-sm">Completed</p>
                 <p className="text-2xl font-bold text-green-600">142</p>
               </div>
               <CheckCircle className="w-8 h-8 text-green-400" />
             </div>
           </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm">Success Rate</p>
-                <p className="text-2xl font-bold text-blue-600">{calculateSuccessRate()}%</p>
-              </div>
-              <TrendingUp className="w-8 h-8 text-blue-400" />
-            </div>
-          </div>
-        </div>
+        </div> */}
 
         {/* Gallery Section */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
@@ -504,39 +484,8 @@ const VendorProfile = () => {
             </div>
           )}
         </div>
-
-        {/* Offers Section */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-6">Current Offers</h2>
-          {loadingOffers ? (
-            <div className="text-center py-8">
-              <Loader2 className="w-8 h-8 text-purple-600 animate-spin mx-auto" />
-            </div>
-          ) : offers.length > 0 ? (
-            <div className="space-y-4">
-              {offers.filter(o => o.isActive).map((offer) => (
-                <div key={offer._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="font-medium">{offer?.title}</p>
-                    <p className="text-sm text-gray-600">
-                      {typeof offer.service === 'object' ? offer?.service?.title : 'Service'}
-                    </p>
-                  </div>
-                  <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                    Active
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <p>No active offers currently</p>
-            </div>
-          )}
-        </div>
-
         {/* Recent Bookings */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
+        {/* <div className="bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Recent Bookings</h2>
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -554,7 +503,7 @@ const VendorProfile = () => {
               <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Upcoming</span>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

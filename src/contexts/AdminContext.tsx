@@ -208,7 +208,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }) => {
     try {
       setLoadingCategories(true);
-      
+      console.log(formData)
       // Prepare FormData for file upload
       const fd = new FormData();
       fd.append('title', formData.title);

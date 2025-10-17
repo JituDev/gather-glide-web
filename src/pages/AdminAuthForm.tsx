@@ -18,10 +18,10 @@ const AdminAuthForm = () => {
     confirmPassword: '',
     name: '',
     phoneNumber: '',
-  });
-  const [error, setError] = useState<string | null>(null);
+  })
+  const [] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { login, register } = useAuth();
+  const { login, register, error, setError } = useAuth();
   const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,7 +53,7 @@ const AdminAuthForm = () => {
       }
       navigate('/adminProfile');
     } catch (err: any) {
-      setError(err.message || 'An error occurred');
+      console.log(err)
     } finally {
       setLoading(false);
     }

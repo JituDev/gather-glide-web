@@ -197,7 +197,7 @@ const UserBookingsPage = () => {
                                                 </ul>
                                             </div>
 
-                                            <div className="mt-6 flex justify-end space-x-3">
+                                            {/* <div className="mt-6 flex justify-end space-x-3">
                                                 <Link
                                                     to={`/booking/${booking._id}`}
                                                     className="px-4 py-2 border border-purple-600 text-purple-600 rounded-md hover:bg-purple-50 transition"
@@ -214,7 +214,7 @@ const UserBookingsPage = () => {
                                                         Cancel Booking
                                                     </button>
                                                 )}
-                                            </div>
+                                            </div> */}
                                         </div>
                                     </div>
                                 ))}

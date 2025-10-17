@@ -122,12 +122,12 @@ const VendorPage = () => {
                         >
                             Services
                         </button>
-                        <button
+                        {/* <button
                             className={`py-2 px-4 font-medium ${activeTab === 'reviews' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
                             onClick={() => setActiveTab('reviews')}
                         >
                             Reviews
-                        </button>
+                        </button> */}
                     </div>
 
                     {/* Services Tab Content */}
@@ -250,11 +250,11 @@ const VendorPage = () => {
                     )}
 
                     {/* Reviews Tab Content */}
-                    {activeTab === 'reviews' && (
+                    {/* {activeTab === 'reviews' && (
                         <div className="mt-6">
                             <div className="text-center py-8 text-gray-500">Reviews will be displayed here</div>
                         </div>
-                    )}
+                    )} */}
                 </div>
             </div>
         </>

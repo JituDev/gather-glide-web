@@ -214,7 +214,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       navigate('/');
     }
   } catch (err: any) {
-    setError(err.response?.data?.error || 'Login failed');
+    console.log(err.response?.data?.error );
+    setError(err.response?.data?.error || err.response?.data?.message);
     console.log("err", err);
     throw err;
   } finally {

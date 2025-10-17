@@ -275,7 +275,7 @@ const AuthPage = () => {
                     <option value="photography">Photography & Videography</option>
                     <option value="lighting">Lighting & Sound Systems</option>
                     <option value="flowers">Floral Arrangements</option>
-                    <option value="transport">Transportation Services</option>
+                    <option value="transport">Party Hall</option>
                     <option value="entertainment">Entertainment & DJ</option>
                     <option value="venue">Venue Management</option>
                     <option value="other">Other Services</option>

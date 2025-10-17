@@ -176,7 +176,16 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const updateBookingStatus = async (bookingId: string, status: string) => {
         try {
             setLoading(true);
-            const response = await api.put(`/${bookingId}/status`, { status });
+            const response = await api.put(
+                `/${bookingId}/status`,
+                { status },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
 
             // Update both bookings and vendorBookings state
             setBookings((prev) => prev.map((b) => (b._id === bookingId ? response.data.data : b)));

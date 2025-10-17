@@ -501,7 +501,7 @@ const ServiceDetail = () => {
                       {renderCategorySpecificDetails()}
 
                       {/* Reviews Section */}
-                      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                      {/* <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
                           <div className="flex items-center justify-between mb-6">
                               <h2 className="text-2xl font-bold text-gray-900">
                                   Reviews & Ratings
@@ -513,7 +513,6 @@ const ServiceDetail = () => {
                               </div>
                           </div>
 
-                          {/* Existing Reviews */}
                           <div className="space-y-6 mb-8">
                               {reviews.map((review) => (
                                   <div
@@ -556,7 +555,6 @@ const ServiceDetail = () => {
                               ))}
                           </div>
 
-                          {/* Write Review */}
                           <div className="bg-gray-50 rounded-xl p-6">
                               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                                   Write a Review
@@ -603,7 +601,7 @@ const ServiceDetail = () => {
                                   </button>
                               </div>
                           </div>
-                      </div>
+                      </div> */}
                   </div>
 
                   {/* Sidebar */}

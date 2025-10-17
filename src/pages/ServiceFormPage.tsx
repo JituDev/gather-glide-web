@@ -479,7 +479,7 @@ const ServiceFormPage = () => {
             navigate("/services");
         } catch (error) {
             console.error('Error submitting service:', error);
-            toast.error(`Failed to ${isEditMode ? 'update' : 'create'} service`);
+            toast.error(error?.response?.data?.error || `Failed to ${isEditMode ? "update" : "create"} service`);
         }
     };
 
@@ -843,149 +843,183 @@ const ServiceFormPage = () => {
                                 </div>
                             )}
 
-                            <div className="mb-4">
-                                <label className="block text-gray-700 font-semibold mb-2">
+                            <div className="mb-6">
+                                <label className="block text-gray-700 font-semibold mb-3">
                                     Service Variants*
                                 </label>
 
-                                {formData?.variants?.map((variant, index) => (
-                                    <div
-                                        key={index}
-                                        className="mb-4 p-3 border rounded-lg bg-gray-50"
-                                    >
-                                        <div className="grid grid-cols-6 gap-2 mb-2">
-                                            <input
-                                                type="text"
-                                                placeholder="Name (e.g., Drone Shoot)"
-                                                value={variant.name}
-                                                onChange={(e) =>
-                                                    updateVariant(index, "name", e.target.value)
-                                                }
-                                                className="col-span-2 px-2 py-1 border rounded"
-                                            />
-
-                                            {/* Checkbox toggle */}
-                                            <div className="col-span-1 flex items-center">
-                                                <label className="flex items-center">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={variant.isCheckbox}
-                                                        onChange={(e) => {
-                                                            const updates = {
-                                                                isCheckbox: e.target.checked,
-                                                                // Reset to defaults when changing type
-                                                                unit: e.target.checked
-                                                                    ? "item"
-                                                                    : "",
-                                                                minQty: e.target.checked
-                                                                    ? 1
-                                                                    : undefined,
-                                                                maxQty: e.target.checked
-                                                                    ? 1
-                                                                    : undefined,
-                                                            };
-                                                            updateVariant(index, updates);
-                                                        }}
-                                                        className="mr-1"
-                                                    />
-                                                    <span className="text-sm">Checkbox</span>
-                                                </label>
+                                <div className="space-y-3">
+                                    {formData?.variants?.map((variant, index) => (
+                                        <div
+                                            key={index}
+                                            className="p-4 border border-gray-200 rounded-lg bg-white"
+                                        >
+                                            {/* Header */}
+                                            <div className="flex justify-between items-center mb-3">
+                                                <h4 className="text-sm font-medium text-gray-600">
+                                                    Variant {index + 1}
+                                                </h4>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeVariant(index)}
+                                                    className="w-6 h-6 flex items-center justify-center bg-gray-100 text-gray-500 rounded hover:bg-red-100 hover:text-red-600 transition-colors text-xs"
+                                                >
+                                                    ✕
+                                                </button>
                                             </div>
 
-                                            <input
-                                                type="number"
-                                                placeholder="Price"
-                                                value={variant.price}
-                                                onChange={(e) =>
-                                                    updateVariant(
-                                                        index,
-                                                        "price",
-                                                        Number(e.target.value)
-                                                    )
-                                                }
-                                                className="col-span-1 px-2 py-1 border rounded"
-                                                min="0"
-                                                step="0.01"
-                                            />
-
-                                            {!variant.isCheckbox && (
-                                                <>
+                                            {/* Stacked form fields */}
+                                            <div className="space-y-3">
+                                                {/* Name Input */}
+                                                <div>
                                                     <input
                                                         type="text"
-                                                        placeholder="Unit (e.g., hour)"
-                                                        value={variant.unit}
+                                                        placeholder="Service name"
+                                                        value={variant.name}
                                                         onChange={(e) =>
                                                             updateVariant(
                                                                 index,
-                                                                "unit",
+                                                                "name",
                                                                 e.target.value
                                                             )
                                                         }
-                                                        className="col-span-1 px-2 py-1 border rounded"
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
                                                     />
-                                                    <input
-                                                        type="number"
-                                                        placeholder="Min Qty"
-                                                        value={variant.minQty ?? ""}
-                                                        onChange={(e) =>
-                                                            updateVariant(
-                                                                index,
-                                                                "minQty",
-                                                                Number(e.target.value)
-                                                            )
-                                                        }
-                                                        className="col-span-1 px-2 py-1 border rounded"
-                                                        min="1"
-                                                    />
-                                                </>
-                                            )}
+                                                </div>
 
-                                            <button
-                                                type="button"
-                                                onClick={() => removeVariant(index)}
-                                                className="text-red-500 text-sm ml-2"
-                                            >
-                                                ✕
-                                            </button>
-                                        </div>
+                                                {/* Price and Type row */}
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    {/* Price Input */}
+                                                    <div className="relative">
+                                                        <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
+                                                            $
+                                                        </span>
+                                                        <input
+                                                            type="number"
+                                                            placeholder="Price"
+                                                            value={variant.price}
+                                                            onChange={(e) =>
+                                                                updateVariant(
+                                                                    index,
+                                                                    "price",
+                                                                    Number(e.target.value)
+                                                                )
+                                                            }
+                                                            className="w-full pl-6 pr-2 py-2 border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                                            min="0"
+                                                            step="0.01"
+                                                        />
+                                                    </div>
 
-                                        {/* Additional options for checkbox variants */}
-                                        {variant.isCheckbox && (
-                                            <div className="mt-2 flex items-center">
-                                                <label className="flex items-center mr-4">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={variant.defaultChecked}
-                                                        onChange={(e) =>
-                                                            updateVariant(
-                                                                index,
-                                                                "defaultChecked",
-                                                                e.target.checked
-                                                            )
-                                                        }
-                                                        className="mr-1"
-                                                    />
-                                                    <span className="text-sm">
-                                                        Checked by default
-                                                    </span>
-                                                </label>
+                                                    {/* Checkbox Toggle */}
+                                                    <div className="flex items-center justify-end">
+                                                        <label className="flex items-center space-x-2 cursor-pointer">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={variant.isCheckbox}
+                                                                onChange={(e) => {
+                                                                    const updates = {
+                                                                        isCheckbox:
+                                                                            e.target.checked,
+                                                                        unit: e.target.checked
+                                                                            ? "item"
+                                                                            : "",
+                                                                        minQty: e.target.checked
+                                                                            ? 1
+                                                                            : undefined,
+                                                                        maxQty: e.target.checked
+                                                                            ? 1
+                                                                            : undefined,
+                                                                    };
+                                                                    updateVariant(index, updates);
+                                                                }}
+                                                                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                                            />
+                                                            <span className="text-sm text-gray-700 whitespace-nowrap">
+                                                                Fixed Price
+                                                            </span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                {/* Conditional inputs */}
+                                                {!variant.isCheckbox && (
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Unit (hour, day...)"
+                                                            value={variant.unit}
+                                                            onChange={(e) =>
+                                                                updateVariant(
+                                                                    index,
+                                                                    "unit",
+                                                                    e.target.value
+                                                                )
+                                                            }
+                                                            className="px-3 py-2 border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                                        />
+                                                        <input
+                                                            type="number"
+                                                            placeholder="Min Qty"
+                                                            value={variant.minQty ?? ""}
+                                                            onChange={(e) =>
+                                                                updateVariant(
+                                                                    index,
+                                                                    "minQty",
+                                                                    Number(e.target.value)
+                                                                )
+                                                            }
+                                                            className="px-3 py-2 border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                                            min="1"
+                                                        />
+                                                    </div>
+                                                )}
+
+                                                {/* Checkbox option */}
+                                                {variant.isCheckbox && (
+                                                    <div className="flex items-center">
+                                                        <label className="flex items-center space-x-2 cursor-pointer">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={variant.defaultChecked}
+                                                                onChange={(e) =>
+                                                                    updateVariant(
+                                                                        index,
+                                                                        "defaultChecked",
+                                                                        e.target.checked
+                                                                    )
+                                                                }
+                                                                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                                            />
+                                                            <span className="text-sm text-gray-700">
+                                                                Checked by default
+                                                            </span>
+                                                        </label>
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
-                                    </div>
-                                ))}
+                                        </div>
+                                    ))}
+                                </div>
 
+                                {/* Add Variant Button */}
                                 <button
                                     type="button"
                                     onClick={addVariant}
-                                    className="mt-2 px-3 py-1 bg-blue-500 text-white rounded"
+                                    className="mt-3 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors flex items-center space-x-2"
                                 >
-                                    + Add Variant
+                                    <span>+</span>
+                                    <span>Add Variant</span>
                                 </button>
 
+                                {/* Validation Error */}
                                 {validationErrors.variants && (
-                                    <p className="text-red-500 text-sm mt-1">
-                                        {validationErrors.variants}
-                                    </p>
+                                    <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded">
+                                        <p className="text-red-600 text-sm flex items-center">
+                                            <span className="w-2 h-2 bg-red-600 rounded-full mr-2"></span>
+                                            {validationErrors.variants}
+                                        </p>
+                                    </div>
                                 )}
                             </div>
                         </div>

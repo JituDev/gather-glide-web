@@ -29,6 +29,13 @@ const BookingPage = () => {
         variants: {} as Record<string, number>,
     });
 
+    // Get tomorrow's date in YYYY-MM-DD format for min date
+    const getTomorrowDate = () => {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        return tomorrow.toISOString().split("T")[0];
+    };
+
     // Fetch service details
     useEffect(() => {
         if (id) getService(id);
@@ -64,23 +71,32 @@ const BookingPage = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleVariantChange = (variantId: string, value: string, minQty: number) => {
-        let quantity = value === "" ? 0 : parseInt(value);
-
-        // Enforce minimum
-        if (!isNaN(quantity) && quantity < minQty) {
-            quantity = minQty;
+    const handleVariantChange = (variantId: string, value: string) => {
+        // Allow empty input for better UX
+        if (value === "") {
+            setFormData({
+                ...formData,
+                variants: {
+                    ...formData.variants,
+                    [variantId]: 0,
+                },
+            });
+            return;
         }
 
-        setFormData({
-            ...formData,
-            variants: {
-                ...formData.variants,
-                [variantId]: quantity,
-            },
-        });
-    };
+        const quantity = parseInt(value);
 
+        // Only update if it's a valid number
+        if (!isNaN(quantity)) {
+            setFormData({
+                ...formData,
+                variants: {
+                    ...formData.variants,
+                    [variantId]: quantity,
+                },
+            });
+        }
+    };
 
     const handleCheckboxChange = (variantId: string, isChecked: boolean) => {
         setFormData({
@@ -101,14 +117,81 @@ const BookingPage = () => {
         }, 0);
     };
 
+    const validateVariants = (): boolean => {
+        if (!currentService?.variants) return false;
+
+        let isValid = true;
+        let errorMessage = "";
+
+        // Check if at least one variant has quantity > 0
+        const hasSelectedVariant = currentService.variants.some(
+            (variant) => (formData.variants[variant._id] || 0) > 0
+        );
+
+        if (!hasSelectedVariant) {
+            toast.error("Please select at least one service option");
+            return false;
+        }
+
+        // Check minimum quantities for non-checkbox variants
+        for (const variant of currentService.variants) {
+            if (!variant.isCheckbox) {
+                const quantity = formData.variants[variant._id] || 0;
+
+                if (quantity > 0 && quantity < variant.minQty) {
+                    isValid = false;
+                    errorMessage = `${variant.name}: Minimum quantity is ${variant.minQty}`;
+                    break;
+                }
+
+                // Also check max quantity if defined
+                if (variant.maxQty && quantity > variant.maxQty) {
+                    isValid = false;
+                    errorMessage = `${variant.name}: Maximum quantity is ${variant.maxQty}`;
+                    break;
+                }
+            }
+        }
+
+        if (!isValid) {
+            toast.error(errorMessage);
+        }
+
+        return isValid;
+    };
+
+    const validateDate = (): boolean => {
+        if (!formData.date) {
+            toast.error("Please select a booking date");
+            return false;
+        }
+
+        const selectedDate = new Date(formData.date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time to midnight for accurate comparison
+
+        if (selectedDate <= today) {
+            toast.error("Booking date must be in the future");
+            return false;
+        }
+
+        return true;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const totalPrice = calculateTotal();
 
-        if (totalPrice <= 0) {
-            toast.error("Please select at least one service option");
+        // Validate date first
+        if (!validateDate()) {
             return;
         }
+
+        // Validate variants before proceeding
+        if (!validateVariants()) {
+            return;
+        }
+
+        const totalPrice = calculateTotal();
 
         if (currentService?.availability?.isSlotBased && !selectedSlot) {
             toast.error("Please select a time slot");
@@ -128,14 +211,14 @@ const BookingPage = () => {
             email: formData.email,
             phone: formData.phone,
             date: formData.date,
-            slotId: selectedSlot?._id || null, // ✅ send slotId not slot string
+            slotId: selectedSlot?._id || null,
             message: formData.message,
             totalPrice,
             variants: variantsArray,
         };
 
         try {
-            console.log('bookingData',bookingData)
+            console.log("bookingData", bookingData);
             const { booking, payment } = await createBooking(bookingData);
 
             if (payment) {
@@ -151,8 +234,12 @@ const BookingPage = () => {
             } else {
                 navigate(`/booking/${booking._id}`);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Booking failed:", error);
+            // Handle specific backend errors
+            if (error.message?.includes("Booking date must be in the future")) {
+                toast.error("Please select a future date for booking");
+            }
         }
     };
 
@@ -185,6 +272,17 @@ const BookingPage = () => {
                                             </span>
                                         </div>
 
+                                        {/* Minimum requirement badge */}
+                                        {!variant.isCheckbox && (
+                                            <div className="mb-2">
+                                                <span className="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded border border-yellow-200">
+                                                    Minimum: {variant.minQty} {variant.unit}
+                                                    {variant.maxQty &&
+                                                        ` • Maximum: ${variant.maxQty}`}
+                                                </span>
+                                            </div>
+                                        )}
+
                                         {variant.isCheckbox ? (
                                             <div className="flex items-center">
                                                 <input
@@ -210,22 +308,24 @@ const BookingPage = () => {
                                             <div>
                                                 <input
                                                     type="number"
-                                                    min={variant.minQty}
-                                                    placeholder={`Quantity (min ${variant.minQty})`}
-                                                    className="w-full px-3 py-2 border rounded-md"
+                                                    min="0"
+                                                    placeholder={`Enter quantity (min ${variant.minQty})`}
+                                                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                                     onChange={(e) =>
                                                         handleVariantChange(
                                                             variant._id,
-                                                            e.target.value,
-                                                            variant.minQty
+                                                            e.target.value
                                                         )
                                                     }
                                                     value={formData.variants[variant._id] || ""}
                                                 />
 
-                                                {variant.maxQty && (
-                                                    <p className="text-sm text-gray-500 mt-1">
-                                                        Maximum: {variant.maxQty}
+                                                {/* Current quantity indicator */}
+                                                {(formData.variants[variant._id] || 0) > 0 && (
+                                                    <p className="text-sm text-gray-600 mt-1">
+                                                        Selected: {formData.variants[variant._id]}{" "}
+                                                        {variant.unit}
+                                                        {formData.variants[variant._id] > 1 && "s"}
                                                     </p>
                                                 )}
                                             </div>
@@ -234,11 +334,16 @@ const BookingPage = () => {
                                 ))}
                             </div>
 
-                            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                                 <div className="flex justify-between font-bold text-lg">
                                     <span>Total:</span>
                                     <span>₹{calculateTotal()}</span>
                                 </div>
+                                <p className="text-sm text-blue-600 mt-2 text-center">
+                                    {Object.values(formData.variants).some((qty) => qty > 0)
+                                        ? "Ready to book!"
+                                        : "Select service options above"}
+                                </p>
                             </div>
                         </div>
 
@@ -247,62 +352,69 @@ const BookingPage = () => {
                             <h2 className="text-xl font-semibold mb-4">Your Information</h2>
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div>
-                                    <label className="block text-gray-700 mb-1">Full Name</label>
+                                    <label className="block text-gray-700 mb-1">Full Name *</label>
                                     <input
                                         type="text"
                                         name="name"
                                         required
-                                        className="w-full px-3 py-2 border rounded-md"
+                                        className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         onChange={handleChange}
                                         value={formData.name}
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-gray-700 mb-1">Email</label>
+                                    <label className="block text-gray-700 mb-1">Email *</label>
                                     <input
                                         type="email"
                                         name="email"
                                         required
-                                        className="w-full px-3 py-2 border rounded-md"
+                                        className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         onChange={handleChange}
                                         value={formData.email}
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-gray-700 mb-1">Phone Number</label>
+                                    <label className="block text-gray-700 mb-1">
+                                        Phone Number *
+                                    </label>
                                     <input
                                         type="tel"
                                         name="phone"
                                         required
-                                        className="w-full px-3 py-2 border rounded-md"
+                                        className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         onChange={handleChange}
                                         value={formData.phone}
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-gray-700 mb-1">Event Date</label>
+                                    <label className="block text-gray-700 mb-1">Event Date *</label>
                                     <input
                                         type="date"
                                         name="date"
                                         required
-                                        className="w-full px-3 py-2 border rounded-md"
+                                        className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         onChange={handleChange}
-                                        min={new Date().toISOString().split("T")[0]}
+                                        min={getTomorrowDate()} // Changed from today to tomorrow
                                         value={formData.date}
                                     />
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        Please select a future date
+                                    </p>
                                 </div>
 
                                 {currentService?.availability?.isSlotBased && formData.date && (
                                     <div>
                                         <label className="block text-gray-700 mb-1">
-                                            Select a time slot
+                                            Select a time slot *
                                         </label>
                                         <div className="grid grid-cols-2 gap-2">
                                             {slots.length === 0 ? (
-                                                <p className="text-gray-500">No slots available</p>
+                                                <p className="text-gray-500 col-span-2 text-center py-4">
+                                                    No slots available for this date
+                                                </p>
                                             ) : (
                                                 slots.map((slot) => (
                                                     <button
@@ -315,15 +427,16 @@ const BookingPage = () => {
                                                                 ? "This slot is already booked"
                                                                 : "Click to select this slot"
                                                         }
-                                                        className={`px-3 py-2 border rounded-md text-center ${
+                                                        className={`px-3 py-2 border rounded-md text-center transition-colors ${
                                                             slot.isBooked
-                                                                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                                                ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300"
                                                                 : selectedSlot?._id === slot._id
-                                                                ? "bg-blue-600 text-white"
-                                                                : "bg-white text-gray-700"
+                                                                ? "bg-blue-600 text-white border-blue-600"
+                                                                : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:border-blue-300"
                                                         }`}
                                                     >
                                                         {slot.startTime} - {slot.endTime}
+                                                        {slot.isBooked && " (Booked)"}
                                                     </button>
                                                 ))
                                             )}
@@ -333,14 +446,15 @@ const BookingPage = () => {
 
                                 <div>
                                     <label className="block text-gray-700 mb-1">
-                                        Special Requests
+                                        Special Requests (Optional)
                                     </label>
                                     <textarea
                                         name="message"
                                         rows={3}
-                                        className="w-full px-3 py-2 border rounded-md"
+                                        className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         onChange={handleChange}
                                         value={formData.message}
+                                        placeholder="Any special requirements or notes..."
                                     ></textarea>
                                 </div>
 
